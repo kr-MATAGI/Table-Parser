@@ -1,0 +1,6 @@
+# Dataset Json
+*.json
+
+# config directory
+__pycache__
+.idea
