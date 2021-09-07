@@ -11,10 +11,9 @@ import ijson
 DOC_TITLE = 'title'
 DOC_TEXT = 'text'
 
-## regex
-# Table Token
-RE_CHECK_ROW = r'^\|\|'
-RE_SPLIT_TOKEN = r'\|\|'
+### regex
+## Table Token
+RE_ROW_SPLIT = r'\|\|'
 
 RE_OLD_COL_SPAN = r'\|\|{2,}'
 RE_NEW_COL_SPAN = r'<-\d>'
@@ -22,37 +21,96 @@ RE_NEW_ROW_SPAN = r'<\|\d>'
 
 RE_EMPTY_CELL = r'[\|\|]+'
 
-# convert
-RE_BG_COLOR = r'<bgcolor=#[\w]+>|<bgcolor=[\w]+>{1}' # bgcolor
-CONV_BG_COLOR = '<bg>'
+## Convert
+# 2.1
+RE_TEXT_FORM = r"\'\'\'|\'\'|\'\'\' \'\'|__|~~|--"
+CONV_TEXT_FORM = "\'\'\'"
 
-RE_BR_TAG = r'\[BR\]'
+RE_SUB_SCRIPT = r'\^\^||,,'
+CONV_SUB_SCRIPT = ' '
+
+# 2.3
+RE_TEXT_COLOR = r'\{\{\{#[\d]+|\{\{\{#[\w]+|\{\{\{#[\w]+,#[\w]+'
+CONV_TEXT_COLOR = '<ftc>' # font color
+
+# 12.4
+RE_BR_TAG = r'\[br\]'
 CONV_BR_TAG = '<br>'
 
-RE_TEXT_SHAPE = r"\'\'\'|\'\'|\'\'\' \'\'" # ''', '', ''' '', __
-CONV_TEXT_SHAPE = "\'\'\'"
+# 13.3.1
+RE_BG_COLOR = r'<bgcolor=#?\w+(,\s?#?\w+)?>|'
+CONV_BG_COLOR = '<bg>'
 
-RE_ROW_BG_COLOR = r'<rowbgcolor=.+>'
+RE_TBG_COLOR = r'<tablecolor=#?\w+(,\s?#?\w+)?>'
+CONV_TBG_COLOR = '<tbg>'
+
+RE_COL_BG_COLOR = r'<colbgcolor=#?\w+(,\s?#?\w+)?>'
+CONV_COL_BG_COLOR = '<cbg>'
+
+RE_ROW_BG_COLOR = r'<rowbgcolor=#?\w+(,\s?#?\w+)?>'
 CONV_ROW_BG_COLOR = '<rbg>'
 
-RE_TABLE_BG_COLOR = r'<tablebgcolor=#[\w]+>|<table bgcolor=#[\w]+>'
-CONV_TABLE_BG_COLOR = r'<tbg>'
+RE_CELL_COLOR = r'<color=#?\w+(,\s?#?\w+)?>'
+CONV_CELL_COLOR = '<celc>'
 
-# remove
-RE_TABLE_SIZE = r'<tablewidth=[\w]+>|<tablealign=[\w]+>|<table width=[\w]+>|<table align=\'[\w]+\'>'
-RE_TABLE_BORDER = r'<tablebordercolor=.+>|<table bordercolor=.+>'
+RE_COL_COLOR = r'<colcolor=#?\w+(,\s?#?\w+)?>'
+CONV_COL_COLOR = '<colc>'
 
-RE_CELL_SIZE = r'<width=.+>|<height=.+>'
+RE_ROW_COLOR = r'<rowcolor=#?\w+(,\s?#?\w+)?>'
+CONV_ROW_COLOR = '<rowc>'
 
-RE_TEXT_COLOR = r'{{{#[\w]+ |<#[\w]+>' # Plz check order
-RE_TEXT_SIZE = r'{{{\+[\d]|}}}'
-RE_TEXT_ALIGN = r'<\(>|<\:>|<\)>'
+## Remove
+# 2.1
+RE_LITERAL = r'\{\{\{\[\[|\]\]\}\}\}'
 
-RE_FILE_LINK = r'\[\[파일:[^\]]+\]\]'
-RE_VIDEO_LINK = r'\[youtube\(.+\)\]|\[kakaotv\(.+\)\]|\[nicovideo\(.+\)\]|\{\{\{\#!html.+\}\}\}'
-RE_HTML_LINK = r'\[\[http.+\]\]'
+# 2.2
+RE_TEXT_SIZE_FRONT = r'\{\{\{\+\d ' # text size input's front
 
-RE_FOOT_NOTE = r'\[\*.+\]'
+# 3
+RE_PARENT_ARTICLE_LINK = '[[../]]'
+RE_CHILD_ARTICLIE_LINK = r'\[\[[/[\w]+]+'
+RE_EXTERNAL_LINK = r'\[\[https?://[/?[\w]+]+\|?'
+
+# 5
+RE_IMAGE_FILE = r'\[\[파일:[\w]+\.[\w]+\|?'
+RE_IMAGE_PARAM = r'width=[\d]+%?&?|height=[\d]+%?&?'
+RE_IMAGE_ALIGN = r'align=[\w]+'
+
+# 6
+RE_YOUTUBE = r'\[youtube\(\w+\)\]|' \
+             r'\[include\(틀:.+ (left|center|right)?\s?url=\w+\)\]'
+RE_KAKAO_TV = r'\[kakaotv\(\w+\)\]'
+RE_NICO_VIDEO = r'\[nicovideo\(\w+\)\]'
+RE_NAVER_VIDEO = r'\[include\(틀:navertv, i=\w+\)\]|' \
+                 r'\[include\(틀:naverid, vid=\w+, outkey=\w+\)\]'
+RE_VIDEO_PARAM = r'[(, |,)?(width|height|start)=\w+%?]+'
+# 6 - deep syntax
+RE_HTML_VIDEO = r'\{\{\{#!html <video src=("|\').+("|\')></video>\}\}\}|' \
+                r'\{\{\{#!html .+\}\}\}'
+
+# 8
+RE_ADD_LIST = r'v+(\w*\.|\*)?v*'
+
+# 9
+RE_FOOT_NOTE = r'\[\*.+\]$'
+
+# 12.2
+RE_AGE_FORM = r'\[age\(\d{4}-\d{0,2}-\d{0,2}\)\]'
+RE_DATE_TIME_FORM = r'\[date\]|\[datetime\]'
+RE_DDAY_FORM = r'\[dday\(\d{4}-\d{0,2}-\d{0,2}\)\]'
+
+# 13.3.1
+RE_TABLE_ALIGN = r'<table\s?align=(left|center|right)'
+RE_TABLE_WIDTH = r'<table\s?width=\d(px|%)>'
+
+RE_CELL_WIDTH = r'<width=\d(px|%)>'
+RE_CELL_HEIGHT = r'<height=\d(px|%)>'
+
+RE_CELL_H_ALIGN = r'<\(>|<:>|<\)>'
+RE_CELL_V_ALIGN = r'<\^\|\d>|<\|\d>|<v\|\d>'
+
+# 14
+RE_FOLDING = r'\{\{\{#!folding \[.+\]'
 
 # macro - ruby
 RE_MACRO_RUBY = r'\[ruby\([\w]+, ruby\=[\w]+\)\]'
@@ -81,7 +139,7 @@ class NamuWikiParser:
                 colSpanList = re.findall(RE_OLD_COL_SPAN, row)
 
                 for colSpan in colSpanList:
-                    spanCnt = len(re.findall(RE_SPLIT_TOKEN, colSpan)) - 1
+                    spanCnt = len(re.findall(RE_ROW_SPLIT, colSpan)) - 1
                     convStr = '||<-%s>' % spanCnt
                     row = row.replace(colSpan, convStr)
 
@@ -120,7 +178,7 @@ class NamuWikiParser:
     def ParseTableFromText(self, docText):
         retTableList = []
 
-        re_checkRow = re.compile(RE_CHECK_ROW)
+        re_checkRow = re.compile(RE_ROW_SPLIT)
         for text in docText:
             splitList = text.split('\n')
             
@@ -149,25 +207,47 @@ class NamuWikiParser:
         for table in tableList:
             for idx, row in enumerate(table):
                 newRow = row
-                
-                # Remove Tags
-                newRow = re.sub(RE_TABLE_SIZE, '', newRow) # Remove table's tag
-                newRow = re.sub(RE_TABLE_BORDER, '', newRow) # Remove table's tag
-                newRow = re.sub(RE_TEXT_ALIGN, '', newRow) # Remove text align' tag
-                newRow = re.sub(RE_FILE_LINK, '', newRow) # Remove [[파일:*.*]]
-                newRow = re.sub(RE_VIDEO_LINK, '', newRow) # Remove youtube link
-                newRow = re.sub(RE_HTML_LINK, '', newRow) # Remove external html link
-                newRow = re.sub(RE_CELL_SIZE, '', newRow) # Remove cell's width, height
-                newRow = re.sub(RE_TEXT_COLOR, '', newRow) # Remove {{{#[\w]+}}}, check piority with text size
-                newRow = re.sub(RE_TEXT_SIZE, '', newRow) # Remove {{{, }}}
-                newRow = re.sub(RE_FOOT_NOTE, '', newRow) # Remove [* ]
 
                 # Convert Tags
-                newRow = re.sub(RE_TABLE_BG_COLOR, CONV_TABLE_BG_COLOR, newRow)
-                newRow = re.sub(RE_BG_COLOR, CONV_BG_COLOR, newRow)
+                newRow = re.sub(RE_TEXT_FORM, CONV_TEXT_FORM, newRow)
+                newRow = re.sub(RE_SUB_SCRIPT, CONV_SUB_SCRIPT, newRow)
+                newRow = re.sub(RE_TEXT_COLOR, CONV_TEXT_COLOR, newRow)
                 newRow = re.sub(RE_BR_TAG, CONV_BR_TAG, newRow)
-                newRow = re.sub(RE_TEXT_SHAPE, CONV_TEXT_SHAPE, newRow)
+                newRow = re.sub(RE_BG_COLOR, CONV_BG_COLOR, newRow)
+                newRow = re.sub(RE_TBG_COLOR, CONV_TBG_COLOR, newRow)
+                newRow = re.sub(RE_COL_BG_COLOR, CONV_COL_BG_COLOR, newRow)
                 newRow = re.sub(RE_ROW_BG_COLOR, CONV_ROW_BG_COLOR, newRow)
+                newRow = re.sub(RE_CELL_COLOR, CONV_CELL_COLOR, newRow)
+                newRow = re.sub(RE_COL_COLOR, CONV_COL_COLOR, newRow)
+                newRow = re.sub(RE_ROW_COLOR, CONV_ROW_COLOR, newRow)
+
+                # Remove Tags
+                newRow = re.sub(RE_LITERAL, '', newRow)
+                newRow = re.sub(RE_TEXT_SIZE_FRONT, '', newRow)
+                newRow = re.sub(RE_PARENT_ARTICLE_LINK, '', newRow)
+                newRow = re.sub(RE_CHILD_ARTICLIE_LINK, '', newRow)
+                newRow = re.sub(RE_EXTERNAL_LINK, '', newRow)
+                newRow = re.sub(RE_IMAGE_FILE, '', newRow)
+                newRow = re.sub(RE_IMAGE_PARAM, '', newRow)
+                newRow = re.sub(RE_IMAGE_ALIGN, '', newRow)
+                newRow = re.sub(RE_YOUTUBE, '', newRow)
+                newRow = re.sub(RE_KAKAO_TV, '', newRow)
+                newRow = re.sub(RE_NICO_VIDEO, '', newRow)
+                newRow = re.sub(RE_NAVER_VIDEO, '', newRow)
+                newRow = re.sub(RE_HTML_VIDEO, '', newRow)
+                newRow = re.sub(RE_VIDEO_PARAM, '', newRow)
+                newRow = re.sub(RE_ADD_LIST, '', newRow)
+                newRow = re.sub(RE_FOOT_NOTE, '', newRow)
+                newRow = re.sub(RE_AGE_FORM, '', newRow)
+                newRow = re.sub(RE_DATE_TIME_FORM, '', newRow)
+                newRow = re.sub(RE_DDAY_FORM, '', newRow)
+                newRow = re.sub(RE_TABLE_ALIGN, '', newRow)
+                newRow = re.sub(RE_TABLE_WIDTH, '', newRow)
+                newRow = re.sub(RE_CELL_WIDTH, '', newRow)
+                newRow = re.sub(RE_CELL_HEIGHT, '', newRow)
+                newRow = re.sub(RE_CELL_H_ALIGN, '', newRow)
+                newRow = re.sub(RE_CELL_V_ALIGN, '', newRow)
+                newRow = re.sub(RE_FOLDING, '', newRow)
 
                 # Ruby
                 if not re.search(RE_MACRO_RUBY, newRow):
@@ -188,7 +268,7 @@ class NamuWikiParser:
     def SplitColSpan(self, table):
         for rIdx, row in enumerate(table):
             if None != re.search(RE_NEW_COL_SPAN, row):
-                colList = re.split(RE_SPLIT_TOKEN, row)[1:-1]
+                colList = re.split(RE_ROW_SPLIT, row)[1:-1]
 
                 newColList = []
                 for col in colList:
@@ -218,7 +298,7 @@ class NamuWikiParser:
         spanTripList = [] # (colIdx, colText, spanCnt)
         for rIdx, row in enumerate(table):
             if None != re.search(RE_NEW_ROW_SPAN, row):
-                rowList = re.split(RE_SPLIT_TOKEN, row)[1:-1]
+                rowList = re.split(RE_ROW_SPLIT, row)[1:-1]
                 
                 newColList = []
                 for cIdx, col in enumerate(rowList):
@@ -239,7 +319,7 @@ class NamuWikiParser:
                 table[rIdx] = newRow
             else:
                 if 0 < len(spanTripList):
-                    rowList = re.split(RE_SPLIT_TOKEN, row)[1:-1]
+                    rowList = re.split(RE_ROW_SPLIT, row)[1:-1]
 
                     newColList = []
                     for cIdx, col in enumerate(rowList):
@@ -281,12 +361,12 @@ class NamuWikiParser:
         # Check Min Length
         minLen = sys.maxsize
         for row in table:
-            currLen = len(re.split(RE_SPLIT_TOKEN, row)[1:-1])
+            currLen = len(re.split(RE_ROW_SPLIT, row)[1:-1])
             minLen = minLen if minLen < currLen else currLen
 
         # Slice Over Length
         for row in table:
-            spList = re.split(RE_SPLIT_TOKEN, row)[1:-1]
+            spList = re.split(RE_ROW_SPLIT, row)[1:-1]
             newRow = spList[:minLen]
             newTable.append(newRow)
 

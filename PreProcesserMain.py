@@ -2,7 +2,7 @@ from NamuParser import DOC_TEXT, DOC_TITLE, NamuWikiParser
 from HeadExtractor import Extractor
 
 # Definition
-SRC_JSON_PATH = './docData200302.json'
+SRC_JSON_PATH = './dataset/docData200302.json'
 
 if __name__ == '__main__':
     # Make instance    
