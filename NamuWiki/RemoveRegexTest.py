@@ -303,7 +303,6 @@ class RemoveRegexTest(unittest.TestCase):
         ans_2 = "마스코트 '에너지보이' 각주 테스트"
         test_2 = "마스코트 '에너지보이'[* 메인 마스코트와는 별개로 서비스 쪽 캐릭터인 ] 각주 테스트"
         re_test_2 = re.sub(RE_FOOT_NOTE, '', test_2)
-        print(re_test_2)
         self.assertEqual(ans_2, re_test_2)
 
 

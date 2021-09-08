@@ -87,7 +87,7 @@ RE_HTML_VIDEO = r'\{\{\{#!html <video src=("|\').+("|\')></video>\}\}\}|' \
 RE_ADD_LIST = r'v+(\w*\.|\*)?v*'
 
 # 9
-RE_FOOT_NOTE = r'\[*.+\]'
+RE_FOOT_NOTE = r'\[\*.+\]'
 
 # 12.2
 RE_AGE_FORM = r'\[age\(\d{4}-\d{1,2}-\d{1,2}\)\]'
