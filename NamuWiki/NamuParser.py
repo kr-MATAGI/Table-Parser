@@ -63,23 +63,19 @@ RE_LITERAL = r'\{\{\{\[\[|\]\]\}\}\}'
 RE_TEXT_SIZE_FRONT = r'\{\{\{\+\d ' # text size input's front
 
 # 3
-RE_PARENT_ARTICLE_LINK = '[[../]]'
-RE_CHILD_ARTICLIE_LINK = r'\[\[[/[\w]+]+'
-RE_EXTERNAL_LINK = r'\[\[https?://[/?[\w]+]+\|?'
+RE_PARENT_ARTICLE_LINK = r'\[\[\.\./\]\]'
+# RE_CHILD_ARTICLIE_LINK = r'\[\[[/[\w]+]+'
+RE_EXTERNAL_LINK = r'\[\[https?://.+(\..+)?(\|.+)?\]\]'
 
 # 5
-RE_IMAGE_FILE = r'\[\[파일:[\w]+\.[\w]+\|?'
-RE_IMAGE_PARAM = r'width=[\d]+%?&?|height=[\d]+%?&?'
-RE_IMAGE_ALIGN = r'align=[\w]+'
+RE_IMAGE_FILE = r'\[\[파일:\w+(\.\w+)?\|?(&?(width|height|align|bgcolor)=(left|center|right|\d+%?|#\w+))*\]\]'
 
 # 6
-RE_YOUTUBE = r'\[youtube\(\w+\)\]|' \
-             r'\[include\(틀:.+ (left|center|right)?\s?url=\w+\)\]'
-RE_KAKAO_TV = r'\[kakaotv\(\w+\)\]'
-RE_NICO_VIDEO = r'\[nicovideo\(\w+\)\]'
-RE_NAVER_VIDEO = r'\[include\(틀:navertv, i=\w+\)\]|' \
-                 r'\[include\(틀:naverid, vid=\w+, outkey=\w+\)\]'
-RE_VIDEO_PARAM = r'[(, |,)?(width|height|start)=\w+%?]+'
+RE_YOUTUBE = r'\[youtube\(\w+(,\s?(start|width|height)=\w+%?)*\)\]|' \
+             r'\[include\(틀:.+ (left|center|right)?\s?url=\w+\)(,\s?(start|width|height)=\w+%?)*\]'
+RE_KAKAO_TV = r'\[kakaotv\(\w+(,\s?(start|width|height)=\w+%?)*\)\]'
+RE_NICO_VIDEO = r'\[nicovideo\(\w+(,\s?(start|width|height)=\w+%?)*\)\]'
+RE_NAVER_VIDEO = r'\[include\(틀:(navertv|navervid){1}(,\s?(i=\w+|vid=\w+,\s?outkey=\w+)+)+(,\s?(start|width|height)=\w+%?)*\)\]'
 # 6 - deep syntax
 RE_HTML_VIDEO = r'\{\{\{#!html <video src=("|\').+("|\')></video>\}\}\}|' \
                 r'\{\{\{#!html .+\}\}\}'
@@ -88,15 +84,16 @@ RE_HTML_VIDEO = r'\{\{\{#!html <video src=("|\').+("|\')></video>\}\}\}|' \
 RE_ADD_LIST = r'v+(\w*\.|\*)?v*'
 
 # 9
-RE_FOOT_NOTE = r'\[\*.+\]$'
+RE_FOOT_NOTE = r'\[\*.+\]'
 
 # 12.2
-RE_AGE_FORM = r'\[age\(\d{4}-\d{0,2}-\d{0,2}\)\]'
+RE_AGE_FORM = r'\[age\(\d{4}-\d{1,2}-\d{1,2}\)\]'
 RE_DATE_TIME_FORM = r'\[date\]|\[datetime\]'
-RE_DDAY_FORM = r'\[dday\(\d{4}-\d{0,2}-\d{0,2}\)\]'
+RE_DDAY_FORM = r'\[dday\(\d{4}-\d{1,2}-\d{1,2}\)\]'
 
 # 12.4
 RE_BR_TAG = r'\[br\]'
+RE_CLEARFIX = r'\[clearfix\]'
 
 # 13.3.1
 RE_TABLE_ALIGN = r'<table\s?align=(left|center|right)'
@@ -223,17 +220,13 @@ class NamuWikiParser:
                 newRow = re.sub(RE_LITERAL, '', newRow)
                 newRow = re.sub(RE_TEXT_SIZE_FRONT, '', newRow)
                 newRow = re.sub(RE_PARENT_ARTICLE_LINK, '', newRow)
-                newRow = re.sub(RE_CHILD_ARTICLIE_LINK, '', newRow)
                 newRow = re.sub(RE_EXTERNAL_LINK, '', newRow)
                 newRow = re.sub(RE_IMAGE_FILE, '', newRow)
-                newRow = re.sub(RE_IMAGE_PARAM, '', newRow)
-                newRow = re.sub(RE_IMAGE_ALIGN, '', newRow)
                 newRow = re.sub(RE_YOUTUBE, '', newRow)
                 newRow = re.sub(RE_KAKAO_TV, '', newRow)
                 newRow = re.sub(RE_NICO_VIDEO, '', newRow)
                 newRow = re.sub(RE_NAVER_VIDEO, '', newRow)
                 newRow = re.sub(RE_HTML_VIDEO, '', newRow)
-                newRow = re.sub(RE_VIDEO_PARAM, '', newRow)
                 newRow = re.sub(RE_ADD_LIST, '', newRow)
                 newRow = re.sub(RE_FOOT_NOTE, '', newRow)
                 newRow = re.sub(RE_AGE_FORM, '', newRow)
