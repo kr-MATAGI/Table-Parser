@@ -7,7 +7,7 @@ from NamuWiki.NamuParser import RE_LITERAL, RE_TEXT_SIZE_FRONT, RE_BR_TAG, RE_CL
 from NamuWiki.NamuParser import RE_PARENT_ARTICLE_LINK, RE_EXTERNAL_LINK, RE_IMAGE_FILE
 from NamuWiki.NamuParser import RE_YOUTUBE, RE_KAKAO_TV, RE_NICO_VIDEO, RE_NAVER_VIDEO
 from NamuWiki.NamuParser import RE_HTML_VIDEO, RE_ADD_LIST, RE_FOOT_NOTE, RE_AGE_FORM, RE_DATE_TIME_FORM, RE_DDAY_FORM
-from NamuWiki.NamuParser import RE_TABLE_ALIGN, RE_TABLE_WIDTH, RE_CELL_WIDTH, RE_CELL_HEIGHT, RE_CELL_H_ALIGN, RE_CELL_V_ALIGN
+from NamuWiki.NamuParser import RE_TABLE_ALIGN, RE_TABLE_WIDTH, RE_CELL_SIZE, RE_CELL_H_ALIGN, RE_CELL_V_ALIGN
 from NamuWiki.NamuParser import RE_FOLDING, RE_MACRO_RUBY, RE_RUBY_FRONT
 
 
@@ -224,8 +224,8 @@ class RemoveRegexTest(unittest.TestCase):
     '''
         Test - Remove [br], [clearfix] tags
     '''
-    def RemoveBrAndClearfixTags(self):
-        answer = "나는  최재훈  입니다"
+    def test_RemoveBrAndClearfixTags(self):
+        answer = "나는  마타기  입니다."
 
         brStr = "나는 [br] 마타기 [br] 입니다."
         re_br = re.sub(RE_BR_TAG, '', brStr)
@@ -233,4 +233,51 @@ class RemoveRegexTest(unittest.TestCase):
 
         clearfixStr = "나는 [clearfix] 마타기 [clearfix] 입니다."
         re_clearfix = re.sub(RE_CLEARFIX, '', clearfixStr)
-        self.assertEqual(answer, re_br)
+        self.assertEqual(answer, re_clearfix)
+
+    '''
+        Test - Remove Table Attributes
+    '''
+    def test_RemoveTableAttributes(self):
+        answer = ".!3text"
+
+        alignStr_1 = "<tablealign=left>" + answer
+        re_align_1 = re.sub(RE_TABLE_ALIGN, '', alignStr_1)
+        self.assertEqual(answer, re_align_1)
+
+        alignStr_2 = "<table align=center>" + answer
+        re_align_2 = re.sub(RE_TABLE_ALIGN, '', alignStr_2)
+        self.assertEqual(answer, re_align_2)
+
+        tableWidthStr_1 = "<tablewidth=100px>" + answer
+        re_tableWidth_1 = re.sub(RE_TABLE_WIDTH, '', tableWidthStr_1)
+        self.assertEqual(answer, re_tableWidth_1)
+
+        tableWidthStr_2 = "<table width=100px>" + answer
+        re_tableWidth_2 = re.sub(RE_TABLE_WIDTH, '', tableWidthStr_2)
+        self.assertEqual(answer, re_tableWidth_2)
+
+        cellWidthStr = "<width=100px>" + answer
+        re_cellWidth = re.sub(RE_CELL_SIZE, '', cellWidthStr)
+        self.assertEqual(answer, re_cellWidth)
+
+        cellWidthHeight = "<width=100%>" + answer + "<height=50px>"
+        re_cellWHSize = re.sub(RE_CELL_SIZE, '', cellWidthHeight)
+        self.assertEqual(answer, re_cellWHSize)
+
+        cellHAlignStr = "<(>" + answer + "<:>" + "<)>" + answer
+        re_cellHAlign = re.sub(RE_CELL_H_ALIGN, '', cellHAlignStr)
+        self.assertEqual(answer+answer, re_cellHAlign)
+
+        cellVAlignStr = "<^|31>" + answer + "<|1111>" + "<v|1>" + answer
+        re_cellVAlign = re.sub(RE_CELL_V_ALIGN, '', cellVAlignStr)
+        self.assertEqual(answer+answer, re_cellVAlign)
+
+    '''
+        Test - Remove Folding
+    '''
+    def test_RemoveFolding(self):
+        answer = "[ 내용 1 ][ '''내용 2''' ]}}}"
+        foldingStr = "{{{#!folding [ ''접기'' 링크 텍스트 ][ 내용 1 ][ '''내용 2''' ]}}}"
+        re_folding = re.sub(RE_FOLDING, '', foldingStr)
+        self.assertEqual(answer, re_folding)

@@ -96,17 +96,16 @@ RE_BR_TAG = r'\[br\]'
 RE_CLEARFIX = r'\[clearfix\]'
 
 # 13.3.1
-RE_TABLE_ALIGN = r'<table\s?align=(left|center|right)'
-RE_TABLE_WIDTH = r'<table\s?width=\d(px|%)>'
+RE_TABLE_ALIGN = r'<table\s?align=(left|center|right)>'
+RE_TABLE_WIDTH = r'<table\s?width=\d+(px|%)?>'
 
-RE_CELL_WIDTH = r'<width=\d(px|%)>'
-RE_CELL_HEIGHT = r'<height=\d(px|%)>'
+RE_CELL_SIZE = r'<(width|height)=\d+(px|%)?>'
 
-RE_CELL_H_ALIGN = r'<\(>|<:>|<\)>'
-RE_CELL_V_ALIGN = r'<\^\|\d>|<\|\d>|<v\|\d>'
+RE_CELL_H_ALIGN = r'(<\(>)|(<:>)|(<\)>)'
+RE_CELL_V_ALIGN = r'(<\^\|\d+>)|(<\|\d+>)|(<v\|\d+>)'
 
 # 14
-RE_FOLDING = r'\{\{\{#!folding \[.+\]'
+RE_FOLDING = r'\{\{\{#!folding\s?\[[^\[.]+\]'
 
 # macro - ruby
 RE_MACRO_RUBY = r'\[ruby\(\w+, ruby=\w+\)\]'
@@ -235,8 +234,7 @@ class NamuWikiParser:
                 newRow = re.sub(RE_BR_TAG, '', newRow)
                 newRow = re.sub(RE_TABLE_ALIGN, '', newRow)
                 newRow = re.sub(RE_TABLE_WIDTH, '', newRow)
-                newRow = re.sub(RE_CELL_WIDTH, '', newRow)
-                newRow = re.sub(RE_CELL_HEIGHT, '', newRow)
+                newRow = re.sub(RE_CELL_SIZE, '', newRow)
                 newRow = re.sub(RE_CELL_H_ALIGN, '', newRow)
                 newRow = re.sub(RE_CELL_V_ALIGN, '', newRow)
                 newRow = re.sub(RE_FOLDING, '', newRow)
