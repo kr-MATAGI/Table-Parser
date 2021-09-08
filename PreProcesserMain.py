@@ -1,4 +1,4 @@
-from NamuParser import DOC_TEXT, DOC_TITLE, NamuWikiParser
+from NamuWiki.NamuParser import DOC_TEXT, DOC_TITLE, NamuWikiParser
 from HeadExtractor import Extractor
 
 # Definition
