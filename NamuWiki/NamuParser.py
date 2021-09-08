@@ -99,6 +99,8 @@ RE_CLEARFIX = r'\[clearfix\]'
 RE_TABLE_ALIGN = r'<table\s?align=(left|center|right)>'
 RE_TABLE_WIDTH = r'<table\s?width=\d+(px|%)?>'
 
+RE_TABLE_BORDER_COLOR = r'<table\s?bordercolor=#\w+>'
+
 RE_CELL_SIZE = r'<(width|height)=\d+(px|%)?>'
 
 RE_CELL_H_ALIGN = r'(<\(>)|(<:>)|(<\)>)'
@@ -110,6 +112,9 @@ RE_FOLDING = r'\{\{\{#!folding\s?\[[^\[.]+\]'
 # macro - ruby
 RE_MACRO_RUBY = r'\[ruby\(\w+, ruby=\w+\)\]'
 RE_RUBY_FRONT = r'\[ruby\([\w]+,\s?'
+
+# tirple barket }}}
+RE_TRIPLE_BARKET_BACK = r'\}\}\}'
 
 class NamuWikiParser:
     ### VAR ###
@@ -234,10 +239,12 @@ class NamuWikiParser:
                 newRow = re.sub(RE_BR_TAG, '', newRow)
                 newRow = re.sub(RE_TABLE_ALIGN, '', newRow)
                 newRow = re.sub(RE_TABLE_WIDTH, '', newRow)
+                newRow = re.sub(RE_TABLE_BORDER_COLOR, '', newRow)
                 newRow = re.sub(RE_CELL_SIZE, '', newRow)
                 newRow = re.sub(RE_CELL_H_ALIGN, '', newRow)
                 newRow = re.sub(RE_CELL_V_ALIGN, '', newRow)
                 newRow = re.sub(RE_FOLDING, '', newRow)
+                newRow = re.sub(RE_TRIPLE_BARKET_BACK, '', newRow)
 
                 # Ruby
                 if not re.search(RE_MACRO_RUBY, newRow):

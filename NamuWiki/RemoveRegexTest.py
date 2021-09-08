@@ -8,7 +8,7 @@ from NamuWiki.NamuParser import RE_PARENT_ARTICLE_LINK, RE_EXTERNAL_LINK, RE_IMA
 from NamuWiki.NamuParser import RE_YOUTUBE, RE_KAKAO_TV, RE_NICO_VIDEO, RE_NAVER_VIDEO
 from NamuWiki.NamuParser import RE_HTML_VIDEO, RE_ADD_LIST, RE_FOOT_NOTE, RE_AGE_FORM, RE_DATE_TIME_FORM, RE_DDAY_FORM
 from NamuWiki.NamuParser import RE_TABLE_ALIGN, RE_TABLE_WIDTH, RE_CELL_SIZE, RE_CELL_H_ALIGN, RE_CELL_V_ALIGN
-from NamuWiki.NamuParser import RE_FOLDING, RE_MACRO_RUBY, RE_RUBY_FRONT
+from NamuWiki.NamuParser import RE_FOLDING, RE_TABLE_BORDER_COLOR
 
 
 class RemoveRegexTest(unittest.TestCase):
@@ -256,6 +256,14 @@ class RemoveRegexTest(unittest.TestCase):
         tableWidthStr_2 = "<table width=100px>" + answer
         re_tableWidth_2 = re.sub(RE_TABLE_WIDTH, '', tableWidthStr_2)
         self.assertEqual(answer, re_tableWidth_2)
+
+        tableBorderColorStr_1 = "<tablebordercolor=#RRGGBB>" + answer
+        re_tableBorder_1 = re.sub(RE_TABLE_BORDER_COLOR, '', tableBorderColorStr_1)
+        self.assertEqual(answer, re_tableBorder_1)
+
+        tableBorderColorStr_2 = "<table bordercolor=#RRGGBB>" + answer
+        re_tableBorder_2 = re.sub(RE_TABLE_BORDER_COLOR, '', tableBorderColorStr_2)
+        self.assertEqual(answer, re_tableBorder_2)
 
         cellWidthStr = "<width=100px>" + answer
         re_cellWidth = re.sub(RE_CELL_SIZE, '', cellWidthStr)
