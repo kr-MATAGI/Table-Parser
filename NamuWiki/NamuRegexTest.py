@@ -1,1 +1,0 @@
-# NamuWiki Regex Test

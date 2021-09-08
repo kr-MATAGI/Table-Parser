@@ -23,22 +23,18 @@ RE_EMPTY_CELL = r'[\|\|]+'
 
 ## Convert
 # 2.1
-RE_TEXT_FORM = r"\'\'\'|\'\'|\'\'\' \'\'|__|~~|--"
-CONV_TEXT_FORM = "\'\'\'"
+RE_TEXT_FORM = r"(''' '')|('' ''')|(''')|('')|__|~~|--" # Check Priority (''' '', ''')
+CONV_TEXT_FORM = "<tf>" # text form
 
-RE_SUB_SCRIPT = r'\^\^||,,'
-CONV_SUB_SCRIPT = ' '
+RE_SUB_SCRIPT = r'\^\^|,,'
+CONV_SUB_SCRIPT = ' ' # white space
 
 # 2.3
-RE_TEXT_COLOR = r'\{\{\{#[\d]+|\{\{\{#[\w]+|\{\{\{#[\w]+,#[\w]+'
-CONV_TEXT_COLOR = '<ftc>' # font color
-
-# 12.4
-RE_BR_TAG = r'\[br\]'
-CONV_BR_TAG = '<br>'
+RE_TEXT_COLOR = r'\{\{\{#\w+(,\s?#\w+)?\s?'
+CONV_TEXT_COLOR = '<tc>' # text color
 
 # 13.3.1
-RE_BG_COLOR = r'<bgcolor=#?\w+(,\s?#?\w+)?>|'
+RE_BG_COLOR = r'<bgcolor=#?\w+(,\s?#?\w+)?>'
 CONV_BG_COLOR = '<bg>'
 
 RE_TBG_COLOR = r'<tablecolor=#?\w+(,\s?#?\w+)?>'
@@ -99,6 +95,9 @@ RE_AGE_FORM = r'\[age\(\d{4}-\d{0,2}-\d{0,2}\)\]'
 RE_DATE_TIME_FORM = r'\[date\]|\[datetime\]'
 RE_DDAY_FORM = r'\[dday\(\d{4}-\d{0,2}-\d{0,2}\)\]'
 
+# 12.4
+RE_BR_TAG = r'\[br\]'
+
 # 13.3.1
 RE_TABLE_ALIGN = r'<table\s?align=(left|center|right)'
 RE_TABLE_WIDTH = r'<table\s?width=\d(px|%)>'
@@ -113,8 +112,8 @@ RE_CELL_V_ALIGN = r'<\^\|\d>|<\|\d>|<v\|\d>'
 RE_FOLDING = r'\{\{\{#!folding \[.+\]'
 
 # macro - ruby
-RE_MACRO_RUBY = r'\[ruby\([\w]+, ruby\=[\w]+\)\]'
-RE_RUBY_FRONT = r'\[ruby\([\w]+, '
+RE_MACRO_RUBY = r'\[ruby\(\w+, ruby=\w+\)\]'
+RE_RUBY_FRONT = r'\[ruby\([\w]+,\s?'
 
 class NamuWikiParser:
     ### VAR ###
@@ -212,7 +211,6 @@ class NamuWikiParser:
                 newRow = re.sub(RE_TEXT_FORM, CONV_TEXT_FORM, newRow)
                 newRow = re.sub(RE_SUB_SCRIPT, CONV_SUB_SCRIPT, newRow)
                 newRow = re.sub(RE_TEXT_COLOR, CONV_TEXT_COLOR, newRow)
-                newRow = re.sub(RE_BR_TAG, CONV_BR_TAG, newRow)
                 newRow = re.sub(RE_BG_COLOR, CONV_BG_COLOR, newRow)
                 newRow = re.sub(RE_TBG_COLOR, CONV_TBG_COLOR, newRow)
                 newRow = re.sub(RE_COL_BG_COLOR, CONV_COL_BG_COLOR, newRow)
@@ -241,6 +239,7 @@ class NamuWikiParser:
                 newRow = re.sub(RE_AGE_FORM, '', newRow)
                 newRow = re.sub(RE_DATE_TIME_FORM, '', newRow)
                 newRow = re.sub(RE_DDAY_FORM, '', newRow)
+                newRow = re.sub(RE_BR_TAG, '', newRow)
                 newRow = re.sub(RE_TABLE_ALIGN, '', newRow)
                 newRow = re.sub(RE_TABLE_WIDTH, '', newRow)
                 newRow = re.sub(RE_CELL_WIDTH, '', newRow)
