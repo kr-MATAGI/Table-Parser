@@ -1,5 +1,6 @@
 # Dataset Json
 *.json
+*.zip
 
 # config directory
 __pycache__

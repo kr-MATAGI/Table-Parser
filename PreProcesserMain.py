@@ -16,10 +16,10 @@ if __name__ == '__main__':
         if 0 == docCount % 1000:
             print('Processing....', docCount)
 
-        if 257000 >= docCount: continue  # For Test '한국전력공사'
+        # if 257000 >= docCount: continue  # For Test '한국전력공사'
 
-        # if '백 평짜리 숲(킹덤 하츠)'== docItem[DOC_TITLE]:
-        if '한국전력공사' == docItem[DOC_TITLE]:
+        if '백 평짜리 숲(킹덤 하츠)' == docItem[DOC_TITLE]:
+        # if '한국전력공사' == docItem[DOC_TITLE]:
             tableList = namuParser.ParseTableFromText(docItem[DOC_TEXT])
             
             if 0 < len(tableList):
@@ -30,12 +30,12 @@ if __name__ == '__main__':
                     colSplitTable = namuParser.SplitColSpan(table)
                     rowSplitTable = namuParser.SplitRowSpan(colSplitTable)
                     organizedTable = namuParser.RemoveEmptyCells(rowSplitTable)
+                    break
                     sliceLenTable = namuParser.SliceTableLength(organizedTable)
 
                     if 2 <= len(sliceLenTable):
                         newTableList.append(sliceLenTable)
                 normalTableList, infoBoxList = namuParser.ClassifyNormalTableOrInfoBox(newTableList)
-                print(infoBoxList)
 
                 # Finish Parse and Regex Expression Process
                 tableList = normalTableList

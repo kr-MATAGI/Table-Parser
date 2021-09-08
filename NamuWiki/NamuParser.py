@@ -21,6 +21,9 @@ RE_NEW_ROW_SPAN = r'<\|\d>'
 
 RE_EMPTY_CELL = r'[\|\|]+'
 
+## Custom Attribute Token
+RE_CUSTOM_ATTR = r'<\w+>'
+
 ## Convert
 # 2.1
 RE_TEXT_FORM = r"(''' '')|('' ''')|(''')|('')|__|~~|--" # Check Priority (''' '', ''')
@@ -37,7 +40,7 @@ CONV_TEXT_COLOR = '<tc>' # text color
 RE_BG_COLOR = r'<bgcolor=#?\w+(,\s?#?\w+)?>'
 CONV_BG_COLOR = '<bg>'
 
-RE_TBG_COLOR = r'<tablecolor=#?\w+(,\s?#?\w+)?>'
+RE_TBG_COLOR = r'<(tablecolor|tablebgcolor)=#?\w+(,\s?#?\w+)?>'
 CONV_TBG_COLOR = '<tbg>'
 
 RE_COL_BG_COLOR = r'<colbgcolor=#?\w+(,\s?#?\w+)?>'
@@ -68,7 +71,7 @@ RE_PARENT_ARTICLE_LINK = r'\[\[\.\./\]\]'
 RE_EXTERNAL_LINK = r'\[\[https?://.+(\..+)?(\|.+)?\]\]'
 
 # 5
-RE_IMAGE_FILE = r'\[\[파일:\w+(\.\w+)?\|?(&?(width|height|align|bgcolor)=(left|center|right|\d+%?|#\w+))*\]\]'
+RE_IMAGE_FILE = r'\[\[파일:.+\|?(&?(width|height|align|bgcolor)=(left|center|right|(\d+%?)|(#\w+)))*\]\]'
 
 # 6
 RE_YOUTUBE = r'\[youtube\(\w+(,\s?(start|width|height)=\w+%?)*\)\]|' \
@@ -84,7 +87,7 @@ RE_HTML_VIDEO = r'\{\{\{#!html <video src=("|\').+("|\')></video>\}\}\}|' \
 RE_ADD_LIST = r'v+(\w*\.|\*)?v*'
 
 # 9
-RE_FOOT_NOTE = r'\[\*.+\]'
+RE_FOOT_NOTE = r'\[*.+\]'
 
 # 12.2
 RE_AGE_FORM = r'\[age\(\d{4}-\d{1,2}-\d{1,2}\)\]'
@@ -96,7 +99,7 @@ RE_BR_TAG = r'\[br\]'
 RE_CLEARFIX = r'\[clearfix\]'
 
 # 13.3.1
-RE_TABLE_ALIGN = r'<table\s?align=(left|center|right)>'
+RE_TABLE_ALIGN = r'<table\s?align=\'?(left|center|right)\'?>'
 RE_TABLE_WIDTH = r'<table\s?width=\d+(px|%)?>'
 
 RE_TABLE_BORDER_COLOR = r'<table\s?bordercolor=#\w+>'
@@ -342,10 +345,13 @@ class NamuWikiParser:
     '''
     def RemoveEmptyCells(self, table):
         newTable = []
+
+        print(table)
         for row in table:
-            rowSplitList = re.split(RE_EMPTY_CELL, row.replace(' ', ''))
-            if 2 < len(rowSplitList): newTable.append(row)
-        table = newTable
+            newRow = None
+            textRow = str(row).replace('||', '')
+            textRow = re.sub(RE_CUSTOM_ATTR, '', textRow)
+
 
         return table
 

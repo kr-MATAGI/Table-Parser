@@ -289,3 +289,21 @@ class RemoveRegexTest(unittest.TestCase):
         foldingStr = "{{{#!folding [ ''접기'' 링크 텍스트 ][ 내용 1 ][ '''내용 2''' ]}}}"
         re_folding = re.sub(RE_FOLDING, '', foldingStr)
         self.assertEqual(answer, re_folding)
+
+
+    '''
+        Test - Real Dataset Exception
+    '''
+    def test_RealDatasetException(self):
+        ans_1 = "마스코트 '에너지보이'"
+        test_1 = "[[파일:한전 캐릭터.jpg|width=70]]마스코트 '에너지보이'"
+        re_test_1 = re.sub(RE_IMAGE_FILE, '', test_1)
+        self.assertEqual(ans_1, re_test_1)
+
+        ans_2 = "마스코트 '에너지보이' 각주 테스트"
+        test_2 = "마스코트 '에너지보이'[* 메인 마스코트와는 별개로 서비스 쪽 캐릭터인 ] 각주 테스트"
+        re_test_2 = re.sub(RE_FOOT_NOTE, '', test_2)
+        print(re_test_2)
+        self.assertEqual(ans_2, re_test_2)
+
+
