@@ -114,7 +114,8 @@ RE_FOLDING = r'\{\{\{#!folding\s?\[[^\[.]+\]'
 
 # macro - ruby
 RE_MACRO_RUBY = r'\[ruby\(\w+, ruby=\w+\)\]'
-RE_RUBY_FRONT = r'\[ruby\([\w]+,\s?'
+RE_RUBY_FRONT = r'\[ruby\('
+RE_RUBY_BACK = r',\s?ruby=.+\)\]'
 
 # tirple barket }}}
 RE_TRIPLE_BARKET_BACK = r'\}\}\}'
@@ -250,16 +251,13 @@ class NamuWikiParser:
                 newRow = re.sub(RE_TRIPLE_BARKET_BACK, '', newRow)
 
                 # Ruby
-                if not re.search(RE_MACRO_RUBY, newRow):
+                if re.search(RE_MACRO_RUBY, newRow):
                     rubyList = re.findall(RE_MACRO_RUBY, newRow)
                     
                     for rubyStr in rubyList:
                         delRubyStr = re.sub(RE_RUBY_FRONT, '', rubyStr)
-                        delRubyStr = delRubyStr.replace('ruby=', '')
-                        delRubyStr = delRubyStr.replace(')]', '')
-                        
+                        delRubyStr = re.sub(RE_RUBY_BACK, '', delRubyStr)
                         newRow = newRow.replace(rubyStr, delRubyStr)
-
                 table[idx] = newRow
 
     '''

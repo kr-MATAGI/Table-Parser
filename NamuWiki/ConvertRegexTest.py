@@ -3,11 +3,11 @@
 import re
 import unittest
 
-from NamuWiki.NamuParser import RE_ROW_SPLIT, RE_OLD_COL_SPAN, RE_NEW_COL_SPAN, RE_NEW_ROW_SPAN, RE_EMPTY_CELL
 from NamuWiki.NamuParser import RE_TEXT_FORM, CONV_TEXT_FORM, RE_SUB_SCRIPT, CONV_SUB_SCRIPT, RE_TEXT_COLOR, CONV_TEXT_COLOR
 from NamuWiki.NamuParser import RE_BG_COLOR, CONV_BG_COLOR, RE_TBG_COLOR, CONV_TBG_COLOR
 from NamuWiki.NamuParser import RE_COL_BG_COLOR, CONV_COL_BG_COLOR, RE_ROW_BG_COLOR, CONV_ROW_BG_COLOR, RE_CELL_COLOR, CONV_CELL_COLOR
 from NamuWiki.NamuParser import RE_COL_COLOR, CONV_COL_COLOR, RE_ROW_COLOR, CONV_ROW_COLOR
+from NamuWiki.NamuParser import RE_MACRO_RUBY, RE_RUBY_FRONT, RE_RUBY_BACK
 
 # 2.1 Text Form
 class ConvertRegexTest(unittest.TestCase):
@@ -217,6 +217,5 @@ class ConvertRegexTest(unittest.TestCase):
         testStr_3 = "<rowcolor=#00a495, #2d2f34>"
         re_row_color_3 = re.sub(RE_ROW_COLOR, CONV_ROW_COLOR, testStr_3)
 
-a = '<|4>'
-b= '<|4>'
-print(a == b)
+
+
