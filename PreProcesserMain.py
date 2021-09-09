@@ -18,8 +18,8 @@ if __name__ == '__main__':
 
         # if 257000 >= docCount: continue  # For Test '한국전력공사'
 
-        if '백 평짜리 숲(킹덤 하츠)' == docItem[DOC_TITLE]:
-        # if '한국전력공사' == docItem[DOC_TITLE]:
+        #if '백 평짜리 숲(킹덤 하츠)' == docItem[DOC_TITLE]:
+        if '한국전력공사' == docItem[DOC_TITLE]:
             tableList = namuParser.ParseTableFromText(docItem[DOC_TEXT])
             
             if 0 < len(tableList):
@@ -27,14 +27,10 @@ if __name__ == '__main__':
                 namuParser.ModifyHTMLTags(tableList)
                 
                 for table in tableList:
-                    colSplitTable = namuParser.SplitColSpan(table)
-                    rowSplitTable = namuParser.SplitRowSpan(colSplitTable)
-                    organizedTable = namuParser.RemoveEmptyCells(rowSplitTable)
-                    break
-                    sliceLenTable = namuParser.SliceTableLength(organizedTable)
+                    preprocessedTable = namuParser.PreprocessingTable(table)
 
-                    if 2 <= len(sliceLenTable):
-                        newTableList.append(sliceLenTable)
+                    if 2 <= len(preprocessedTable):
+                        newTableList.append(preprocessedTable)
                 normalTableList, infoBoxList = namuParser.ClassifyNormalTableOrInfoBox(newTableList)
 
                 # Finish Parse and Regex Expression Process

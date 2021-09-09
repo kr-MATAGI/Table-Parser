@@ -216,3 +216,7 @@ class ConvertRegexTest(unittest.TestCase):
 
         testStr_3 = "<rowcolor=#00a495, #2d2f34>"
         re_row_color_3 = re.sub(RE_ROW_COLOR, CONV_ROW_COLOR, testStr_3)
+
+a = '<|4>'
+b= '<|4>'
+print(a == b)

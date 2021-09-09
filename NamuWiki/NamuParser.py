@@ -16,8 +16,8 @@ DOC_TEXT = 'text'
 RE_ROW_SPLIT = r'\|\|'
 
 RE_OLD_COL_SPAN = r'\|\|{2,}'
-RE_NEW_COL_SPAN = r'<-\d>'
-RE_NEW_ROW_SPAN = r'<\|\d>'
+RE_NEW_COL_SPAN = r'<-\d+>'
+RE_NEW_ROW_SPAN = r'<\|\d+>'
 
 RE_EMPTY_CELL = r'[\|\|]+'
 
@@ -107,7 +107,7 @@ RE_TABLE_BORDER_COLOR = r'<table\s?bordercolor=#\w+>'
 RE_CELL_SIZE = r'<(width|height)=\d+(px|%)?>'
 
 RE_CELL_H_ALIGN = r'(<\(>)|(<:>)|(<\)>)'
-RE_CELL_V_ALIGN = r'(<\^\|\d+>)|(<\|\d+>)|(<v\|\d+>)'
+RE_CELL_V_ALIGN = r'(<\^\|\d+>)|(<v\|\d+>)' # (<\|\d+>) ? -> row Span
 
 # 14
 RE_FOLDING = r'\{\{\{#!folding\s?\[[^\[.]+\]'
@@ -138,7 +138,7 @@ class NamuWikiParser:
         retRow = rowList
 
         for rIdx, row in enumerate(rowList):
-            if None != re.search(RE_OLD_COL_SPAN, row):
+            if not re.search(RE_OLD_COL_SPAN, row):
                 colSpanList = re.findall(RE_OLD_COL_SPAN, row)
 
                 for colSpan in colSpanList:
@@ -263,117 +263,110 @@ class NamuWikiParser:
                 table[idx] = newRow
 
     '''
+        Split Row and Col by '||'
+    '''
+    def SplitRowAndColByToken(self, table):
+        retTable = []
+
+        for row in table:
+            newRow = []
+            spliteRowList = re.split(RE_ROW_SPLIT, row)[1:-1]
+
+            for col in spliteRowList:
+                newRow.append(col)
+            retTable.append(newRow)
+
+        return retTable
+
+    '''
         Split Col Span
     '''
     def SplitColSpan(self, table):
-        for rIdx, row in enumerate(table):
-            if None != re.search(RE_NEW_COL_SPAN, row):
-                colList = re.split(RE_ROW_SPLIT, row)[1:-1]
+        retTable = []
 
-                newColList = []
-                for col in colList:
-                    newCol = col
-                    spanCnt = 0
+        for row in table:
+            newRow = []
 
-                    if None != re.search(RE_NEW_COL_SPAN, col):
-                        spanCnt = re.findall(RE_NEW_COL_SPAN, col)[0]
-                        spanCnt = int(spanCnt.replace('<-', '').replace('>', '')) - 1
+            for col in row:
+                if re.search(RE_NEW_COL_SPAN, col):
+                    spanCnt = int(re.search(RE_NEW_COL_SPAN, col).group(0).replace('<-', '').replace('>', ''))
+                    newCol = re.sub(RE_NEW_COL_SPAN, '<cs>', col)
+                    for spIdx in range(spanCnt):
+                        newRow.append(newCol)
+                else:
+                    newRow.append(col)
+            retTable.append(newRow)
 
-                        newCol = re.sub(RE_NEW_COL_SPAN, '<cs>', col)
-                    newColList.append(newCol)
-                    for cnt in range(spanCnt): newColList.append(newCol)
-                
-                # Re-Merge
-                newRow = '||'
-                for col in newColList: newRow += (col + '||')
-                table[rIdx] = newRow
-
-        return table
+        return retTable
 
 
     '''
         Split Row Span
     '''
     def SplitRowSpan(self, table):
-        spanTripList = [] # (colIdx, colText, spanCnt)
-        for rIdx, row in enumerate(table):
-            if None != re.search(RE_NEW_ROW_SPAN, row):
-                rowList = re.split(RE_ROW_SPLIT, row)[1:-1]
-                
-                newColList = []
-                for cIdx, col in enumerate(rowList):
-                    newCol = col
+        retTable = []
 
-                    if None != re.search(RE_NEW_ROW_SPAN, col):
-                        spanCnt = re.findall(RE_NEW_ROW_SPAN, col)[0]
-                        spanCnt = int(spanCnt.replace('<|', '').replace('>', '')) - 1
-                        
-                        newCol = re.sub(RE_NEW_ROW_SPAN, '<rs>', col)
-                        spanTripList.append((cIdx, newCol, spanCnt))
+        spanInfoList = [] # (colIdx, str, spanCnt)
+        for row in table:
+            newRow = []
 
-                    newColList.append(newCol)
-                
-                # Re-Merge
-                newRow = '||'
-                for col in newColList: newRow += (col + '||')
-                table[rIdx] = newRow
-            else:
-                if 0 < len(spanTripList):
-                    rowList = re.split(RE_ROW_SPLIT, row)[1:-1]
+            for cIdx, col in enumerate(row):
+                if re.search(RE_NEW_ROW_SPAN, col):
+                    spanCnt = int(re.search(RE_NEW_ROW_SPAN, col).group(0).replace("<|", '').replace(">", ''))
+                    newCol = re.sub(RE_NEW_ROW_SPAN, '<rs>', col)
+                    spanInfo = (cIdx, newCol, spanCnt-1)
+                    spanInfoList.append(spanInfo)
 
-                    newColList = []
-                    for cIdx, col in enumerate(rowList):
-                        for trIdx, triPair in enumerate(spanTripList):
-                            if triPair[0] == cIdx:
-                                newColList.append(triPair[1])
+                    newRow.append(newCol)
+                else:
+                    for infoIdx, infoData in enumerate(spanInfoList):
+                        if cIdx == infoData[0]:
+                            newRow.append(infoData[1])
+                            if 0 > infoData[2]-1:
+                                spanInfoList.remove(infoData)
+                            else:
+                                newInfo = (infoData[0], infoData[1], infoData[2]-1)
+                                spanInfoList[infoIdx] = newInfo
+                    newRow.append(col)
+            retTable.append(newRow)
 
-                                newSpanCnt = int(triPair[2]) - 1
-                                newTriPair = (triPair[0], triPair[1], newSpanCnt)
-                                if 0 >= newSpanCnt: spanTripList.remove(triPair)
-                                else: spanTripList[trIdx] = newTriPair
-                        newColList.append(col)
-            
-                    # Re-Merge
-                    newRow = '||'
-                    for col in newColList: newRow += (col + '||')
-                    table[rIdx] = newRow
-
-        return table
+        return retTable
         
     '''
         Remove Empty Cells
     '''
     def RemoveEmptyCells(self, table):
-        newTable = []
+        retTable = []
 
-        print(table)
         for row in table:
-            newRow = None
-            textRow = str(row).replace('||', '')
-            textRow = re.sub(RE_CUSTOM_ATTR, '', textRow)
+            newRow = []
 
+            for col in row:
+                removeTokenCol = re.sub(r"<\w+>", '', col)
+                if 0 < len(removeTokenCol):
+                    newRow.append(col)
+            if 0 < len(newRow):
+                retTable.append(newRow)
 
-        return table
+        return retTable
 
     '''
         Slice Table Length with min length
     '''
     def SliceTableLength(self, table):
-        newTable = []
+        retTable = []
 
-        # Check Min Length
+        # Check Table Min Length
         minLen = sys.maxsize
         for row in table:
-            currLen = len(re.split(RE_ROW_SPLIT, row)[1:-1])
-            minLen = minLen if minLen < currLen else currLen
+            minLen = min(minLen, len(row))
 
-        # Slice Over Length
+        # Slice row of table
         for row in table:
-            spList = re.split(RE_ROW_SPLIT, row)[1:-1]
-            newRow = spList[:minLen]
-            newTable.append(newRow)
+            newRow = row[:minLen]
+            retTable.append(newRow)
 
-        return newTable
+        return retTable
 
     '''
         Classify Normal Table and Info Box
@@ -394,3 +387,18 @@ class NamuWikiParser:
                 infoBoxList.append(table)
 
         return normalTableList, infoBoxList
+
+    '''
+        Merge Related Process 
+    '''
+    def PreprocessingTable(self, table):
+        retTable = table
+
+        ## Preprocess
+        retTable = self.SplitRowAndColByToken(table)
+        retTable = self.SplitColSpan(retTable)
+        retTable = self.SplitRowSpan(retTable)
+        retTable = self.RemoveEmptyCells(retTable)
+        retTable = self.SliceTableLength(retTable)
+
+        return retTable
