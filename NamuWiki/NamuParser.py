@@ -1,6 +1,8 @@
 
 import re
 import sys
+import os
+import pandas as pd
 
 import ijson
 
@@ -124,6 +126,8 @@ RE_TRIPLE_BARKET_BACK = r'\}\}\}'
 class NamuWikiParser:
     ### VAR ###
     __srcPath = ''
+    __normalTableCnt = 0
+    __infoBoxCnt = 0
 
     ### INIT ###
     '''
@@ -405,3 +409,24 @@ class NamuWikiParser:
 
         return retTable
 
+    '''
+        Write Tables
+    '''
+    def WriteTableToFile(self, tableList, title, destPath, isNormalTable):
+        if not os.path.exists(destPath):
+            print('Check Path: ', destPath)
+            return
+
+        fileIdx = 0
+        if isNormalTable:
+            fileIdx = self.__normalTableCnt
+            self.__normalTableCnt += 1
+        else:
+            fileIdx = self.__infoBoxCnt
+            self.__infoBoxCnt += 1
+
+        for tIdx, table in enumerate(tableList):
+            fileName = 'table_' + str(tIdx) + '.tsv'
+
+            tablePd = pd.DataFrame(table)
+            tablePd.to_csv(destPath+'/' + str(fileIdx) + '_' + fileName, sep='\t', encoding='utf-8')

@@ -3,6 +3,7 @@ from HeadExtractor import Extractor
 
 # Definition
 SRC_JSON_PATH = './dataset/docData200302.json'
+WRITE_TABLE_DEST_PATH = './Tables'
 
 if __name__ == '__main__':
     # Make instance    
@@ -16,33 +17,28 @@ if __name__ == '__main__':
         if 0 == docCount % 1000:
             print('Processing....', docCount)
 
-        # if 257000 >= docCount: continue  # For Test '한국전력공사'
+        tableList = namuParser.ParseTableFromText(docItem[DOC_TEXT])
 
-        #if '백 평짜리 숲(킹덤 하츠)' == docItem[DOC_TITLE]:
-        if '한국전력공사' == docItem[DOC_TITLE]:
-            tableList = namuParser.ParseTableFromText(docItem[DOC_TEXT])
-            
-            if 0 < len(tableList):
-                newTableList = []
-                namuParser.ModifyHTMLTags(tableList)
-                
-                for table in tableList:
-                    preprocessedTable = namuParser.PreprocessingTable(table)
+        if 0 < len(tableList):
+            newTableList = []
+            namuParser.ModifyHTMLTags(tableList)
 
-                    if 2 <= len(preprocessedTable):
-                        newTableList.append(preprocessedTable)
-                normalTableList, infoBoxList = namuParser.ClassifyNormalTableOrInfoBox(newTableList)
-                #print(normalTableList)
-                #print(infoBoxList)
+            for table in tableList:
+                preprocessedTable = namuParser.PreprocessingTable(table)
 
-                # Write Table to Directory
+                if 2 <= len(preprocessedTable):
+                    newTableList.append(preprocessedTable)
+            normalTableList, infoBoxList = namuParser.ClassifyNormalTableOrInfoBox(newTableList)
+            #print(normalTableList)
+            #print(infoBoxList)
 
+            # Write Table to Directory
+            namuParser.WriteTableToFile(normalTableList, docItem[DOC_TITLE], WRITE_TABLE_DEST_PATH+'/normal', True)
+            namuParser.WriteTableToFile(infoBoxList, docItem[DOC_TITLE], WRITE_TABLE_DEST_PATH+'/infobox', False)
 
-                # Finish Parse and Regex Expression Process
-                tableList = normalTableList
-                tableList.extend(infoBoxList)
+            # Finish Parse and Regex Expression Process
+            tableList = normalTableList
+            tableList.extend(infoBoxList)
 
-                # Extract Table Head and Make Tensor
-                #scoreTable = headExtractor.GiveScoreToHeadCell(newTableList)
-
-                break # TEST STOP
+            # Extract Table Head and Make Tensor
+            #scoreTable = headExtractor.GiveScoreToHeadCell(newTableList)

@@ -5,3 +5,6 @@
 # config directory
 __pycache__
 .idea
+
+# Table set
+/Tables
