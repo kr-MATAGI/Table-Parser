@@ -3,7 +3,8 @@
 import re
 import unittest
 
-from NamuWiki.NamuParser import RE_TEXT_FORM, CONV_TEXT_FORM, RE_SUB_SCRIPT, CONV_SUB_SCRIPT, RE_TEXT_COLOR, CONV_TEXT_COLOR
+from NamuWiki.NamuParser import RE_TEXT_FORM, CONV_TEXT_FORM, RE_SUB_SCRIPT, CONV_SUB_SCRIPT, RE_TEXT_COLOR, \
+    CONV_TEXT_COLOR, RE_TABLE_ALIGN, RE_TABLE_BORDER_COLOR
 from NamuWiki.NamuParser import RE_BG_COLOR, CONV_BG_COLOR, RE_TBG_COLOR, CONV_TBG_COLOR
 from NamuWiki.NamuParser import RE_COL_BG_COLOR, CONV_COL_BG_COLOR, RE_ROW_BG_COLOR, CONV_ROW_BG_COLOR, RE_CELL_COLOR, CONV_CELL_COLOR
 from NamuWiki.NamuParser import RE_COL_COLOR, CONV_COL_COLOR, RE_ROW_COLOR, CONV_ROW_COLOR
@@ -217,5 +218,16 @@ class ConvertRegexTest(unittest.TestCase):
         testStr_3 = "<rowcolor=#00a495, #2d2f34>"
         re_row_color_3 = re.sub(RE_ROW_COLOR, CONV_ROW_COLOR, testStr_3)
 
+    '''
+        Test - Exception
+    '''
+    def test_exception(self):
+        test_5 = "<-3><tablealign=center><tablebordercolor=#004098><bgcolor=#e60012> "
+        test_5 = re.sub(RE_TABLE_ALIGN, '', test_5)
+        self.assertEqual("<-3><tablebordercolor=#004098><bgcolor=#e60012> ", test_5)
+        test_5 = re.sub(RE_TABLE_BORDER_COLOR, '', test_5)
+        self.assertEqual("<-3><bgcolor=#e60012> ", test_5)
+        test_5 = re.sub(RE_BG_COLOR, CONV_BG_COLOR, test_5)
+        self.assertEqual("<-3><bg> ", test_5)
 
 

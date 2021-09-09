@@ -8,7 +8,7 @@ from NamuWiki.NamuParser import RE_PARENT_ARTICLE_LINK, RE_EXTERNAL_LINK, RE_IMA
 from NamuWiki.NamuParser import RE_YOUTUBE, RE_KAKAO_TV, RE_NICO_VIDEO, RE_NAVER_VIDEO
 from NamuWiki.NamuParser import RE_HTML_VIDEO, RE_ADD_LIST, RE_FOOT_NOTE, RE_AGE_FORM, RE_DATE_TIME_FORM, RE_DDAY_FORM
 from NamuWiki.NamuParser import RE_TABLE_ALIGN, RE_TABLE_WIDTH, RE_CELL_SIZE, RE_CELL_H_ALIGN, RE_CELL_V_ALIGN
-from NamuWiki.NamuParser import RE_FOLDING, RE_TABLE_BORDER_COLOR
+from NamuWiki.NamuParser import RE_FOLDING, RE_TABLE_BORDER_COLOR, RE_BG_COLOR
 
 
 class RemoveRegexTest(unittest.TestCase):
@@ -60,6 +60,10 @@ class RemoveRegexTest(unittest.TestCase):
         testStr_4 = "[[https://goo.gl/|[[파일:홈페이지 아이콘.svg]]]] test"
         re_artiLink_4 = re.sub(RE_EXTERNAL_LINK, '', testStr_4)
         self.assertEqual(' test', re_artiLink_4)
+
+        testStr_5 = "[[http://goo.gl/|출력]]"
+        re_artiLink_5 = re.sub(RE_EXTERNAL_LINK, '', testStr_5)
+        self.assertEqual('', re_artiLink_5)
 
     '''
         Test - Remove Image File
@@ -277,7 +281,7 @@ class RemoveRegexTest(unittest.TestCase):
         re_cellHAlign = re.sub(RE_CELL_H_ALIGN, '', cellHAlignStr)
         self.assertEqual(answer+answer, re_cellHAlign)
 
-        cellVAlignStr = "<^|31>" + answer + "<|1111>" + "<v|1>" + answer
+        cellVAlignStr = "<^|31>" + answer + "<v|1>" + answer
         re_cellVAlign = re.sub(RE_CELL_V_ALIGN, '', cellVAlignStr)
         self.assertEqual(answer+answer, re_cellVAlign)
 
@@ -304,5 +308,19 @@ class RemoveRegexTest(unittest.TestCase):
         test_2 = "마스코트 '에너지보이'[* 메인 마스코트와는 별개로 서비스 쪽 캐릭터인 ] 각주 테스트"
         re_test_2 = re.sub(RE_FOOT_NOTE, '', test_2)
         self.assertEqual(ans_2, re_test_2)
+
+        ans_3 = '[* 메인 마스코트와는 별개로 서비스 쪽 캐릭터인 ]'
+        test_3 = "[* 메인 마스코트와는 별개로 서비스 쪽 캐릭터인 [[https://pbs.twing.com/media/DQvgTnHUQAEbaru.jpg|케피, 우피, 해피도 있다.]]]"
+        reg_3 = re.sub(RE_EXTERNAL_LINK, '', test_3)
+        self.assertEqual(ans_3, reg_3)
+
+        ans_4 = '[br]'
+        test_4 = "[br][[https://www.instagram.com/iamkepco| [[파일:인스타그램 아이콘.svg|width=15]]"
+        reg_4 = re.sub(RE_EXTERNAL_LINK, '', test_4)
+        self.assertEqual(ans_4, reg_4)
+
+te = '<cs> [[한국전력|한국전력]] 스포츠단 '
+te = re.sub(r"<\w+>", '', te)
+print(te.lstrip())
 
 

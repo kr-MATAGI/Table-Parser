@@ -37,7 +37,8 @@ RE_TEXT_COLOR = r'\{\{\{#\w+(,\s?#\w+)?\s?'
 CONV_TEXT_COLOR = '<tc>' # text color
 
 # 13.3.1
-RE_BG_COLOR = r'<bgcolor=#?\w+(,\s?#?\w+)?>'
+RE_BG_COLOR = r'<bgcolor=#?(\w|\d)+(,\s?#?\w+)?>'
+RE_OLD_BG_COLOR = r'<#?\w+>'
 CONV_BG_COLOR = '<bg>'
 
 RE_TBG_COLOR = r'<(tablecolor|tablebgcolor)=#?\w+(,\s?#?\w+)?>'
@@ -66,12 +67,12 @@ RE_LITERAL = r'\{\{\{\[\[|\]\]\}\}\}'
 RE_TEXT_SIZE_FRONT = r'\{\{\{\+\d ' # text size input's front
 
 # 3
-RE_PARENT_ARTICLE_LINK = r'\[\[\.\./\]\]'
+RE_PARENT_ARTICLE_LINK = r'(\[\[)\.\./(\]\])'
 # RE_CHILD_ARTICLIE_LINK = r'\[\[[/[\w]+]+'
-RE_EXTERNAL_LINK = r'\[\[https?://.+(\..+)?(\|.+)?\]\]'
+RE_EXTERNAL_LINK = r'\[\[https?://[^\|\t\n\r\f\v]+(\s?\|[^\]\t\n\r\f\v]+(\]\])?)?\]\]'
 
 # 5
-RE_IMAGE_FILE = r'\[\[파일:.+\|?(&?(width|height|align|bgcolor)=(left|center|right|(\d+%?)|(#\w+)))*\]\]'
+RE_IMAGE_FILE = r'\[\[파일:[^\]\t\n\r\f\v]+\|?(&?(width|height|align|bgcolor)=(left|center|right|(\d+%?)|(#\w+)))*\]\]'
 
 # 6
 RE_YOUTUBE = r'\[youtube\(\w+(,\s?(start|width|height)=\w+%?)*\)\]|' \
@@ -95,14 +96,14 @@ RE_DATE_TIME_FORM = r'\[date\]|\[datetime\]'
 RE_DDAY_FORM = r'\[dday\(\d{4}-\d{1,2}-\d{1,2}\)\]'
 
 # 12.4
-RE_BR_TAG = r'\[br\]'
+RE_BR_TAG = r'(\[BR\])|(\[br\])'
 RE_CLEARFIX = r'\[clearfix\]'
 
 # 13.3.1
 RE_TABLE_ALIGN = r'<table\s?align=\'?(left|center|right)\'?>'
 RE_TABLE_WIDTH = r'<table\s?width=\d+(px|%)?>'
 
-RE_TABLE_BORDER_COLOR = r'<table\s?bordercolor=#\w+>'
+RE_TABLE_BORDER_COLOR = r'<table\s?bordercolor=#?\w+>'
 
 RE_CELL_SIZE = r'<(width|height)=\d+(px|%)?>'
 
@@ -228,8 +229,8 @@ class NamuWikiParser:
                 newRow = re.sub(RE_LITERAL, '', newRow)
                 newRow = re.sub(RE_TEXT_SIZE_FRONT, '', newRow)
                 newRow = re.sub(RE_PARENT_ARTICLE_LINK, '', newRow)
-                newRow = re.sub(RE_EXTERNAL_LINK, '', newRow)
-                newRow = re.sub(RE_IMAGE_FILE, '', newRow)
+                newRow = re.sub(RE_IMAGE_FILE, '', newRow) # Check Order
+                newRow = re.sub(RE_EXTERNAL_LINK, '', newRow) # Check Order
                 newRow = re.sub(RE_YOUTUBE, '', newRow)
                 newRow = re.sub(RE_KAKAO_TV, '', newRow)
                 newRow = re.sub(RE_NICO_VIDEO, '', newRow)
@@ -249,6 +250,9 @@ class NamuWikiParser:
                 newRow = re.sub(RE_CELL_V_ALIGN, '', newRow)
                 newRow = re.sub(RE_FOLDING, '', newRow)
                 newRow = re.sub(RE_TRIPLE_BARKET_BACK, '', newRow)
+
+                # Exception
+                newRow = re.sub(RE_OLD_BG_COLOR, CONV_BG_COLOR, newRow)
 
                 # Ruby
                 if re.search(RE_MACRO_RUBY, newRow):
@@ -320,7 +324,7 @@ class NamuWikiParser:
                     for infoIdx, infoData in enumerate(spanInfoList):
                         if cIdx == infoData[0]:
                             newRow.append(infoData[1])
-                            if 0 > infoData[2]-1:
+                            if 0 >= infoData[2]-1:
                                 spanInfoList.remove(infoData)
                             else:
                                 newInfo = (infoData[0], infoData[1], infoData[2]-1)
@@ -341,7 +345,7 @@ class NamuWikiParser:
 
             for col in row:
                 removeTokenCol = re.sub(r"<\w+>", '', col)
-                if 0 < len(removeTokenCol):
+                if 0 < len(removeTokenCol.strip()):
                     newRow.append(col)
             if 0 < len(newRow):
                 retTable.append(newRow)
@@ -400,3 +404,4 @@ class NamuWikiParser:
         retTable = self.SliceTableLength(retTable)
 
         return retTable
+
