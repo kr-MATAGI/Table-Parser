@@ -1,4 +1,5 @@
 import re
+import sys
 from builtins import enumerate
 
 import numpy as np
@@ -397,8 +398,31 @@ class Extractor:
         @Note
             Compute (14), (15) equations of Section 5.3                         
     '''
-    def __CoputeBinaryMatrices(self, scoreTableList):
-        pass
+    def __ComputeBinaryMatrices(self, scoreTableList, tableShape):
+        retTable = np.zeros(tableShape, dtype=np.int32)
+
+        # Linear Interpolation
+        linearInterpTable = np.zeros(tableShape, dtype=np.int32)
+        for table in scoreTableList:
+            linearInterpTable += table
+
+        # MID
+        # Get MAX(S_ij)
+        maxVal = -1
+        minVal = sys.maxsize
+        for row in linearInterpTable:
+            maxVal = max(maxVal, np.max(row))
+            minVal = min(minVal, np.min(row))
+        midVal = (maxVal + minVal) / 2
+
+        # Make Result Matrix
+        for rIdx, row in enumerate(linearInterpTable):
+            for cIdx, col in enumerate(row):
+                if midVal <= col:
+                    retTable[rIdx, cIdx] = 1
+
+        return retTable
+
 
 
     ### PUBLIC ###
@@ -426,10 +450,11 @@ class Extractor:
 
             # Use Linear interpolation
             # Please See a Section 5.3 in paper
-            #finalTable = self.__CoputeBinaryMatrices([resHeuri_2, resHeuri_3, resHeuri_4,
-                                                      #resHeuri_5, resHeuri_6, resHeuri_7])
+            tableShape = resHeuri_7.shape
+            finalTable = self.__ComputeBinaryMatrices([resHeuri_2, resHeuri_3, resHeuri_4,
+                                                       resHeuri_5, resHeuri_6, resHeuri_7], tableShape)
 
             # Append to return
-            #retTableList.append(finalTable)
+            retTableList.append(finalTable)
 
         return retTableList
