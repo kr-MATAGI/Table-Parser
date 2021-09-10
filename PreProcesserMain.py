@@ -33,12 +33,13 @@ if __name__ == '__main__':
             #print(infoBoxList)
 
             # Write Table to Directory
-            namuParser.WriteTableToFile(normalTableList, docItem[DOC_TITLE], WRITE_TABLE_DEST_PATH+'/normal', True)
-            namuParser.WriteTableToFile(infoBoxList, docItem[DOC_TITLE], WRITE_TABLE_DEST_PATH+'/infobox', False)
+            #namuParser.WriteTableToFile(normalTableList, docItem[DOC_TITLE], WRITE_TABLE_DEST_PATH+'/normal', True)
+            #namuParser.WriteTableToFile(infoBoxList, docItem[DOC_TITLE], WRITE_TABLE_DEST_PATH+'/infobox', False)
 
-            # Finish Parse and Regex Expression Process
-            tableList = normalTableList
-            tableList.extend(infoBoxList)
+            #### TEST #####
+            if '백 평짜리 숲(킹덤 하츠)' == docItem[DOC_TITLE]:
+                # Extract Table Head and Make Tensor
+                scoreTable = headExtractor.GiveScoreToHeadCell(normalTableList)
 
-            # Extract Table Head and Make Tensor
-            #scoreTable = headExtractor.GiveScoreToHeadCell(newTableList)
+                break
+            ###############

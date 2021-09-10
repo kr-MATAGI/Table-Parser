@@ -1,4 +1,6 @@
 import re
+from builtins import enumerate
+
 import numpy as np
 from enum import Enum
 
@@ -19,25 +21,25 @@ class CONTENT_PATT(Enum):
     WORD = 1
     DIGIT = 2
     TAG = 3
-    SP_CHAR = 4
+    SPEC_CHAR = 4
 
 # Heurisitc Regex
 HEURI_2_TBG = r'<tbg>{1}'
 HEURI_2_BG = r'<bg>{1}'
 
-HEURI_3_TEXT_ATTR = r'\'\'\'.+\'\'\''
+HEURI_3_TEXT_ATTR = r'(<tf>)|(<tc>)'
 
 HEURI_4_LINK = r'\[\[.+\]\]'
 HEURI_4_IS_FLOAT = r'[\d]+\.[\d]+'
-HEURI_4_IS_FONT = r'<ft>'
-HEURI_4_IS_RBG_COLOR = r'<rbg>{1}'
-HEURI_4_IS_SPAN = r'<rs>{1}|<cs>{1}'
+HEURI_4_IS_FONT = r'<tf>'
+HEURI_4_IS_BG_COLOR = r'(<rbg>)|(<cbg>)'
+HEURI_4_IS_SPAN = r'(<rs>)|(<cs>)'
 
 HEURI_5_IS_FLOAT = HEURI_4_IS_FLOAT
 HEURI_5_IS_TAG = HEURI_4_LINK
 
-HEURI_6_ROW_SPAN = r'<rs>{1}'
-HEURI_6_COL_SPAN = r'<cs>{1}'
+HEURI_6_ROW_SPAN = r'<rs>'
+HEURI_6_COL_SPAN = r'<cs>'
 
 HEURI_7_EMPTY = r'<[\w]+>|[\s]+'
 
@@ -59,11 +61,10 @@ class Extractor:
         pass
 
     '''
-            @Heuristic
-                If a table is divided into two areas by background color, 
-                the upper-side area or the left-side area has a high probability of being a HEAD.    
-        '''
-
+        @Heuristic
+            If a table is divided into two areas by background color, 
+            the upper-side area or the left-side area has a high probability of being a HEAD.    
+    '''
     def __Heuristic_2(self, srcTable):
         tableShape = (len(srcTable), len(srcTable[0]))
         retNpTable = np.zeros(tableShape, dtype=np.int32)
@@ -80,7 +81,7 @@ class Extractor:
 
 
         # Add Score
-        if (True == isTbg) and (True == isBg):
+        if isTbg and isBg:
             for rIdx, row in enumerate(retNpTable):
                 for cIdx, col in enumerate(row):
                     if (0 == rIdx) or (0 == cIdx):
@@ -92,48 +93,39 @@ class Extractor:
         @Heuristic
             If a table is divided into two areas by font attributes,
             the upper-side area or the left-side area has a high probability of being a HEAD.
+            
+            When a table is in accordance with the third point in (3.2) in Section 3.1, DPH = “1,” 
+            which is the highest value and the table consists of two areas. Intuitively, if a table has two areas, 
+            with the two areas having a horizontal or a vertical distribution, 
+            then the upper area or the left-hand area, respectively, have the higher probability of being a HEAD.
     '''
     def __Heuristic_3(self, srcTable):
         tableShape = (len(srcTable), len(srcTable[0]))
         retNpTable = np.zeros(tableShape, dtype=np.int32)
 
-        isTextAttr = False
-
-        rowAttrList = [] # table[0][?] List
-        colAttrList = [] # table[?][0] List
+        textAttrList = [] # (rowIdx, colIdx)
 
         # Check Text Attribute row[0] or col[0]
         for rIdx, row in enumerate(srcTable):
             for cIdx, col in enumerate(row):
-                if 0 == rIdx and re.search(HEURI_3_TEXT_ATTR, col):
-                    rowAttrList.append((rIdx, cIdx))
-                elif 0 == cIdx and re.search(HEURI_3_TEXT_ATTR, col):
-                    colAttrList.append((rIdx, cIdx))
+                if re.search(HEURI_3_TEXT_ATTR, col):
+                    textAttrList.append((rIdx, cIdx))
 
-        # Add Score
-        for idxPair in rowAttrList:
-            retNpTable[idxPair[0], idxPair[1]] = 1
-        for idxPair in colAttrList:
-            retNpTable[idxPair[0], idxPair[1]] = 1
+        # Add Score - compare (0, cIdx), (rIdx, 0) with others attr count
+        zeroIdxCnt = 0
+        othersIdxCnt = 0
+        for idxPair in textAttrList:
+            if (0 == idxPair[0]) or (0 == idxPair[1]):
+                zeroIdxCnt += 1
+            else:
+                othersIdxCnt += 1
+
+        if zeroIdxCnt > othersIdxCnt:
+            for idxPair in textAttrList:
+                if (0 == idxPair[0]) or (0 == idxPair[1]):
+                    retNpTable[idxPair[0], idxPair[1]] = 1
 
         return retNpTable
-
-    '''
-            Check Elements Type
-        '''
-
-    def __IsSameElements(self, targetList):
-        retValue = True
-
-        # Type Check
-        firstElement = targetList[0]
-        for idx in range(1, len(targetList)):
-            if firstElement != targetList[idx]:
-                retValue = False
-                break
-
-        return retValue
-
 
     '''
         @Heuristic
@@ -146,66 +138,114 @@ class Extractor:
     '''
     def __Heuristic_4(self, srcTable):
         tableShape = (len(srcTable), len(srcTable[0]))
-        retNpTable = np.zeros(tableShape, dtype=np.int32)
 
-        typeTable = [ [ INST_TYPE.NONE for _ in range(tableShape[1]) ] for _ in range(tableShape[0]) ]
-
+        typeTable = [ [ set() for _ in range(tableShape[1]) ] for _ in range(tableShape[0]) ]
         ## Check Elements
         for rIdx, row in enumerate(srcTable):
             isRbg = False
             for cIdx, col in enumerate(row):
+                onlyText = re.sub(r'<\w+>', '', col).replace(' ', '')
+
                 # Check Link
-                if re.search(HEURI_4_LINK, col):
-                    typeTable[rIdx][cIdx] = INST_TYPE.LINK
+                if re.search(HEURI_4_LINK, onlyText):
+                    typeTable[rIdx][cIdx].add(INST_TYPE.LINK)
 
                 ## Check Image - Not Used, Remove Tag in parsing step
 
                 # Check Digit
-                elif str(col).isdigit() or re.search(HEURI_4_IS_FLOAT, col):
-                    typeTable[rIdx][cIdx] = INST_TYPE.DIGIT
+                if not onlyText.isalnum() and (onlyText.isdigit() or re.search(HEURI_4_IS_FLOAT, onlyText)):
+                    typeTable[rIdx][cIdx].add(INST_TYPE.DIGIT)
 
-                # Check Font - TODO
-                elif re.search(HEURI_4_IS_FONT, col):
-                    typeTable[rIdx][cIdx] = INST_TYPE.FONT
+                # Check Font
+                if re.search(HEURI_4_IS_FONT, col):
+                    typeTable[rIdx][cIdx].add(INST_TYPE.FONT)
 
                 # Check Background color
-                elif re.search(HEURI_4_IS_RBG_COLOR, col):
-                    isRbg = True
-                    typeTable[rIdx][cIdx] = INST_TYPE.BG_COLOR
+                if re.search(HEURI_4_IS_BG_COLOR, col):
+                    # <rbg>
+                    if re.search(r'<rbg>', col):
+                        isRbg = True
+
+                    # <cbg>
+                    if re.search(r'<cbg>', col):
+                        for rCbgIdx in range(tableShape[0]):
+                            typeTable[rCbgIdx][0].add(INST_TYPE.BG_COLOR)
 
                 # Check Span
-                elif re.search(HEURI_4_IS_SPAN, col):
-                    typeTable[rIdx][cIdx] = INST_TYPE.SPAN
+                if re.search(HEURI_4_IS_SPAN, col):
+                    typeTable[rIdx][cIdx].add(INST_TYPE.SPAN)
 
                 if isRbg:
-                    typeTable[rIdx][cIdx] = INST_TYPE.BG_COLOR
+                    typeTable[rIdx][cIdx].add(INST_TYPE.BG_COLOR)
 
-        ## Is same elements?
-        rowMaxLen = tableShape[0]
-        colMaxLen= tableShape[1]
-
-        # Row
-        for rIdx in range(1, rowMaxLen):
-            targetList = []
-            isSame = True
-            for cIdx in range(1, colMaxLen):
-                targetList.append(typeTable[rIdx][cIdx])
-
-            isSame = self.__IsSameElements(targetList)
-            if isSame:
-                retNpTable[rIdx, 0] = 1
-
-        # Col
-        for cIdx in range(1, colMaxLen):
-            targetList = []
-            for rIdx in range(1, rowMaxLen):
-                targetList.append(typeTable[rIdx][cIdx])
-
-            isSame = self.__IsSameElements(targetList)
-            if isSame:
-                retNpTable[0, cIdx] = 1
+        ## Add Score
+        retNpTable = self.__CheckInstanceType(typeTable, tableShape)
 
         return retNpTable
+
+    '''
+        Heuristic 4 Instance Type Checking
+    '''
+    def __CheckInstanceType(self, typeTable, tableShape):
+        retNpTable = np.zeros(tableShape, dtype=np.int32)
+
+        colInstSumDict = {
+            INST_TYPE.LINK: [ 0 for _ in range(tableShape[1]) ],
+            INST_TYPE.DIGIT: [ 0 for _ in range(tableShape[1]) ],
+            INST_TYPE.FONT: [ 0 for _ in range(tableShape[1]) ],
+            INST_TYPE.BG_COLOR: [ 0 for _ in range(tableShape[1]) ],
+            INST_TYPE.SPAN: [ 0 for _ in range(tableShape[1]) ]
+        }
+        rowInstSumDict = {
+            INST_TYPE.LINK: [0 for _ in range(tableShape[0])],
+            INST_TYPE.DIGIT: [0 for _ in range(tableShape[0])],
+            INST_TYPE.FONT: [0 for _ in range(tableShape[0])],
+            INST_TYPE.BG_COLOR: [0 for _ in range(tableShape[0])],
+            INST_TYPE.SPAN: [0 for _ in range(tableShape[0])]
+        }
+
+        for rIdx, row in enumerate(typeTable):
+            for cIdx, col in enumerate(row):
+                if INST_TYPE.LINK in col:
+                    colInstSumDict[INST_TYPE.LINK][cIdx] += 1
+                    rowInstSumDict[INST_TYPE.LINK][rIdx] += 1
+
+                if INST_TYPE.DIGIT in col:
+                    colInstSumDict[INST_TYPE.DIGIT][cIdx] += 1
+                    rowInstSumDict[INST_TYPE.DIGIT][rIdx] += 1
+
+                if INST_TYPE.FONT in col:
+                    colInstSumDict[INST_TYPE.FONT][cIdx] += 1
+                    rowInstSumDict[INST_TYPE.FONT][rIdx] += 1
+
+                if INST_TYPE.BG_COLOR in col:
+                    colInstSumDict[INST_TYPE.BG_COLOR][cIdx] += 1
+                    rowInstSumDict[INST_TYPE.BG_COLOR][rIdx] += 1
+
+                if INST_TYPE.SPAN in col:
+                    colInstSumDict[INST_TYPE.SPAN][cIdx] += 1
+                    rowInstSumDict[INST_TYPE.SPAN][rIdx] += 1
+
+        # Add Score
+        rowScoreCnt = tableShape[0] - 1
+        colScoreCnt = tableShape[1] - 1
+
+        for key, val in colInstSumDict.items():
+            for vIdx, cnt in enumerate(val):
+                if 0 == vIdx:
+                    continue
+                if cnt == colScoreCnt:
+                    retNpTable[0, vIdx] = 1
+
+        for key, val in rowInstSumDict.items():
+            for vIdx, cnt in enumerate(val):
+                if 0 == vIdx:
+                    continue
+                if cnt == rowScoreCnt:
+                    retNpTable[vIdx, 0] = 1
+
+        return retNpTable
+
 
     '''
         @Heuristic
@@ -220,53 +260,86 @@ class Extractor:
     '''
     def __Heuristic_5(self, srcTable):
         tableShape = (len(srcTable), len(srcTable[0]))
-        retNpTable = np.zeros(tableShape, dtype=np.int32)
 
-        # Init to Word
-        patternTable = [ [ CONTENT_PATT.WORD for _ in range(tableShape[1]) ] for _ in range(tableShape[0]) ]
-        specificChTable = [ [ '' for _ in range(tableShape[1]) ] for _ in range(tableShape[0]) ]
+        typeTable = [ [ set() for _ in range(tableShape[1]) ] for _ in range(tableShape[0]) ]
 
+        ## Chcek Elements
         for rIdx, row in enumerate(srcTable):
             for cIdx, col in enumerate(row):
+                isDigit = False
+                isTag = False
+
+                onlyText = re.sub(r"<\w+>", '', col).lstrip().rstrip()
+                delSpace = onlyText.replace(' ', '')
                 # Check Digit
-                if not str(col).isalpha() and (str(col).isdigit() or re.search(HEURI_5_IS_FLOAT, col)):
-                    patternTable[rIdx][cIdx] = CONTENT_PATT.DIGIT
+                if not onlyText.isalnum() and (onlyText.isdigit() or re.search(HEURI_5_IS_FLOAT, delSpace)):
+                    isDigit = True
+                    typeTable[rIdx][cIdx].add(CONTENT_PATT.DIGIT)
 
-                # Check Tag
-                elif re.search(HEURI_5_IS_TAG, col):
-                    patternTable[rIdx][cIdx] = CONTENT_PATT.TAG
+                # Check tag
+                if re.search(HEURI_5_IS_TAG, onlyText):
+                    isTag = True
+                    typeTable[rIdx][cIdx].add(CONTENT_PATT.TAG)
 
-                # Insert Specific Charter (Ends with ac specific character.)
-                else:
-                    justStr = str(col).lstrip().rstrip()
-                    justStr = re.sub(HEURI_2_TBG, '', justStr)
-                    justStr = re.sub(HEURI_2_BG, '', justStr)
-                    justStr = re.sub(HEURI_3_TEXT_ATTR, '', justStr)
-                    justStr = re.sub(HEURI_4_LINK, '', justStr)
-                    justStr = re.sub(HEURI_4_IS_SPAN, '', justStr)
-                    justStr = re.sub(HEURI_4_IS_RBG_COLOR, '', justStr)
-                    if 0 < len(justStr):
-                        specificChTable[rIdx][cIdx] = justStr[-1]
+                if not isDigit and not isTag:
+                    if onlyText.isalnum():
+                        typeTable[rIdx][cIdx].add(CONTENT_PATT.WORD)
 
-        ## Check is same pattern (word, digit, tag)?
-        # Row
-        for rIdx in range(1, tableShape[0]):
-            targetList = []
-            isSame = True
-            for cIdx in range(1, tableShape[1]):
-                targetList.append(patternTable[rIdx][cIdx])
+                # Check Specific charter - What is mean?
 
-            isSame = self.__IsSameElements(targetList)
-            if isSame:
-                retNpTable[rIdx, 0] = 1
+        retNpTable = self.__CheckContentPattern(typeTable, tableShape)
+        return retNpTable
 
-        # Col
-        for cIdx in range(1, tableShape[1]):
-            targetList = []
+    '''
+        Check Content Pattern 
+    '''
+    def __CheckContentPattern(self, typeTable, tableShape):
+        retNpTable = np.zeros(tableShape, dtype=np.int32)
 
+        colPatternDict = {
+            CONTENT_PATT.WORD: [ 0 for _ in range(tableShape[1]) ],
+            CONTENT_PATT.DIGIT: [ 0 for _ in range(tableShape[1]) ],
+            CONTENT_PATT.TAG: [ 0 for _ in range(tableShape[1]) ],
+        }
 
-        ## Check is same specific character?
+        rowPatternDict = {
+            CONTENT_PATT.WORD: [ 0 for _ in range(tableShape[0]) ],
+            CONTENT_PATT.DIGIT: [ 0 for _ in range(tableShape[0]) ],
+            CONTENT_PATT.TAG: [ 0 for _ in range(tableShape[0]) ]
+        }
 
+        # Word, Digit, Tag
+        for rIdx, row in enumerate(typeTable):
+            for cIdx, col in enumerate(row):
+                if CONTENT_PATT.WORD in col:
+                    colPatternDict[CONTENT_PATT.WORD][cIdx] += 1
+                    rowPatternDict[CONTENT_PATT.WORD][rIdx] += 1
+
+                if CONTENT_PATT.DIGIT in col:
+                    colPatternDict[CONTENT_PATT.DIGIT][cIdx] += 1
+                    rowPatternDict[CONTENT_PATT.DIGIT][rIdx] += 1
+
+                if CONTENT_PATT.TAG in col:
+                    colPatternDict[CONTENT_PATT.TAG][cIdx] += 1
+                    rowPatternDict[CONTENT_PATT.TAG][rIdx] += 1
+
+        # Add Score
+        rowScoreCnt = tableShape[0] - 1
+        colScoreCnt = tableShape[1] - 1
+
+        for key, val in colPatternDict.items():
+            for vIdx, cnt in enumerate(val):
+                if 0 == vIdx:
+                    continue
+                if cnt == colScoreCnt:
+                    retNpTable[0, vIdx] = 1
+
+        for key, val in rowPatternDict.items():
+            for vIdx, cnt in enumerate(val):
+                if 0 == vIdx:
+                    continue
+                if cnt == rowScoreCnt:
+                    retNpTable[vIdx, 0] = 1
 
         return retNpTable
 
@@ -317,6 +390,7 @@ class Extractor:
                 retNpTable[ridx, 0] = 1
             for cIdx in range(tableShape[1]):
                 retNpTable[0, cIdx] = 1
+
         return retNpTable
 
     '''
@@ -340,8 +414,6 @@ class Extractor:
         retTableList = []
 
         for table in tableList:
-            tableScore = []
-
             # Use Heuristic
             # Not use Heuristic5_1, <th> was not included naum wiki data
             # resHeuri_1 = self.__Heuristic5_1(table)
@@ -354,10 +426,10 @@ class Extractor:
 
             # Use Linear interpolation
             # Please See a Section 5.3 in paper
-            finalTable = self.__CoputeBinaryMatrices([resHeuri_2, resHeuri_3, resHeuri_4,
-                                                      resHeuri_5, resHeuri_6, resHeuri_7])
+            #finalTable = self.__CoputeBinaryMatrices([resHeuri_2, resHeuri_3, resHeuri_4,
+                                                      #resHeuri_5, resHeuri_6, resHeuri_7])
 
             # Append to return
-            retTableList.append(finalTable)
+            #retTableList.append(finalTable)
 
         return retTableList

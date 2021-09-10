@@ -318,9 +318,3 @@ class RemoveRegexTest(unittest.TestCase):
         test_4 = "[br][[https://www.instagram.com/iamkepco| [[파일:인스타그램 아이콘.svg|width=15]]"
         reg_4 = re.sub(RE_EXTERNAL_LINK, '', test_4)
         self.assertEqual(ans_4, reg_4)
-
-te = '<cs> [[한국전력|한국전력]] 스포츠단 '
-te = re.sub(r"<\w+>", '', te)
-print(te.lstrip())
-
-
