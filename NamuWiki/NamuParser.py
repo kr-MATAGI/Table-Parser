@@ -40,7 +40,7 @@ CONV_TEXT_COLOR = '<tc>' # text color
 
 # 13.3.1
 RE_BG_COLOR = r'<bgcolor=#?(\w|\d)+(,\s?#?\w+)?>'
-RE_OLD_BG_COLOR = r'<#?\w+>'
+RE_OLD_BG_COLOR = r'<#\w+>'
 CONV_BG_COLOR = '<bg>'
 
 RE_TBG_COLOR = r'<(tablecolor|tablebgcolor)=#?\w+(,\s?#?\w+)?>'
