@@ -68,7 +68,7 @@ class Extractor:
     '''
     def __Heuristic_2(self, srcTable):
         tableShape = (len(srcTable), len(srcTable[0]))
-        retNpTable = np.zeros(tableShape, dtype=np.int32)
+        retNpTable = np.zeros(tableShape, dtype=np.float64)
 
         # Check Divide with Background Color
         isTbg = False
@@ -102,7 +102,7 @@ class Extractor:
     '''
     def __Heuristic_3(self, srcTable):
         tableShape = (len(srcTable), len(srcTable[0]))
-        retNpTable = np.zeros(tableShape, dtype=np.int32)
+        retNpTable = np.zeros(tableShape, dtype=np.float64)
 
         textAttrList = [] # (rowIdx, colIdx)
 
@@ -188,7 +188,7 @@ class Extractor:
         Heuristic 4 Instance Type Checking
     '''
     def __CheckInstanceType(self, typeTable, tableShape):
-        retNpTable = np.zeros(tableShape, dtype=np.int32)
+        retNpTable = np.zeros(tableShape, dtype=np.float64)
 
         colInstSumDict = {
             INST_TYPE.LINK: [ 0 for _ in range(tableShape[1]) ],
@@ -286,7 +286,7 @@ class Extractor:
                     if onlyText.isalnum():
                         typeTable[rIdx][cIdx].add(CONTENT_PATT.WORD)
 
-                # Check Specific charter - What is mean?
+                # Check Specific charter - Not Used Namuwiki e.g) &lt, &frac...
 
         retNpTable = self.__CheckContentPattern(typeTable, tableShape)
         return retNpTable
@@ -295,7 +295,7 @@ class Extractor:
         Check Content Pattern 
     '''
     def __CheckContentPattern(self, typeTable, tableShape):
-        retNpTable = np.zeros(tableShape, dtype=np.int32)
+        retNpTable = np.zeros(tableShape, dtype=np.float64)
 
         colPatternDict = {
             CONTENT_PATT.WORD: [ 0 for _ in range(tableShape[1]) ],
@@ -352,7 +352,7 @@ class Extractor:
     '''
     def __Heuristic_6(self, srcTable):
         tableShape = (len(srcTable), len(srcTable[0]))
-        retNpTable = np.zeros(tableShape, dtype=np.int32)
+        retNpTable = np.zeros(tableShape, dtype=np.float64)
 
         colSpanList = [] # (row, idx), table[0][col]
         rowSpanList = [] # (row, idx), table[row][0]
@@ -381,7 +381,7 @@ class Extractor:
     '''
     def __Heuristic_7(self, srcTable):
         tableShape = (len(srcTable), len(srcTable[0]))
-        retNpTable = np.zeros(tableShape, dtype=np.int32)
+        retNpTable = np.zeros(tableShape, dtype=np.float64)
 
         # Check Empty table[0][0]
         cmpStr = re.sub(HEURI_7_EMPTY, '', srcTable[0][0])
@@ -398,13 +398,13 @@ class Extractor:
         @Note
             Compute (14), (15) equations of Section 5.3                         
     '''
-    def __ComputeBinaryMatrices(self, scoreTableList, tableShape):
-        retTable = np.zeros(tableShape, dtype=np.int32)
+    def __ComputeBinaryMatrices(self, scoreTableList, tableShape, weight):
+        retTable = np.zeros(tableShape, dtype=np.float64)
 
         # Linear Interpolation
-        linearInterpTable = np.zeros(tableShape, dtype=np.int32)
-        for table in scoreTableList:
-            linearInterpTable += table
+        linearInterpTable = np.zeros(tableShape, dtype=np.float64)
+        for tIdx, table in enumerate(scoreTableList):
+            linearInterpTable += (table * weight[tIdx])
 
         # MID
         # Get MAX(S_ij)
@@ -439,7 +439,7 @@ class Extractor:
 
         for table in tableList:
             # Use Heuristic
-            # Not use Heuristic5_1, <th> was not included naum wiki data
+            # Not use Heuristic5_1, <th> was not included namu wiki data
             # resHeuri_1 = self.__Heuristic5_1(table)
             resHeuri_2 = self.__Heuristic_2(table) # Check <tbg> and <bg>
             resHeuri_3 = self.__Heuristic_3(table) # Check Text Attribute
@@ -452,9 +452,11 @@ class Extractor:
             # Please See a Section 5.3 in paper
             tableShape = resHeuri_7.shape
             finalTable = self.__ComputeBinaryMatrices([resHeuri_2, resHeuri_3, resHeuri_4,
-                                                       resHeuri_5, resHeuri_6, resHeuri_7], tableShape)
+                                                       resHeuri_5, resHeuri_6, resHeuri_7], tableShape,
+                                                      weight=[0.3, 0.2, 0.1, 0.1, 0.25, 0.25])
 
             # Append to return
             retTableList.append(finalTable)
 
+        print(retTableList)
         return retTableList

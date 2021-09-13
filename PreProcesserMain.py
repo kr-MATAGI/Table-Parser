@@ -15,7 +15,7 @@ if __name__ == '__main__':
         docCount += 1
 
         if 0 == docCount % 1000:
-            print('Processing....', docCount)
+            print('Processing....', docItem[DOC_TITLE], docCount)
 
         tableList = namuParser.ParseTableFromText(docItem[DOC_TEXT])
 
@@ -37,7 +37,7 @@ if __name__ == '__main__':
             #namuParser.WriteTableToFile(infoBoxList, docItem[DOC_TITLE], WRITE_TABLE_DEST_PATH+'/infobox', False)
 
             #### TEST #####
-            if '백 평짜리 숲(킹덤 하츠)' == docItem[DOC_TITLE]:
+            if '마비노기' == docItem[DOC_TITLE]:
                 # Extract Table Head and Make Tensor
                 scoreTable = headExtractor.GiveScoreToHeadCell(normalTableList)
 
