@@ -37,9 +37,11 @@ if __name__ == '__main__':
             #namuParser.WriteTableToFile(infoBoxList, docItem[DOC_TITLE], WRITE_TABLE_DEST_PATH+'/infobox', False)
 
             #### TEST #####
-            if '마비노기' == docItem[DOC_TITLE]:
+            if '던전앤파이터' == docItem[DOC_TITLE]:
                 # Extract Table Head and Make Tensor
-                scoreTable = headExtractor.GiveScoreToHeadCell(normalTableList)
+                #scoreTable = headExtractor.GiveScoreToHeadCell(normalTableList)
+                print(normalTableList)
+                print(infoBoxList)
 
                 break
             ###############

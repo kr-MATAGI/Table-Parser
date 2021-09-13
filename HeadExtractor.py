@@ -443,10 +443,10 @@ class Extractor:
             # resHeuri_1 = self.__Heuristic5_1(table)
             resHeuri_2 = self.__Heuristic_2(table) # Check <tbg> and <bg>
             resHeuri_3 = self.__Heuristic_3(table) # Check Text Attribute
-            resHeuri_4 = self.__Heuristic_4(table)
-            resHeuri_5 = self.__Heuristic_5(table)
-            resHeuri_6 = self.__Heuristic_6(table)
-            resHeuri_7 = self.__Heuristic_7(table)
+            resHeuri_4 = self.__Heuristic_4(table) # Check instance types
+            resHeuri_5 = self.__Heuristic_5(table) # Check content pattern
+            resHeuri_6 = self.__Heuristic_6(table) # Check Row and Col Span
+            resHeuri_7 = self.__Heuristic_7(table) # Check table[0][0] empty
 
             # Use Linear interpolation
             # Please See a Section 5.3 in paper
@@ -458,5 +458,4 @@ class Extractor:
             # Append to return
             retTableList.append(finalTable)
 
-        print(retTableList)
         return retTableList
