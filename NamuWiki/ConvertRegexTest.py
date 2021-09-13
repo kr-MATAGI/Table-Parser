@@ -229,5 +229,3 @@ class ConvertRegexTest(unittest.TestCase):
         self.assertEqual("<-3><bgcolor=#e60012> ", test_5)
         test_5 = re.sub(RE_BG_COLOR, CONV_BG_COLOR, test_5)
         self.assertEqual("<-3><bg> ", test_5)
-
-

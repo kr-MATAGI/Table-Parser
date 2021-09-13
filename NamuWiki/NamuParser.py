@@ -148,7 +148,7 @@ class NamuWikiParser:
                 colSpanList = re.findall(RE_OLD_COL_SPAN, row)
 
                 for colSpan in colSpanList:
-                    spanCnt = len(re.findall(RE_ROW_SPLIT, colSpan)) - 1
+                    spanCnt = len(re.findall(RE_ROW_SPLIT, colSpan))
                     convStr = '||<-%s>' % spanCnt
                     newRow = row.replace(colSpan, convStr)
 
@@ -298,7 +298,7 @@ class NamuWikiParser:
 
             for col in row:
                 if re.search(RE_NEW_COL_SPAN, col):
-                    spanCnt = int(re.search(RE_NEW_COL_SPAN, col).group(0).replace('<-', '').replace('>', '')) + 1
+                    spanCnt = int(re.search(RE_NEW_COL_SPAN, col).group(0).replace('<-', '').replace('>', ''))
                     newCol = re.sub(RE_NEW_COL_SPAN, '<cs>', col)
                     for spIdx in range(spanCnt):
                         newRow.append(newCol)
@@ -344,18 +344,12 @@ class NamuWikiParser:
     '''
         Remove Empty Cells
     '''
-    def RemoveEmptyCells(self, table):
+    def RemoveEmptyRows(self, table):
         retTable = []
 
         for row in table:
-            newRow = []
-
-            for col in row:
-                removeTokenCol = re.sub(r"<\w+>", '', col)
-                if 0 < len(removeTokenCol.strip()):
-                    newRow.append(col)
-            if 0 < len(newRow):
-                retTable.append(newRow)
+            if 0 < len(row):
+                retTable.append(row)
 
         return retTable
 
@@ -407,7 +401,7 @@ class NamuWikiParser:
         retTable = self.SplitRowAndColByToken(table)
         retTable = self.SplitColSpan(retTable)
         retTable = self.SplitRowSpan(retTable)
-        retTable = self.RemoveEmptyCells(retTable)
+        retTable = self.RemoveEmptyRows(retTable)
         retTable = self.SliceTableLength(retTable)
 
         return retTable

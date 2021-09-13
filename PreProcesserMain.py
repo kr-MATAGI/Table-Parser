@@ -17,6 +17,9 @@ if __name__ == '__main__':
         if 0 == docCount % 1000:
             print('Processing....', docItem[DOC_TITLE], docCount)
 
+        #### TEST ####
+        if '백 평짜리 숲(킹덤 하츠)' != docItem[DOC_TITLE]: continue
+
         tableList = namuParser.ParseTableFromText(docItem[DOC_TEXT])
 
         if 0 < len(tableList):
@@ -29,19 +32,15 @@ if __name__ == '__main__':
                 if 2 <= len(preprocessedTable):
                     newTableList.append(preprocessedTable)
             normalTableList, infoBoxList = namuParser.ClassifyNormalTableOrInfoBox(newTableList)
-            #print(normalTableList)
-            #print(infoBoxList)
 
             # Write Table to Directory
             #namuParser.WriteTableToFile(normalTableList, docItem[DOC_TITLE], WRITE_TABLE_DEST_PATH+'/normal', True)
             #namuParser.WriteTableToFile(infoBoxList, docItem[DOC_TITLE], WRITE_TABLE_DEST_PATH+'/infobox', False)
 
-            #### TEST #####
-            if '던전앤파이터' == docItem[DOC_TITLE]:
-                # Extract Table Head and Make Tensor
-                #scoreTable = headExtractor.GiveScoreToHeadCell(normalTableList)
+            scoreTable = headExtractor.GiveScoreToHeadCell(normalTableList)
+            #### TEST ####
+            if '백 평짜리 숲(킹덤 하츠)' == docItem[DOC_TITLE]:
                 print(normalTableList)
                 print(infoBoxList)
-
+                print(scoreTable)
                 break
-            ###############
