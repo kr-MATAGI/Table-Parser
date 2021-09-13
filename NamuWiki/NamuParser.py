@@ -298,7 +298,7 @@ class NamuWikiParser:
 
             for col in row:
                 if re.search(RE_NEW_COL_SPAN, col):
-                    spanCnt = int(re.search(RE_NEW_COL_SPAN, col).group(0).replace('<-', '').replace('>', ''))
+                    spanCnt = int(re.search(RE_NEW_COL_SPAN, col).group(0).replace('<-', '').replace('>', '')) + 1
                     newCol = re.sub(RE_NEW_COL_SPAN, '<cs>', col)
                     for spIdx in range(spanCnt):
                         newRow.append(newCol)
