@@ -105,7 +105,7 @@ RE_CLEARFIX = r'\[clearfix\]'
 RE_TABLE_ALIGN = r'<table\s?align=\'?(left|center|right)\'?>'
 RE_TABLE_WIDTH = r'<table\s?width=\d+(px|%)?>'
 
-RE_TABLE_BORDER_COLOR = r'<table\s?bordercolor=#?\w+>'
+RE_TABLE_BORDER_COLOR = r'<table\s?bordercolor=#?\w+(,#?\w+)?>'
 
 RE_CELL_SIZE = r'<(width|height)=\d+(px|%)?>'
 
