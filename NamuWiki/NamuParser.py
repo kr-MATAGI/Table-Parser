@@ -43,7 +43,7 @@ RE_BG_COLOR = r'<bgcolor=#?(\w|\d)+(,\s?#?\w+)?>'
 RE_OLD_BG_COLOR = r'<#\w+>'
 CONV_BG_COLOR = '<bg>'
 
-RE_TBG_COLOR = r'<(tablecolor|tablebgcolor)=#?\w+(,\s?#?\w+)?>'
+RE_TBG_COLOR = r'<(tablecolor|table\s?bgcolor)=#?\w+(,\s?#?\w+)?>'
 CONV_TBG_COLOR = '<tbg>'
 
 RE_COL_BG_COLOR = r'<colbgcolor=#?\w+(,\s?#?\w+)?>'
@@ -141,20 +141,22 @@ class NamuWikiParser:
 
     ### PRIVATE ###
     def __ConvertTableColSpanToken(self, rowList):
-        retRow = rowList
-
-        for rIdx, row in enumerate(rowList):
-            if not re.search(RE_OLD_COL_SPAN, row):
+        retRowList = []
+        for row in rowList:
+            if re.search(RE_OLD_COL_SPAN, row):
+                newRow = row
                 colSpanList = re.findall(RE_OLD_COL_SPAN, row)
 
                 for colSpan in colSpanList:
                     spanCnt = len(re.findall(RE_ROW_SPLIT, colSpan)) - 1
                     convStr = '||<-%s>' % spanCnt
-                    row = row.replace(colSpan, convStr)
+                    newRow = row.replace(colSpan, convStr)
 
-                rowList[rIdx] = row
+                retRowList.append(newRow)
+            else:
+                retRowList.append(row)
 
-        return retRow
+        return retRowList
 
     ### PUBLIC ###
     '''
@@ -194,7 +196,8 @@ class NamuWikiParser:
             # Get Table
             tableRows = []
             for element in splitList:
-                if None != re_checkRow.match(element): tableRows.append(element)
+                if re_checkRow.search(element):
+                    tableRows.append(element)
                 else:
                     if 0 < len(tableRows):
                         # Remove colspan r'[||]{2,}'
