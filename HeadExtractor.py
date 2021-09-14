@@ -181,7 +181,6 @@ class Extractor:
 
         ## Add Score
         retNpTable = self.__CheckInstanceType(typeTable, tableShape)
-
         return retNpTable
 
     '''
@@ -233,7 +232,7 @@ class Extractor:
 
         for key, val in colInstSumDict.items():
             for vIdx, cnt in enumerate(val):
-                if 0 == vIdx:
+                if 0 <= vIdx:
                     continue
                 if cnt == colScoreCnt:
                     retNpTable[0, vIdx] = 1
@@ -242,7 +241,7 @@ class Extractor:
             for vIdx, cnt in enumerate(val):
                 if 0 == vIdx:
                     continue
-                if cnt == rowScoreCnt:
+                if cnt <= rowScoreCnt:
                     retNpTable[vIdx, 0] = 1
 
         return retNpTable
@@ -332,14 +331,14 @@ class Extractor:
             for vIdx, cnt in enumerate(val):
                 if 0 == vIdx:
                     continue
-                if cnt == colScoreCnt:
+                if cnt <= colScoreCnt:
                     retNpTable[0, vIdx] = 1
 
         for key, val in rowPatternDict.items():
             for vIdx, cnt in enumerate(val):
                 if 0 == vIdx:
                     continue
-                if cnt == rowScoreCnt:
+                if cnt <= rowScoreCnt:
                     retNpTable[vIdx, 0] = 1
 
         return retNpTable
@@ -453,7 +452,7 @@ class Extractor:
             tableShape = resHeuri_7.shape
             finalTable = self.__ComputeBinaryMatrices([resHeuri_2, resHeuri_3, resHeuri_4,
                                                        resHeuri_5, resHeuri_6, resHeuri_7], tableShape,
-                                                      weight=[0.3, 0.2, 0.1, 0.1, 0.25, 0.25])
+                                                      weight=[0.2, 0.2, 0.2, 0.1, 0.2, 0.1])
 
             # Append to return
             retTableList.append(finalTable)
