@@ -5,6 +5,10 @@ from HeadExtractor import Extractor
 SRC_JSON_PATH = './dataset/docData200302.json'
 WRITE_TABLE_DEST_PATH = './Tables'
 
+# TEST
+TEST_TAGET_TITLE = '삼성'
+TEST_MODE = True
+
 if __name__ == '__main__':
     # Make instance    
     namuParser = NamuWikiParser(SRC_JSON_PATH)
@@ -18,7 +22,7 @@ if __name__ == '__main__':
             print('Processing....', docItem[DOC_TITLE], docCount)
 
         #### TEST ####
-        if '백 평짜리 숲(킹덤 하츠)' != docItem[DOC_TITLE]: continue
+        if TEST_MODE and TEST_TAGET_TITLE != docItem[DOC_TITLE]: continue
 
         tableList = namuParser.ParseTableFromText(docItem[DOC_TEXT])
 
@@ -39,8 +43,13 @@ if __name__ == '__main__':
 
             scoreTable = headExtractor.GiveScoreToHeadCell(normalTableList)
             #### TEST ####
-            if '백 평짜리 숲(킹덤 하츠)' == docItem[DOC_TITLE]:
+            if TEST_MODE and TEST_TAGET_TITLE == docItem[DOC_TITLE]:
                 print(normalTableList)
                 print(infoBoxList)
                 print(scoreTable)
-                break
+
+        #### TEST ####
+        if TEST_MODE and TEST_TAGET_TITLE == docItem[DOC_TITLE]:
+            print("NOT EXISTED TABLE")
+            # print(docItem[DOC_TEXT])
+            break

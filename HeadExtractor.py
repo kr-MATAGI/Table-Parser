@@ -452,7 +452,7 @@ class Extractor:
             tableShape = resHeuri_7.shape
             finalTable = self.__ComputeBinaryMatrices([resHeuri_2, resHeuri_3, resHeuri_4,
                                                        resHeuri_5, resHeuri_6, resHeuri_7], tableShape,
-                                                      weight=[0.2, 0.2, 0.2, 0.1, 0.2, 0.1])
+                                                      weight=[0.1, 0.2, 0.2, 0.1, 0.2, 0.2])
 
             # Append to return
             retTableList.append(finalTable)
