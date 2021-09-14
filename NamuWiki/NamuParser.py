@@ -427,3 +427,27 @@ class NamuWikiParser:
 
             tablePd = pd.DataFrame(table)
             tablePd.to_csv(destPath+'/' + str(fileIdx) + '_' + fileName, sep='\t', encoding='utf-8')
+
+
+    '''
+        Extract Only Text in column data
+    '''
+    def ExtractTextDataInColumn(self, tableList):
+        retTableList = []
+
+        for table in tableList:
+            newTable = []
+
+            for row in table:
+                newRow = []
+
+                for col in row:
+                    newCol = re.sub(r"<\w+>", '', col)
+                    newCol = re.sub(r"\[\[.+\|", '', newCol)
+                    newCol = re.sub(r'\]\]', '', newCol)
+
+                    newRow.append(newCol)
+                newTable.append(newRow)
+            retTableList.append(newTable)
+
+        return retTableList
