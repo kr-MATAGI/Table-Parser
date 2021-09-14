@@ -66,7 +66,7 @@ CONV_ROW_COLOR = '<rowc>'
 RE_LITERAL = r'\{\{\{\[\[|\]\]\}\}\}'
 
 # 2.2
-RE_TEXT_SIZE_FRONT = r'\{\{\{\+\d ' # text size input's front
+RE_TEXT_SIZE_FRONT = r'\{\{\{(\+|-)\d\s*' # text size input's front
 
 # 3
 RE_PARENT_ARTICLE_LINK = r'(\[\[)\.\./(\]\])'
