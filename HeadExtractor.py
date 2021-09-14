@@ -232,16 +232,16 @@ class Extractor:
 
         for key, val in colInstSumDict.items():
             for vIdx, cnt in enumerate(val):
-                if 0 <= vIdx:
+                if 0 == vIdx:
                     continue
-                if cnt == colScoreCnt:
+                if cnt >= colScoreCnt:
                     retNpTable[0, vIdx] = 1
 
         for key, val in rowInstSumDict.items():
             for vIdx, cnt in enumerate(val):
                 if 0 == vIdx:
                     continue
-                if cnt <= rowScoreCnt:
+                if cnt >= rowScoreCnt:
                     retNpTable[vIdx, 0] = 1
 
         return retNpTable
@@ -331,14 +331,14 @@ class Extractor:
             for vIdx, cnt in enumerate(val):
                 if 0 == vIdx:
                     continue
-                if cnt <= colScoreCnt:
+                if cnt >= colScoreCnt:
                     retNpTable[0, vIdx] = 1
 
         for key, val in rowPatternDict.items():
             for vIdx, cnt in enumerate(val):
                 if 0 == vIdx:
                     continue
-                if cnt <= rowScoreCnt:
+                if cnt >= rowScoreCnt:
                     retNpTable[vIdx, 0] = 1
 
         return retNpTable
