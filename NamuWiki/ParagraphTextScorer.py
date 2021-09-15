@@ -1,6 +1,6 @@
 from eunjeon import Mecab
 
-class TableDetailScorer:
+class TableTextScorer:
     ### VAR ###
 
 
@@ -14,13 +14,11 @@ class TableDetailScorer:
         print('INIT TableDetailScorer')
 
     '''
-        @Param
-            table
+        Set table element string using by concat(.joint())
     '''
-    def GetFeature(self, query):
+    def SetConcatTable(self, table):
         self.Bi_character_feature = []
-
-        TKs = self.tagger.morphs(query)
+        TKs = self.tagger.morphs(table)
 
         for TK in TKs:
             if 1 < len(TK):
@@ -28,14 +26,13 @@ class TableDetailScorer:
                     self.Bi_character_feature.append(str(TK[idx-1:idx+1]))
 
     '''
-        @Param
-            sequence
+        Compute Score     
     '''
-    def GetParagraphScore(self, paragraph):
+    def GetSentenceScore(self, sentence):
         score = 0
 
         for ch_feat in self.Bi_character_feature:
-            if paragraph.find(ch_feat) != -1:
+            if sentence.find(ch_feat) != -1:
                 score += 1
         if 0 == len(self.Bi_character_feature):
             return 1

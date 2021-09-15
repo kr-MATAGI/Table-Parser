@@ -22,9 +22,23 @@ RE_TEXT_COLOR = r'\{\{\{#\w+(,\s?#\w+)?\s?'
 RE_TEXT_ATTR_BACK = r"}}}"
 
 # 3
+RE_EXTERNAL_LINK = r'\[\[https?://[^\|\t\n\r\f\v]+(\s?\|[^\]\t\n\r\f\v]+(\]\])?)?\]\]'
 RE_LINK_ALT_FRONT = r"\[\[[^\|\]]+\|"
 RE_LINK_BASIC_FRONT = r"\[\["
 RE_LINK_BACK = r"\]\]"
+
+# 5
+RE_IMAGE_FILE = r'\[\[파일:[^\]]+(\|[^\]+])?\]\]'
+
+# 6
+RE_YOUTUBE = r'\[youtube\(\w+(,\s?(start|width|height)=\w+%?)*\)\]|' \
+             r'\[include\(틀:.+ (left|center|right)?\s?url=\w+\)(,\s?(start|width|height)=\w+%?)*\]'
+RE_KAKAO_TV = r'\[kakaotv\(\w+(,\s?(start|width|height)=\w+%?)*\)\]'
+RE_NICO_VIDEO = r'\[nicovideo\(\w+(,\s?(start|width|height)=\w+%?)*\)\]'
+RE_NAVER_VIDEO = r'\[include\(틀:(navertv|navervid){1}(,\s?(i=\w+|vid=\w+,\s?outkey=\w+)+)+(,\s?(start|width|height)=\w+%?)*\)\]'
+# 6 - deep syntax
+RE_HTML_VIDEO = r'\{\{\{#!html <video src=("|\').+("|\')></video>\}\}\}|' \
+                r'\{\{\{#!html .+\}\}\}'
 
 # 8
 RE_ADD_LIST = r'v+(\w*\.|\*)?v*'
@@ -43,6 +57,9 @@ RE_HORIZON_LINE = r"-{4,9}"
 RE_MACRO_RUBY = r'\[ruby\(\w+, ruby=\w+\)\]'
 RE_RUBY_FRONT = r'\[ruby\('
 RE_RUBY_BACK = r',\s?ruby=.+\)\]'
+
+# 12.1
+RE_DOC_INSERT = r'\[include\(틀:[^\)]+\)\]'
 
 # 12.2
 RE_AGE_FORM = r'\[age\(\d{4}-\d{1,2}-\d{1,2}\)\]'
@@ -108,17 +125,24 @@ class TextExtractor:
     def RemoveNamuwikiSyntax(self, srcStr):
         retStrList = []
 
-        splitStrList = srcStr[0].split('.')
+        splitStrList = srcStr[0].split('{br}')
         for splitStr in splitStrList:
-            newStr = re.sub(RE_TEXT_FORM, '', splitStr)
+            newStr = re.sub(RE_IMAGE_FILE, '', splitStr)
+            newStr = re.sub(RE_YOUTUBE, '', newStr)
+            newStr = re.sub(RE_KAKAO_TV, '', newStr)
+            newStr = re.sub(RE_NICO_VIDEO, '', newStr)
+            newStr = re.sub(RE_NAVER_VIDEO, '', newStr)
+            newStr = re.sub(RE_HTML_VIDEO, '', newStr)
+            newStr = re.sub(RE_EXTERNAL_LINK, '', newStr)
+            newStr = re.sub(RE_DOC_INSERT, '', newStr)
+
+            newStr = re.sub(RE_TEXT_FORM, '', newStr)
             newStr = re.sub(RE_SUB_SCRIPT, '', newStr)
             newStr = re.sub(RE_TEXT_SIZE_FRONT, '', newStr)
             newStr = re.sub(RE_TEXT_COLOR, '', newStr)
             newStr = re.sub(RE_LITERAL, '', newStr)
             newStr = re.sub(RE_LINK_ALT_FRONT, '', newStr)
             newStr = re.sub(RE_LINK_BASIC_FRONT, '', newStr)
-            newStr = re.sub(RE_LINK_BACK, '', newStr)
-            newStr = re.sub(RE_TEXT_ATTR_BACK, '', newStr)
             newStr = re.sub(RE_ADD_LIST, '', newStr)
             newStr = re.sub(RE_BASIC_LIST, '', newStr)
             newStr = re.sub(RE_FOOT_NOTE, '', newStr)
@@ -131,6 +155,9 @@ class TextExtractor:
             newStr = re.sub(RE_BR_TAG, '', newStr)
             newStr = re.sub(RE_CLEARFIX, '', newStr)
             newStr = re.sub(RE_FOLDING, '', newStr)
+
+            newStr = re.sub(RE_LINK_BACK, '', newStr)
+            newStr = re.sub(RE_TEXT_ATTR_BACK, '', newStr)
 
             # 12. Macro - Ruby
             if re.search(RE_MACRO_RUBY, newStr):

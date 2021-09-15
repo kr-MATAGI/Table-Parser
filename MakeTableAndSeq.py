@@ -9,10 +9,12 @@
 ### Import Compute Tool
 from random import random as rand
 import numpy as np
+from dataclasses import dataclass
 
 ### Import Namu Wiki Parser
 from NamuWiki.NamuParser import NamuWikiParser
 from NamuWiki.TextExtractor import TextExtractor
+from NamuWiki.ParagraphTextScorer import TableTextScorer
 
 ### GLOBAL
 max_length = 512
@@ -40,6 +42,17 @@ DOC_TITLE = 'title'
 DOC_TEXT = 'text'
 namuParser = NamuWikiParser(SRC_JSON_PATH)
 namuTextExtractor = TextExtractor()
+namuTableTextScorer = TableTextScorer()
+
+@dataclass
+class TableRelation:
+    table = None
+    sentenceList = None
+
+@dataclass
+class ParagraphRelation:
+    paragraphIdx: int = None
+    tableRelation = list()
 
 ## TEST MODE
 TEST_TARGET = '백 평짜리 숲(킹덤 하츠)'
@@ -55,12 +68,14 @@ if __name__ == '__main__':
         if 0 == (docCnt % 1000):
             print('Processing...', document[DOC_TITLE], docCnt)
 
-        # TEST MODE
+        #### TEST MODE ####
         if TEST_MODE and TEST_TARGET != document[DOC_TITLE]: continue
 
         # Make paragraph list - [paragraph index, table list, text list]
-        splitParagraphList = namuParser.ParseTableAndDetailsFromDocument(document[DOC_TITLE], document[DOC_TEXT])
+        splitParagraphList = namuParser.ParseTableAndDetailsFromDocument(document[DOC_TITLE],
+                                                                         document[DOC_TEXT])
 
+        paragraphRelationList = []  # [ TableRelation data structure ... ]
         for paragraph in splitParagraphList:
             ## Table
             if 0 < len(paragraph[1]): # exist table
@@ -79,8 +94,81 @@ if __name__ == '__main__':
 
             ## Sequence
             if 0 < len(paragraph[2]): # exist paragraph text
-                splitParagraphList = namuTextExtractor.RemoveNamuwikiSyntax(paragraph[2])
-                paragraph[2] = splitParagraphList
+                textParagraphList = namuTextExtractor.RemoveNamuwikiSyntax(paragraph[2])
+                paragraph[2] = textParagraphList
+
+            # Add score between table and sequence
+            paragraphRelation = ParagraphRelation()
+            paragraphRelation.paragraphIdx = paragraph[0]
+
+            if (0 < len(paragraph[1])) and (0 < len(paragraph[2])):
+                # Make concat tables
+                concatTableList = []
+                for table in paragraph[1]:
+                    mergeTable = []
+                    for row in table:
+                        mergeTable += row
+
+                    concatStr = ' '.join(mergeTable)
+                    concatTableList.append(concatStr)
+
+                # Compute sentence core per concatTable
+                tableSentenceDict = dict() # key: int - table index, value: list - sentenceIndex
+                for senIdx, sentence in enumerate(paragraph[2]):
+                    scoreList = []
+                    for concatTable in concatTableList:
+                        namuTableTextScorer.SetConcatTable(concatTable)
+                        score = namuTableTextScorer.GetSentenceScore(paragraph[2][0])  # sequence
+                        scoreList.append(score)
+
+                    # Assign sentence to highest score table
+                    highScore = max(scoreList)
+                    highTableIdx = scoreList.index(highScore)
+                    if highTableIdx in tableSentenceDict.keys():
+                        tableSentenceDict[highTableIdx].append(senIdx)
+                    else:
+                        tableSentenceDict[highTableIdx] = []
+                        tableSentenceDict[highTableIdx].append(senIdx)
+
+                # Make tableRelation and Add tableRelation to paragraphRelation
+                for key, val in tableSentenceDict.items():
+                    tableRelation = TableRelation()
+
+                    table = paragraph[1][key]
+                    tableRelation.table = table
+
+                    sentenceList = []
+                    for vIdx in val:
+                        sentenceList.append(paragraph[2][vIdx])
+                    tableRelation.sentenceList = sentenceList
+                    paragraphRelation.tableRelation.append(tableRelation)
+
+                paragraphRelationList.append(paragraphRelation)
+                # print(paragraphRelationList[0].paragraphIdx)
+                # print(paragraphRelationList[0].tableRelation[0].table)
+                # print(paragraphRelationList[0].tableRelation[0].sentenceList)
+            else:
+                # only table or only paragraph text
+
+                if 0 < len(paragraph[1]): # table
+                    for table in paragraph[1]:
+                        tableRelation = TableRelation()
+                        tableRelation.table = table
+                        tableRelation.sentenceList = []
+                        paragraphRelation.tableRelation.append(tableRelation)
+                else: # sequence
+                    tableRelation = TableRelation()
+                    tableRelation.sentenceList = []
+                    for sentence in paragraph[2]:
+                        tableRelation.sentenceList.append(sentence)
+                    paragraphRelation.tableRelation.append(tableRelation)
+
+        # for testPa in paragraphRelationList:
+        #
+        #     for testTable in testPa.tableRelation:
+        #         print(testTable.table)
+        #         for testSe in testTable.sentenceList:
+        #             print(testSe)
 
         break
 

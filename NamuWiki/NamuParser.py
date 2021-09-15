@@ -81,7 +81,7 @@ RE_PARENT_ARTICLE_LINK = r'(\[\[)\.\./(\]\])'
 RE_EXTERNAL_LINK = r'\[\[https?://[^\|\t\n\r\f\v]+(\s?\|[^\]\t\n\r\f\v]+(\]\])?)?\]\]'
 
 # 5
-RE_IMAGE_FILE = r'\[\[파일:[^\]\t\n\r\f\v]+\|?(&?(width|height|align|bgcolor)=(left|center|right|(\d+%?)|(#\w+)))*\]\]'
+RE_IMAGE_FILE = r'\[\[파일:[^\]]+(\|[^\]+])?\]\]'
 
 # 6
 RE_YOUTUBE = r'\[youtube\(\w+(,\s?(start|width|height)=\w+%?)*\)\]|' \
@@ -245,7 +245,7 @@ class NamuWikiParser:
                     tableList.append(convertedTable)
                     table.clear()
 
-                detailStr += (' ' + line)
+                detailStr += ('{br}' + line)
 
         return retList
 
