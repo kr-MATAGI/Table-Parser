@@ -10,14 +10,9 @@
 from random import random as rand
 import numpy as np
 
-### Import Model
-from transformers import AutoTokenizer
-
 ### Import Namu Wiki Parser
 from NamuWiki.NamuParser import NamuWikiParser
-
-### Import SyangHeun Moduel
-import Table_Holder # maybe is need...
+from NamuWiki.TextExtractor import TextExtractor
 
 ### GLOBAL
 max_length = 512
@@ -26,8 +21,10 @@ count = 0
 
 max_masking = 20
 
+# File Path
 SRC_JSON_PATH = './dataset/docData200302.json'
 
+# Numpy
 sequence_has_ans = np.zeros(shape=[total_size, 2, max_length], dtype=np.int32)
 segments_has_ans = np.zeros(shape=[total_size, 2, max_length], dtype=np.int32)
 masks_has_ans = np.zeros(shape=[total_size, 2, max_length], dtype=np.int32)
@@ -36,17 +33,16 @@ rows_has_ans = np.zeros(shape=[total_size, 2, max_length], dtype=np.int32)
 
 label_ids = np.zeros(shape=[total_size, 2, max_masking], dtype=np.int32)
 label_position = np.zeros(shape=[total_size, 2, max_masking], dtype=np.int32)
-label_weight = np.zeros(shape=[total_size, 2, max_masking], dtype=np.float)
-
-## Tokenizer
-tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
+label_weight = np.zeros(shape=[total_size, 2, max_masking], dtype=np.float64)
 
 ## NamuParser
-namuParser = NamuWikiParser(SRC_JSON_PATH)
 DOC_TITLE = 'title'
 DOC_TEXT = 'text'
+namuParser = NamuWikiParser(SRC_JSON_PATH)
+namuTextExtractor = TextExtractor()
 
 ## TEST MODE
+TEST_TARGET = '백 평짜리 숲(킹덤 하츠)'
 TEST_MODE = True
 
 if __name__ == '__main__':
@@ -56,12 +52,40 @@ if __name__ == '__main__':
     for document in namuParser.ParsingJSON():
         docCnt += 1
 
-        if TEST_MODE and (0 == docCnt % 1000):
+        if 0 == (docCnt % 1000):
             print('Processing...', document[DOC_TITLE], docCnt)
 
-        docTableList = namuParser.ParseTableFromText(document[DOC_TEXT])
+        # TEST MODE
+        if TEST_MODE and TEST_TARGET != document[DOC_TITLE]: continue
 
-        if 0 < len(docTableList):
+        # Make paragraph list - [paragraph index, table list, text list]
+        splitParagraphList = namuParser.ParseTableAndDetailsFromDocument(document[DOC_TITLE], document[DOC_TEXT])
+
+        for paragraph in splitParagraphList:
+            ## Table
+            if 0 < len(paragraph[1]): # exist table
+                newTableList = []
+                modifiedTableList = namuParser.ModifyHTMLTags(paragraph[1])
+
+                for table in modifiedTableList:
+                    preprocessedTable = namuParser.PreprocessingTable(table)
+
+                    if 2 <= len(preprocessedTable):
+                        newTableList.append(preprocessedTable)
+
+                normalTableList, infoBoxList = namuParser.ClassifyNormalTableOrInfoBox(newTableList)
+                onlyTextTableList = namuTextExtractor.ExtractTextAtTable(normalTableList) # only use normal tables
+                paragraph[1] = onlyTextTableList
+
+            ## Sequence
+            if 0 < len(paragraph[2]): # exist paragraph text
+                splitParagraphList = namuTextExtractor.RemoveNamuwikiSyntax(paragraph[2])
+                paragraph[2] = splitParagraphList
+
+        break
+
+        '''
+        if 0 < len(tableAndDetailsList):
             newTableList = []
             namuParser.ModifyHTMLTags(docTableList)
 
@@ -89,18 +113,8 @@ if __name__ == '__main__':
                         new_line.append(table_data[x][y])
                     new_data.append(new_line)
 
-                # table_holder.table_data = new_data # ????????
-
                 ################### MY Sequence Text 개요 기준 테이블 관련 텍스트
                 seq_text = None
                 sentences = seq_text.split('. ')
                 ###################################
-
-                seq_text = ''
-                for sentence in sentences:
-                    if len(tokenizer.tokenize(seq_text)) > 64:
-                        break
-                    seq_text += sentence + '. '
-
-                tokens = tokenizer.tokenize(seq_text)
-                tokens.insert(0, '[CLS]')
+        '''

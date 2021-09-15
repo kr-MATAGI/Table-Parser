@@ -1,9 +1,12 @@
 
+## Built-in Module
 import re
 import sys
 import os
-import pandas as pd
+import copy
 
+## Pip Module
+import pandas as pd
 import ijson
 
 ## Ref : https://namu.wiki/w/%EB%82%98%EB%AC%B4%EC%9C%84%ED%82%A4:%EB%AC%B8%EB%B2%95%20%EB%8F%84%EC%9B%80%EB%A7%90
@@ -14,6 +17,10 @@ DOC_TITLE = 'title'
 DOC_TEXT = 'text'
 
 ### regex
+## Paragraph
+RE_PARAGRAPH = r"={2,}#? .+ #?={2,}"
+
+
 ## Table Token
 RE_ROW_SPLIT = r'\|\|'
 
@@ -179,7 +186,69 @@ class NamuWikiParser:
                         yield retValue
                         isNewKey = False
                         retValue.clear()
-    
+
+    '''
+        @Note
+            Parse table and text which is related the table.
+            
+            Make [ [paragraphIdx, tableList, detailList] ]
+            paragraphIdx: Integer
+            tableList: [ table ]
+            detailList: [ detail String ]
+        @Param
+            srcText - item.text, type(list)
+                      len(docText) == 1
+        @Return
+            [ [paragraphIdx, tableList, detailList] ]
+    '''
+    def ParseTableAndDetailsFromDocument(self, srcTitle, srcText):
+        retList = []
+
+        if 0 >= len(srcText):
+            print('ERROR - srcText length is 0', srcTitle)
+            return
+
+        docText = srcText[0]
+        docSplitList = docText.split('\n')
+
+        currParagraphIdx = 0
+
+        tableList = []
+        table = []
+
+        detailList = []
+        detailStr = ''
+        for line in docSplitList:
+            if re.search(RE_PARAGRAPH, line):
+                if 0 < len(table):
+                    tableList.append(table)
+                if 0 < len(detailStr):
+                    detailList.append(detailStr)
+                retList.append([currParagraphIdx, copy.deepcopy(tableList), copy.deepcopy(detailList)])
+                currParagraphIdx += 1
+
+                tableList.clear()
+                table.clear()
+
+                detailList.clear()
+                detailStr = ''
+
+            elif re.search(RE_ROW_SPLIT, line):
+                if 0 < len(detailStr):
+                    detailList.append(detailStr)
+                    detailStr = ''
+
+                table.append(line)
+            else:
+                if 0 < len(table):
+                    convertedTable = self.__ConvertTableColSpanToken(table)
+                    tableList.append(convertedTable)
+                    table.clear()
+
+                detailStr += (' ' + line)
+
+        return retList
+
     '''
         @Note
             All docText's len() is 1
@@ -216,7 +285,10 @@ class NamuWikiParser:
             and Remove Others
     '''
     def ModifyHTMLTags(self, tableList):
+        retTableList = []
+
         for table in tableList:
+            newTable = []
             for idx, row in enumerate(table):
                 newRow = row
 
@@ -269,7 +341,11 @@ class NamuWikiParser:
                         delRubyStr = re.sub(RE_RUBY_FRONT, '', rubyStr)
                         delRubyStr = re.sub(RE_RUBY_BACK, '', delRubyStr)
                         newRow = newRow.replace(rubyStr, delRubyStr)
-                table[idx] = newRow
+                newTable.append(newRow)
+            retTableList.append(newTable)
+
+        return retTableList
+
 
     '''
         Split Row and Col by '||'
