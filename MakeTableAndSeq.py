@@ -147,7 +147,7 @@ if __name__ == '__main__':
                     paragraphRelation.tableRelation.append(tableRelation)
 
             else:
-                # only table or only paragraph text
+                # exist only table
                 if 0 < len(paragraph[1]): # table
                     for table in paragraph[1]:
                         tableRelation = TableRelation()
@@ -172,6 +172,7 @@ if __name__ == '__main__':
 
             if TEST_TEXT_PRINT:
                 print(document[DOC_TEXT])
+        ###############
 
         ### Tokenizer
 
