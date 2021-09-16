@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from NamuWiki.NamuParser import NamuWikiParser
 from NamuWiki.NamuTextExtractor import TextExtractor
 from NamuWiki.NamuSentenceScorer import TableTextScorer
+from NamuWiki.NamuTokenizer import NamuTokenizer
 
 ### Hugging Face - transformer
 from transformers import AutoTokenizer, AutoModelForMaskedLM
@@ -40,9 +41,9 @@ masks_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
 cols_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
 rows_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
 
-label_ids = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
-label_position = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
-label_weight = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.float64)
+label_ids = np.zeros(shape=[TOTAL_SIZE, 2, MAX_MASKING], dtype=np.int32)
+label_position = np.zeros(shape=[TOTAL_SIZE, 2, MAX_MASKING], dtype=np.int32)
+label_weight = np.zeros(shape=[TOTAL_SIZE, 2, MAX_MASKING], dtype=np.float64)
 
 ## NamuParser
 DOC_TITLE = 'title'
@@ -277,5 +278,12 @@ if __name__ == '__main__':
                     label_weight[COUNT, 0, idx] = 1.0
 
             ### TODO: ZERO CASE ###
+
+
         break
 
+#### end paragraph parsing loop
+namuTokenizer = NamuTokenizer()
+namuTokenizer.SaveTensorDataSet(COUNT, MAX_LENGTH, MAX_MASKING,
+                                sequence_has_ans, segments_has_ans, masks_has_ans,
+                                rows_has_ans, cols_has_ans, label_ids, label_position, label_weight)
