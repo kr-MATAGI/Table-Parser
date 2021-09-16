@@ -34,15 +34,15 @@ SRC_JSON_PATH = './dataset/docData200302.json'
 tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
 
 # Numpy
-sequence_has_ans = np.zeros(shape=[total_size, 2, max_length], dtype=np.int32)
-segments_has_ans = np.zeros(shape=[total_size, 2, max_length], dtype=np.int32)
-masks_has_ans = np.zeros(shape=[total_size, 2, max_length], dtype=np.int32)
-cols_has_ans = np.zeros(shape=[total_size, 2, max_length], dtype=np.int32)
-rows_has_ans = np.zeros(shape=[total_size, 2, max_length], dtype=np.int32)
+sequence_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
+segments_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
+masks_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
+cols_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
+rows_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
 
-label_ids = np.zeros(shape=[total_size, 2, max_masking], dtype=np.int32)
-label_position = np.zeros(shape=[total_size, 2, max_masking], dtype=np.int32)
-label_weight = np.zeros(shape=[total_size, 2, max_masking], dtype=np.float64)
+label_ids = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
+label_position = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
+label_weight = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.float64)
 
 ## NamuParser
 DOC_TITLE = 'title'
@@ -248,7 +248,7 @@ if __name__ == '__main__':
                     maskIdx = int((maskingLen - 1) * rand())
 
                     # origin code were used index()
-                    if (-1 != labelPositionList.find(maskIdx)) or \
+                    if ( maskIdx in labelPositionList) or \
                         ('[CLS]' == sentenceTokenList[maskIdx]) or \
                         ('[SEP]' == sentenceTokenList[maskIdx]):
                         continue
@@ -262,7 +262,7 @@ if __name__ == '__main__':
 
                 for idx in range(maskingLen):
                     sequence_has_ans[COUNT, 0, idx] = idList[idx]
-                    segmentList[COUNT, 0, idx] = segmentList[idx]
+                    segments_has_ans[COUNT, 0, idx] = segmentList[idx]
                     masks_has_ans[COUNT, 0, idx] = 1
                     cols_has_ans[COUNT, 0, idx] = colList[idx]
                     rows_has_ans[COUNT, 0, idx] = rowList[idx]
@@ -276,6 +276,6 @@ if __name__ == '__main__':
                     label_position[COUNT, 0, idx] = labelPositionList[idx]
                     label_weight[COUNT, 0, idx] = 1.0
 
-            ### ZERO CASE ###
+            ### TODO: ZERO CASE ###
         break
 
