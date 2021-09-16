@@ -175,11 +175,11 @@ if __name__ == '__main__':
         ###############
 
         ### Tokenize
-        print(len(paragraphRelationList))
         for paragraphRelation in paragraphRelationList:
             paraIdx = paragraphRelation.paragraphIdx
 
             tableTokenList = []
+            sentenceTokenList = []
             for tableRelation in paragraphRelation.tableRelation:
                 if not tableRelation.table: continue
 
@@ -194,8 +194,22 @@ if __name__ == '__main__':
                             tableTokenList.append(wordToken)
 
                 # tokenize sentences
+                sequenceText = ''
+                splitSentenceList = sentences.split('.')
+                for spSentence in splitSentenceList:
+                    if 64 < len(tokenizer.tokenize(sequenceText)):
+                        break
+                    elif 0 >= len(spSentence):
+                        continue
+                    sequenceText += spSentence + '. '
 
+                sentenceTokenList = tokenizer.tokenize(sequenceText)
+                sentenceTokenList.insert(0, '[CLS]')
+                sentenceTokenList.append('[SEP]')
 
+                rowList = [ 0 for _ in range(len(sentenceTokenList)) ]
+                colList = [ 0 for _ in range(len(sentenceTokenList)) ]
+                segmentList = [ 0 for _ in range(len(sentenceTokenList)) ]
 
         break
 
