@@ -211,5 +211,6 @@ if __name__ == '__main__':
                 colList = [ 0 for _ in range(len(sentenceTokenList)) ]
                 segmentList = [ 0 for _ in range(len(sentenceTokenList)) ]
 
+
         break
 
