@@ -1,6 +1,5 @@
 import re
 import sys
-from builtins import enumerate
 
 import numpy as np
 from enum import Enum
