@@ -268,11 +268,11 @@ if __name__ == '__main__':
                     cols_has_ans[COUNT, 0, idx] = colList[idx]
                     rows_has_ans[COUNT, 0, idx] = rowList[idx]
 
-                labelIdListLen = len(labelTokenIdList)
-                if MAX_MASKING < maskingLen:
-                    maskingLen = MAX_MASKING
+                labelTokenIdListLen = len(labelTokenIdList)
+                if MAX_MASKING < labelTokenIdListLen:
+                    labelTokenIdListLen = MAX_MASKING
 
-                for idx in range(maskingLen):
+                for idx in range(labelTokenIdListLen):
                     label_ids[COUNT, 0, idx] = labelTokenIdList[idx]
                     label_position[COUNT, 0, idx] = labelPositionList[idx]
                     label_weight[COUNT, 0, idx] = 1.0
