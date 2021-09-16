@@ -48,7 +48,7 @@ namuTableTextScorer = TableTextScorer()
 @dataclass
 class TableRelation:
     table = None
-    sentenceList = None
+    sentence = None
 
 @dataclass
 class ParagraphRelation:
@@ -56,7 +56,7 @@ class ParagraphRelation:
     tableRelation = list()
 
 ## TEST MODE
-TEST_TARGET = '마블 코믹스'
+TEST_TARGET = '삼성전자ㅋ'
 TEST_MODE = True
 
 if __name__ == '__main__':
@@ -117,21 +117,18 @@ if __name__ == '__main__':
                 # Compute sentence core per concatTable
                 tableSentenceDict = dict() # key: int - table index, value: list - sentenceIndex
 
-                for senIdx, sentence in enumerate(paragraph[2]):
+                for ctIdx, concatTable in enumerate(concatTableList):
                     scoreList = []
-                    for concatTable in concatTableList:
-                        namuTableTextScorer.SetConcatTable(concatTable)
-                        score = namuTableTextScorer.GetSentenceScore(sentence)  # sequence
+                    namuTableTextScorer.SetConcatTable(concatTable)
+
+                    for sentence in paragraph[2]:
+                        score = namuTableTextScorer.GetSentenceScore(sentence)
                         scoreList.append(score)
 
                     # Assign sentence to highest score table
                     highScore = max(scoreList)
-                    highTableIdx = scoreList.index(highScore)
-                    if highTableIdx in tableSentenceDict.keys():
-                        tableSentenceDict[highTableIdx].append(senIdx)
-                    else:
-                        tableSentenceDict[highTableIdx] = []
-                        tableSentenceDict[highTableIdx].append(senIdx)
+                    highSentenceIdx = scoreList.index(highScore)
+                    tableSentenceDict[ctIdx] = highSentenceIdx
 
                 # Make tableRelation and Add tableRelation to paragraphRelation
                 for key, val in tableSentenceDict.items():
@@ -140,10 +137,7 @@ if __name__ == '__main__':
                     table = paragraph[1][key]
                     tableRelation.table = table
 
-                    sentenceList = []
-                    for vIdx in val:
-                        sentenceList.append(paragraph[2][vIdx])
-                    tableRelation.sentenceList = sentenceList
+                    tableRelation.sentence = paragraph[2][val]
                     paragraphRelation.tableRelation.append(tableRelation)
 
             else:
@@ -152,7 +146,7 @@ if __name__ == '__main__':
                     for table in paragraph[1]:
                         tableRelation = TableRelation()
                         tableRelation.table = table
-                        tableRelation.sentenceList = []
+                        tableRelation.sentenceList = None
 
                         paragraphRelation.tableRelation.append(tableRelation)
 
@@ -166,11 +160,11 @@ if __name__ == '__main__':
 
                 for test_tableRelation in test_paragraph.tableRelation:
                     print(test_tableRelation.table)
-                    print(test_tableRelation.sentenceList)
+                    print(test_tableRelation.sentence)
 
                 print('\n===============')
 
-        print(document[DOC_TEXT])
+        #print(document[DOC_TEXT])
         break
 
         '''
