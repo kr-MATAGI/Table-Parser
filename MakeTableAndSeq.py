@@ -14,8 +14,8 @@ from dataclasses import dataclass
 
 ### Import Namu Wiki Parser
 from NamuWiki.NamuParser import NamuWikiParser
-from NamuWiki.TextExtractor import TextExtractor
-from NamuWiki.ParagraphTextScorer import TableTextScorer
+from NamuWiki.NamuTextExtractor import TextExtractor
+from NamuWiki.NamuSentenceScorer import TableTextScorer
 
 ### Hugging Face - transformer
 from transformers import AutoTokenizer, AutoModelForMaskedLM
