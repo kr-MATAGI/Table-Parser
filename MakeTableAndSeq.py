@@ -21,11 +21,11 @@ from NamuWiki.NamuSentenceScorer import TableTextScorer
 from transformers import AutoTokenizer, AutoModelForMaskedLM
 
 ### GLOBAL
-max_length = 512
-total_size = 300000
-count = 0
+MAX_LENGTH = 512
+MAX_MASKING = 20
 
-max_masking = 20
+TOTAL_SIZE = 300000
+COUNT = 0
 
 # File Path
 SRC_JSON_PATH = './dataset/docData200302.json'
@@ -181,19 +181,20 @@ if __name__ == '__main__':
             tableTokenList = []
             sentenceTokenList = []
             for tableRelation in paragraphRelation.tableRelation:
-                if not tableRelation.table: continue
+                if not tableRelation.table:
+                    continue
 
                 table = tableRelation.table
                 sentences = tableRelation.sentences
 
-                # tokenize table
-                for lineIdx, line in enumerate(table):
-                    for wIdx, word in enumerate(line):
-                        wordTokenList = tokenizer.tokenize(word)
+                ## tokenize table
+                for row in table:
+                    for col in row:
+                        wordTokenList = tokenizer.tokenize(col)
                         for wordToken in wordTokenList:
                             tableTokenList.append(wordToken)
 
-                # tokenize sentences
+                ## tokenize sentences
                 sequenceText = ''
                 splitSentenceList = sentences.split('.')
                 for spSentence in splitSentenceList:
@@ -211,6 +212,70 @@ if __name__ == '__main__':
                 colList = [ 0 for _ in range(len(sentenceTokenList)) ]
                 segmentList = [ 0 for _ in range(len(sentenceTokenList)) ]
 
+                ## MASKING
+                labelTokenList = []
+                labelPositionList = []
 
+                for rIdx, row in enumerate(table):
+                    for cIdx, col in enumerate(row):
+                        if not col:
+                            continue
+
+                        wordTokenList = tokenizer.tokenize(col)
+                        for wordToken in wordTokenList:
+                            if -1 != sequenceText.find(col):
+                                labelTokenList.append(wordToken)
+                                labelPositionList.append(len(sentenceTokenList))
+                                sentenceTokenList.append('[MASK]')
+                            else:
+                                sentenceTokenList.append(wordToken)
+
+                            segmentList.append(1)
+                            rowList.append(rIdx + 1)
+                            colList.append(cIdx + 1)
+
+                sentenceTokenListLen = len(sentenceTokenList)
+                maskingNum = int(sentenceTokenListLen * 0.25 * rand()) # num_masking
+                if MAX_MASKING < (maskingNum + len(labelTokenList)):
+                    maskingNum = MAX_MASKING - len(labelTokenList)
+
+                # masking tokens
+                maskingLen = sentenceTokenListLen - 1
+                if MAX_LENGTH < maskingLen:
+                    maskingLen = MAX_LENGTH
+
+                for _ in range(maskingNum):
+                    maskIdx = int((maskingLen - 1) * rand())
+
+                    # origin code were used index()
+                    if (-1 != labelPositionList.find(maskIdx)) or \
+                        ('[CLS]' == sentenceTokenList[maskIdx]) or \
+                        ('[SEP]' == sentenceTokenList[maskIdx]):
+                        continue
+
+                    labelTokenList.append(sentenceTokenList[maskIdx])
+                    labelPositionList.append(maskIdx)
+                    sentenceTokenList[maskIdx] = '[MASK]'
+
+                idList = tokenizer.convert_tokens_to_ids(tokens=sentenceTokenList)
+                labelTokenIdList = tokenizer.convert_tokens_to_ids(tokens=labelTokenList)
+
+                for idx in range(maskingLen):
+                    sequence_has_ans[COUNT, 0, idx] = idList[idx]
+                    segmentList[COUNT, 0, idx] = segmentList[idx]
+                    masks_has_ans[COUNT, 0, idx] = 1
+                    cols_has_ans[COUNT, 0, idx] = colList[idx]
+                    rows_has_ans[COUNT, 0, idx] = rowList[idx]
+
+                labelIdListLen = len(labelTokenIdList)
+                if MAX_MASKING < maskingLen:
+                    maskingLen = MAX_MASKING
+
+                for idx in range(maskingLen):
+                    label_ids[COUNT, 0, idx] = labelTokenIdList[idx]
+                    label_position[COUNT, 0, idx] = labelPositionList[idx]
+                    label_weight[COUNT, 0, idx] = 1.0
+
+            ### ZERO CASE ###
         break
 
