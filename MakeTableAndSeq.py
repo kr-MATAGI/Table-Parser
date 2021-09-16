@@ -7,6 +7,7 @@
 # max_length = 384
 
 ### Import Compute Tool
+import copy
 from random import random as rand
 import numpy as np
 from dataclasses import dataclass
@@ -55,7 +56,7 @@ class ParagraphRelation:
     tableRelation = list()
 
 ## TEST MODE
-TEST_TARGET = '백 평짜리 숲(킹덤 하츠)'
+TEST_TARGET = 'SPARK!'
 TEST_MODE = True
 
 if __name__ == '__main__':
@@ -77,6 +78,10 @@ if __name__ == '__main__':
 
         paragraphRelationList = []  # [ TableRelation data structure ... ]
         for paragraph in splitParagraphList:
+            paragraphRelation = ParagraphRelation()
+            paragraphRelation.paragraphIdx = paragraph[0]
+            paragraphRelation.tableRelation = list()
+
             ## Table
             if 0 < len(paragraph[1]): # exist table
                 newTableList = []
@@ -98,9 +103,6 @@ if __name__ == '__main__':
                 paragraph[2] = textParagraphList
 
             # Add score between table and sequence
-            paragraphRelation = ParagraphRelation()
-            paragraphRelation.paragraphIdx = paragraph[0]
-
             if (0 < len(paragraph[1])) and (0 < len(paragraph[2])):
                 # Make concat tables
                 concatTableList = []
@@ -143,32 +145,32 @@ if __name__ == '__main__':
                     tableRelation.sentenceList = sentenceList
                     paragraphRelation.tableRelation.append(tableRelation)
 
-                paragraphRelationList.append(paragraphRelation)
-                # print(paragraphRelationList[0].paragraphIdx)
-                # print(paragraphRelationList[0].tableRelation[0].table)
-                # print(paragraphRelationList[0].tableRelation[0].sentenceList)
             else:
                 # only table or only paragraph text
-
                 if 0 < len(paragraph[1]): # table
                     for table in paragraph[1]:
                         tableRelation = TableRelation()
                         tableRelation.table = table
                         tableRelation.sentenceList = []
-                        paragraphRelation.tableRelation.append(tableRelation)
-                else: # sequence
-                    tableRelation = TableRelation()
-                    tableRelation.sentenceList = []
-                    for sentence in paragraph[2]:
-                        tableRelation.sentenceList.append(sentence)
-                    paragraphRelation.tableRelation.append(tableRelation)
 
-        # for testPa in paragraphRelationList:
-        #
-        #     for testTable in testPa.tableRelation:
-        #         print(testTable.table)
-        #         for testSe in testTable.sentenceList:
-        #             print(testSe)
+                        paragraphRelation.tableRelation.append(tableRelation)
+
+            paragraphRelationList.append(paragraphRelation)
+
+
+        #### TEST ####
+        if TEST_MODE:
+            for test_paragraph in paragraphRelationList:
+                print("para idx: ", test_paragraph.paragraphIdx)
+
+                for test_tableRelation in test_paragraph.tableRelation:
+                    print(test_tableRelation.table)
+                    print(test_tableRelation.sentenceList)
+
+                print('\n===============')
+
+            print(document[DOC_TEXT])
+
 
         break
 

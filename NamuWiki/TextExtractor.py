@@ -6,75 +6,7 @@
         Remove text attr, size, color, background color, hyper-link....
 '''
 import re
-
-### REGEX
-# 2.1
-RE_TEXT_FORM = r"(''' '')|('' ''')|(''')|('')|__|~~|--" # Check Priority (''' '', ''')
-RE_SUB_SCRIPT = r'\^\^|,,'
-RE_LITERAL = r'\{\{\{\[\[|\]\]\}\}\}'
-
-# 2.2
-RE_TEXT_SIZE_FRONT = r'\{\{\{(\+|-)\d\s*' # text size input's front
-
-# 2.3
-RE_TEXT_COLOR = r'\{\{\{#\w+(,\s?#\w+)?\s?'
-
-RE_TEXT_ATTR_BACK = r"}}}"
-
-# 3
-RE_EXTERNAL_LINK = r'\[\[https?://[^\|\t\n\r\f\v]+(\s?\|[^\]\t\n\r\f\v]+(\]\])?)?\]\]'
-RE_LINK_ALT_FRONT = r"\[\[[^\|\]]+\|"
-RE_LINK_BASIC_FRONT = r"\[\["
-RE_LINK_BACK = r"\]\]"
-
-# 5
-RE_IMAGE_FILE = r'\[\[파일:[^\]]+(\|[^\]+])?\]\]'
-
-# 6
-RE_YOUTUBE = r'\[youtube\(\w+(,\s?(start|width|height)=\w+%?)*\)\]|' \
-             r'\[include\(틀:.+ (left|center|right)?\s?url=\w+\)(,\s?(start|width|height)=\w+%?)*\]'
-RE_KAKAO_TV = r'\[kakaotv\(\w+(,\s?(start|width|height)=\w+%?)*\)\]'
-RE_NICO_VIDEO = r'\[nicovideo\(\w+(,\s?(start|width|height)=\w+%?)*\)\]'
-RE_NAVER_VIDEO = r'\[include\(틀:(navertv|navervid){1}(,\s?(i=\w+|vid=\w+,\s?outkey=\w+)+)+(,\s?(start|width|height)=\w+%?)*\)\]'
-# 6 - deep syntax
-RE_HTML_VIDEO = r'\{\{\{#!html <video src=("|\').+("|\')></video>\}\}\}|' \
-                r'\{\{\{#!html .+\}\}\}'
-
-# 8
-RE_ADD_LIST = r'v+(\w*\.|\*)?v*'
-RE_BASIC_LIST = r"\*"
-
-# 9, 12.3
-RE_FOOT_NOTE = r'\[\*.+\]|\[각주\]|\[footnote\]'
-
-# 10
-RE_QUOTE = r">{1,}"
-
-# 11
-RE_HORIZON_LINE = r"-{4,9}"
-
-# 12
-RE_MACRO_RUBY = r'\[ruby\(\w+, ruby=\w+\)\]'
-RE_RUBY_FRONT = r'\[ruby\('
-RE_RUBY_BACK = r',\s?ruby=.+\)\]'
-
-# 12.1
-RE_DOC_INSERT = r'\[include\(틀:[^\)]+\)\]'
-
-# 12.2
-RE_AGE_FORM = r'\[age\(\d{4}-\d{1,2}-\d{1,2}\)\]'
-RE_DATE_TIME_FORM = r'\[date\]|\[datetime\]'
-RE_DDAY_FORM = r'\[dday\(\d{4}-\d{1,2}-\d{1,2}\)\]'
-
-# 12.3
-RE_CONTENTS_TAG = r"\[목차\]|\[tableofcontents\]"
-
-# 12.4
-RE_BR_TAG = r'(\[BR\])|(\[br\])'
-RE_CLEARFIX = r'\[clearfix\]'
-
-# 14
-RE_FOLDING = r'\{\{\{#!folding\s?\[[^\[.]+\]'
+from NamuWiki.NamuSyntax import NAMU_RE
 
 class TextExtractor:
     ### VAR ###
@@ -104,9 +36,9 @@ class TextExtractor:
                 newRow = []
                 for col in row:
                     newCol = re.sub(r"<\w+>", '', col) # attr tag
-                    newCol = re.sub(RE_LINK_ALT_FRONT, '', newCol) # [[.+|.+]]
-                    newCol = re.sub(RE_LINK_BASIC_FRONT, '', newCol) # [[.+]]
-                    newCol = re.sub(RE_LINK_BACK, '', newCol) # [[.+|.+]] and [[.+]]
+                    newCol = re.sub(NAMU_RE.LINK_ALT_FRONT.value, '', newCol) # [[.+|.+]]
+                    newCol = re.sub(NAMU_RE.LINK_BASIC_FRONT.value, '', newCol) # [[.+]]
+                    newCol = re.sub(NAMU_RE.LINK_BACK.value, '', newCol) # [[.+|.+]] and [[.+]]
 
                     newRow.append(newCol)
                 newTable.append(newRow)
@@ -127,45 +59,45 @@ class TextExtractor:
 
         splitStrList = srcStr[0].split('{br}')
         for splitStr in splitStrList:
-            newStr = re.sub(RE_IMAGE_FILE, '', splitStr)
-            newStr = re.sub(RE_YOUTUBE, '', newStr)
-            newStr = re.sub(RE_KAKAO_TV, '', newStr)
-            newStr = re.sub(RE_NICO_VIDEO, '', newStr)
-            newStr = re.sub(RE_NAVER_VIDEO, '', newStr)
-            newStr = re.sub(RE_HTML_VIDEO, '', newStr)
-            newStr = re.sub(RE_EXTERNAL_LINK, '', newStr)
-            newStr = re.sub(RE_DOC_INSERT, '', newStr)
+            newStr = re.sub(NAMU_RE.IMAGE_FILE.value, '', splitStr)
+            newStr = re.sub(NAMU_RE.YOUTUBE.value, '', newStr)
+            newStr = re.sub(NAMU_RE.KAKAO_TV.value, '', newStr)
+            newStr = re.sub(NAMU_RE.NICO_VIDEO.value, '', newStr)
+            newStr = re.sub(NAMU_RE.NAVER_VIDEO.value, '', newStr)
+            newStr = re.sub(NAMU_RE.HTML_VIDEO.value, '', newStr)
+            newStr = re.sub(NAMU_RE.EXTERNAL_LINK.value, '', newStr)
+            newStr = re.sub(NAMU_RE.DOC_INSERT.value, '', newStr)
 
-            newStr = re.sub(RE_TEXT_FORM, '', newStr)
-            newStr = re.sub(RE_SUB_SCRIPT, '', newStr)
-            newStr = re.sub(RE_TEXT_SIZE_FRONT, '', newStr)
-            newStr = re.sub(RE_TEXT_COLOR, '', newStr)
-            newStr = re.sub(RE_LITERAL, '', newStr)
-            newStr = re.sub(RE_LINK_ALT_FRONT, '', newStr)
-            newStr = re.sub(RE_LINK_BASIC_FRONT, '', newStr)
-            newStr = re.sub(RE_ADD_LIST, '', newStr)
-            newStr = re.sub(RE_BASIC_LIST, '', newStr)
-            newStr = re.sub(RE_FOOT_NOTE, '', newStr)
-            newStr = re.sub(RE_QUOTE, '', newStr)
-            newStr = re.sub(RE_HORIZON_LINE, '', newStr)
-            newStr = re.sub(RE_AGE_FORM, '', newStr)
-            newStr = re.sub(RE_DATE_TIME_FORM, '', newStr)
-            newStr = re.sub(RE_DDAY_FORM, '', newStr)
-            newStr = re.sub(RE_CONTENTS_TAG, '', newStr)
-            newStr = re.sub(RE_BR_TAG, '', newStr)
-            newStr = re.sub(RE_CLEARFIX, '', newStr)
-            newStr = re.sub(RE_FOLDING, '', newStr)
+            newStr = re.sub(NAMU_RE.TEXT_FORM.value, '', newStr)
+            newStr = re.sub(NAMU_RE.SUB_SCRIPT.value, '', newStr)
+            newStr = re.sub(NAMU_RE.TEXT_SIZE_FRONT.value, '', newStr)
+            newStr = re.sub(NAMU_RE.TEXT_COLOR.value, '', newStr)
+            newStr = re.sub(NAMU_RE.LITERAL.value, '', newStr)
+            newStr = re.sub(NAMU_RE.LINK_ALT_FRONT.value, '', newStr)
+            newStr = re.sub(NAMU_RE.LINK_BASIC_FRONT.value, '', newStr)
+            newStr = re.sub(NAMU_RE.ADD_LIST.value, '', newStr)
+            newStr = re.sub(NAMU_RE.BASIC_LIST.value, '', newStr)
+            newStr = re.sub(NAMU_RE.FOOT_NOTE.value, '', newStr)
+            newStr = re.sub(NAMU_RE.QUOTE.value, '', newStr)
+            newStr = re.sub(NAMU_RE.HORIZON_LINE.value, '', newStr)
+            newStr = re.sub(NAMU_RE.AGE_FORM.value, '', newStr)
+            newStr = re.sub(NAMU_RE.DATE_TIME_FORM.value, '', newStr)
+            newStr = re.sub(NAMU_RE.DDAY_FORM.value, '', newStr)
+            newStr = re.sub(NAMU_RE.CONTENTS_TAG.value, '', newStr)
+            newStr = re.sub(NAMU_RE.BR_TAG.value, '', newStr)
+            newStr = re.sub(NAMU_RE.CLEARFIX.value, '', newStr)
+            newStr = re.sub(NAMU_RE.FOLDING.value, '', newStr)
 
-            newStr = re.sub(RE_LINK_BACK, '', newStr)
-            newStr = re.sub(RE_TEXT_ATTR_BACK, '', newStr)
+            newStr = re.sub(NAMU_RE.LINK_BACK.value, '', newStr)
+            newStr = re.sub(NAMU_RE.TRIPLE_BARKET_BACK.value, '', newStr)
 
             # 12. Macro - Ruby
-            if re.search(RE_MACRO_RUBY, newStr):
-                rubyList = re.findall(RE_MACRO_RUBY, newStr)
+            if re.search(NAMU_RE.MACRO_RUBY.value, newStr):
+                rubyList = re.findall(NAMU_RE.MACRO_RUBY.value, newStr)
 
                 for rubyStr in rubyList:
-                    delRubyStr = re.sub(RE_RUBY_FRONT, '', rubyStr)
-                    delRubyStr = re.sub(RE_RUBY_BACK, '', delRubyStr)
+                    delRubyStr = re.sub(NAMU_RE.RUBY_FRONT.value, '', rubyStr)
+                    delRubyStr = re.sub(NAMU_RE.RUBY_BACK.value, '', delRubyStr)
                     newStr = newStr.replace(rubyStr, delRubyStr)
 
             if 0 < len(newStr.lstrip()):

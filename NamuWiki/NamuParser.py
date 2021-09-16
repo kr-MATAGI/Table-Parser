@@ -9,126 +9,13 @@ import copy
 import pandas as pd
 import ijson
 
-## Ref : https://namu.wiki/w/%EB%82%98%EB%AC%B4%EC%9C%84%ED%82%A4:%EB%AC%B8%EB%B2%95%20%EB%8F%84%EC%9B%80%EB%A7%90
+## Definition File
+from NamuWiki.NamuSyntax import NAMU_RE
 
 ## Definition
 # Dict Def
 DOC_TITLE = 'title'
 DOC_TEXT = 'text'
-
-### regex
-## Paragraph
-RE_PARAGRAPH = r"={2,}#? .+ #?={2,}"
-
-
-## Table Token
-RE_ROW_SPLIT = r'\|\|'
-
-RE_OLD_COL_SPAN = r'\|\|{2,}'
-RE_NEW_COL_SPAN = r'<-\d+>'
-RE_NEW_ROW_SPAN = r'<\|\d+>'
-
-RE_EMPTY_CELL = r'[\|\|]+'
-
-## Custom Attribute Token
-RE_CUSTOM_ATTR = r'<\w+>'
-
-## Convert
-# 2.1
-RE_TEXT_FORM = r"(''' '')|('' ''')|(''')|('')|__|~~|--" # Check Priority (''' '', ''')
-CONV_TEXT_FORM = "<tf>" # text form
-
-RE_SUB_SCRIPT = r'\^\^|,,'
-CONV_SUB_SCRIPT = ' ' # white space
-
-# 2.3
-RE_TEXT_COLOR = r'\{\{\{#\w+(,\s?#\w+)?\s?'
-CONV_TEXT_COLOR = '<tc>' # text color
-
-# 13.3.1
-RE_BG_COLOR = r'<bgcolor=#?(\w|\d)+(,\s?#?\w+)?>'
-RE_OLD_BG_COLOR = r'<#\w+>'
-CONV_BG_COLOR = '<bg>'
-
-RE_TBG_COLOR = r'<(tablecolor|table\s?bgcolor)=#?\w+(,\s?#?\w+)?>'
-CONV_TBG_COLOR = '<tbg>'
-
-RE_COL_BG_COLOR = r'<colbgcolor=#?\w+(,\s?#?\w+)?>'
-CONV_COL_BG_COLOR = '<cbg>'
-
-RE_ROW_BG_COLOR = r'<rowbgcolor=#?\w+(,\s?#?\w+)?>'
-CONV_ROW_BG_COLOR = '<rbg>'
-
-RE_CELL_COLOR = r'<color=#?\w+(,\s?#?\w+)?>'
-CONV_CELL_COLOR = '<celc>'
-
-RE_COL_COLOR = r'<colcolor=#?\w+(,\s?#?\w+)?>'
-CONV_COL_COLOR = '<colc>'
-
-RE_ROW_COLOR = r'<rowcolor=#?\w+(,\s?#?\w+)?>'
-CONV_ROW_COLOR = '<rowc>'
-
-## Remove
-# 2.1
-RE_LITERAL = r'\{\{\{\[\[|\]\]\}\}\}'
-
-# 2.2
-RE_TEXT_SIZE_FRONT = r'\{\{\{(\+|-)\d\s*' # text size input's front
-
-# 3
-RE_PARENT_ARTICLE_LINK = r'(\[\[)\.\./(\]\])'
-# RE_CHILD_ARTICLIE_LINK = r'\[\[[/[\w]+]+'
-RE_EXTERNAL_LINK = r'\[\[https?://[^\|\t\n\r\f\v]+(\s?\|[^\]\t\n\r\f\v]+(\]\])?)?\]\]'
-
-# 5
-RE_IMAGE_FILE = r'\[\[파일:[^\]]+(\|[^\]+])?\]\]'
-
-# 6
-RE_YOUTUBE = r'\[youtube\(\w+(,\s?(start|width|height)=\w+%?)*\)\]|' \
-             r'\[include\(틀:.+ (left|center|right)?\s?url=\w+\)(,\s?(start|width|height)=\w+%?)*\]'
-RE_KAKAO_TV = r'\[kakaotv\(\w+(,\s?(start|width|height)=\w+%?)*\)\]'
-RE_NICO_VIDEO = r'\[nicovideo\(\w+(,\s?(start|width|height)=\w+%?)*\)\]'
-RE_NAVER_VIDEO = r'\[include\(틀:(navertv|navervid){1}(,\s?(i=\w+|vid=\w+,\s?outkey=\w+)+)+(,\s?(start|width|height)=\w+%?)*\)\]'
-# 6 - deep syntax
-RE_HTML_VIDEO = r'\{\{\{#!html <video src=("|\').+("|\')></video>\}\}\}|' \
-                r'\{\{\{#!html .+\}\}\}'
-
-# 8
-RE_ADD_LIST = r'v+(\w*\.|\*)?v*'
-
-# 9
-RE_FOOT_NOTE = r'\[\*.+\]'
-
-# 12.2
-RE_AGE_FORM = r'\[age\(\d{4}-\d{1,2}-\d{1,2}\)\]'
-RE_DATE_TIME_FORM = r'\[date\]|\[datetime\]'
-RE_DDAY_FORM = r'\[dday\(\d{4}-\d{1,2}-\d{1,2}\)\]'
-
-# 12.4
-RE_BR_TAG = r'(\[BR\])|(\[br\])'
-RE_CLEARFIX = r'\[clearfix\]'
-
-# 13.3.1
-RE_TABLE_ALIGN = r'<table\s?align=\'?(left|center|right)\'?>'
-RE_TABLE_WIDTH = r'<table\s?width=\d+(px|%)?>'
-
-RE_TABLE_BORDER_COLOR = r'<table\s?bordercolor=#?\w+(,#?\w+)?>'
-
-RE_CELL_SIZE = r'<(width|height)=\d+(px|%)?>'
-
-RE_CELL_H_ALIGN = r'(<\(>)|(<:>)|(<\)>)'
-RE_CELL_V_ALIGN = r'(<\^\|\d+>)|(<v\|\d+>)' # (<\|\d+>) ? -> row Span
-
-# 14
-RE_FOLDING = r'\{\{\{#!folding\s?\[[^\[.]+\]'
-
-# macro - ruby
-RE_MACRO_RUBY = r'\[ruby\(\w+, ruby=\w+\)\]'
-RE_RUBY_FRONT = r'\[ruby\('
-RE_RUBY_BACK = r',\s?ruby=.+\)\]'
-
-# tirple barket }}}
-RE_TRIPLE_BARKET_BACK = r'\}\}\}'
 
 class NamuWikiParser:
     ### VAR ###
@@ -150,12 +37,12 @@ class NamuWikiParser:
     def __ConvertTableColSpanToken(self, rowList):
         retRowList = []
         for row in rowList:
-            if re.search(RE_OLD_COL_SPAN, row):
+            if re.search(NAMU_RE.OLD_COL_SPAN.value, row):
                 newRow = row
-                colSpanList = re.findall(RE_OLD_COL_SPAN, row)
+                colSpanList = re.findall(NAMU_RE.OLD_COL_SPAN.value, row)
 
                 for colSpan in colSpanList:
-                    spanCnt = len(re.findall(RE_ROW_SPLIT, colSpan))
+                    spanCnt = len(re.findall(NAMU_RE.ROW_SPLIT.value, colSpan))
                     convStr = '||<-%s>' % spanCnt
                     newRow = row.replace(colSpan, convStr)
 
@@ -219,7 +106,7 @@ class NamuWikiParser:
         detailList = []
         detailStr = ''
         for line in docSplitList:
-            if re.search(RE_PARAGRAPH, line):
+            if re.search(NAMU_RE.PARAGRAPH.value, line):
                 if 0 < len(table):
                     tableList.append(table)
                 if 0 < len(detailStr):
@@ -233,7 +120,7 @@ class NamuWikiParser:
                 detailList.clear()
                 detailStr = ''
 
-            elif re.search(RE_ROW_SPLIT, line):
+            elif re.search(NAMU_RE.ROW_SPLIT.value, line):
                 if 0 < len(detailStr):
                     detailList.append(detailStr)
                     detailStr = ''
@@ -245,7 +132,7 @@ class NamuWikiParser:
                     tableList.append(convertedTable)
                     table.clear()
 
-                detailStr += ('{br}' + line)
+                detailStr += (NAMU_RE.CUSTOM_BR.value + line)
 
         return retList
 
@@ -258,7 +145,7 @@ class NamuWikiParser:
     def ParseTableFromText(self, docText):
         retTableList = []
 
-        re_checkRow = re.compile(RE_ROW_SPLIT)
+        re_checkRow = re.compile(NAMU_RE.ROW_SPLIT.value)
         for text in docText:
             splitList = text.split('\n')
             
@@ -293,53 +180,53 @@ class NamuWikiParser:
                 newRow = row
 
                 # Convert Tags
-                newRow = re.sub(RE_TEXT_FORM, CONV_TEXT_FORM, newRow)
-                newRow = re.sub(RE_SUB_SCRIPT, CONV_SUB_SCRIPT, newRow)
-                newRow = re.sub(RE_TEXT_COLOR, CONV_TEXT_COLOR, newRow)
-                newRow = re.sub(RE_BG_COLOR, CONV_BG_COLOR, newRow)
-                newRow = re.sub(RE_TBG_COLOR, CONV_TBG_COLOR, newRow)
-                newRow = re.sub(RE_COL_BG_COLOR, CONV_COL_BG_COLOR, newRow)
-                newRow = re.sub(RE_ROW_BG_COLOR, CONV_ROW_BG_COLOR, newRow)
-                newRow = re.sub(RE_CELL_COLOR, CONV_CELL_COLOR, newRow)
-                newRow = re.sub(RE_COL_COLOR, CONV_COL_COLOR, newRow)
-                newRow = re.sub(RE_ROW_COLOR, CONV_ROW_COLOR, newRow)
+                newRow = re.sub(NAMU_RE.TEXT_FORM.value, NAMU_RE.CONV_TEXT_FORM.value, newRow)
+                newRow = re.sub(NAMU_RE.SUB_SCRIPT.value, NAMU_RE.CONV_SUB_SCRIPT.value, newRow)
+                newRow = re.sub(NAMU_RE.TEXT_COLOR.value, NAMU_RE.CONV_TEXT_COLOR.value, newRow)
+                newRow = re.sub(NAMU_RE.BG_COLOR.value, NAMU_RE.CONV_BG_COLOR.value, newRow)
+                newRow = re.sub(NAMU_RE.TBG_COLOR.value, NAMU_RE.CONV_TBG_COLOR.value, newRow)
+                newRow = re.sub(NAMU_RE.COL_BG_COLOR.value, NAMU_RE.CONV_COL_BG_COLOR.value, newRow)
+                newRow = re.sub(NAMU_RE.ROW_BG_COLOR.value, NAMU_RE.CONV_ROW_BG_COLOR.value, newRow)
+                newRow = re.sub(NAMU_RE.CELL_COLOR.value, NAMU_RE.CONV_CELL_COLOR.value, newRow)
+                newRow = re.sub(NAMU_RE.COL_COLOR.value, NAMU_RE.CONV_COL_COLOR.value, newRow)
+                newRow = re.sub(NAMU_RE.ROW_COLOR.value, NAMU_RE.CONV_ROW_COLOR.value, newRow)
 
                 # Remove Tags
-                newRow = re.sub(RE_LITERAL, '', newRow)
-                newRow = re.sub(RE_TEXT_SIZE_FRONT, '', newRow)
-                newRow = re.sub(RE_PARENT_ARTICLE_LINK, '', newRow)
-                newRow = re.sub(RE_IMAGE_FILE, '', newRow) # Check Order
-                newRow = re.sub(RE_EXTERNAL_LINK, '', newRow) # Check Order
-                newRow = re.sub(RE_YOUTUBE, '', newRow)
-                newRow = re.sub(RE_KAKAO_TV, '', newRow)
-                newRow = re.sub(RE_NICO_VIDEO, '', newRow)
-                newRow = re.sub(RE_NAVER_VIDEO, '', newRow)
-                newRow = re.sub(RE_HTML_VIDEO, '', newRow)
-                newRow = re.sub(RE_ADD_LIST, '', newRow)
-                newRow = re.sub(RE_FOOT_NOTE, '', newRow)
-                newRow = re.sub(RE_AGE_FORM, '', newRow)
-                newRow = re.sub(RE_DATE_TIME_FORM, '', newRow)
-                newRow = re.sub(RE_DDAY_FORM, '', newRow)
-                newRow = re.sub(RE_BR_TAG, '', newRow)
-                newRow = re.sub(RE_TABLE_ALIGN, '', newRow)
-                newRow = re.sub(RE_TABLE_WIDTH, '', newRow)
-                newRow = re.sub(RE_TABLE_BORDER_COLOR, '', newRow)
-                newRow = re.sub(RE_CELL_SIZE, '', newRow)
-                newRow = re.sub(RE_CELL_H_ALIGN, '', newRow)
-                newRow = re.sub(RE_CELL_V_ALIGN, '', newRow)
-                newRow = re.sub(RE_FOLDING, '', newRow)
-                newRow = re.sub(RE_TRIPLE_BARKET_BACK, '', newRow)
+                newRow = re.sub(NAMU_RE.LITERAL.value, '', newRow)
+                newRow = re.sub(NAMU_RE.TEXT_SIZE_FRONT.value, '', newRow)
+                newRow = re.sub(NAMU_RE.PARENT_ARTICLE_LINK.value, '', newRow)
+                newRow = re.sub(NAMU_RE.IMAGE_FILE.value, '', newRow) # Check Order
+                newRow = re.sub(NAMU_RE.EXTERNAL_LINK.value, '', newRow) # Check Order
+                newRow = re.sub(NAMU_RE.YOUTUBE.value, '', newRow)
+                newRow = re.sub(NAMU_RE.KAKAO_TV.value, '', newRow)
+                newRow = re.sub(NAMU_RE.NICO_VIDEO.value, '', newRow)
+                newRow = re.sub(NAMU_RE.NAVER_VIDEO.value, '', newRow)
+                newRow = re.sub(NAMU_RE.HTML_VIDEO.value, '', newRow)
+                newRow = re.sub(NAMU_RE.ADD_LIST.value, '', newRow)
+                newRow = re.sub(NAMU_RE.FOOT_NOTE.value, '', newRow)
+                newRow = re.sub(NAMU_RE.AGE_FORM.value, '', newRow)
+                newRow = re.sub(NAMU_RE.DATE_TIME_FORM.value, '', newRow)
+                newRow = re.sub(NAMU_RE.DDAY_FORM.value, '', newRow)
+                newRow = re.sub(NAMU_RE.BR_TAG.value, '', newRow)
+                newRow = re.sub(NAMU_RE.TABLE_ALIGN.value, '', newRow)
+                newRow = re.sub(NAMU_RE.TABLE_WIDTH.value, '', newRow)
+                newRow = re.sub(NAMU_RE.TABLE_BORDER_COLOR.value, '', newRow)
+                newRow = re.sub(NAMU_RE.CELL_SIZE.value, '', newRow)
+                newRow = re.sub(NAMU_RE.CELL_H_ALIGN.value, '', newRow)
+                newRow = re.sub(NAMU_RE.CELL_V_ALIGN.value, '', newRow)
+                newRow = re.sub(NAMU_RE.FOLDING.value, '', newRow)
+                newRow = re.sub(NAMU_RE.TRIPLE_BARKET_BACK.value, '', newRow)
 
                 # Exception
-                newRow = re.sub(RE_OLD_BG_COLOR, CONV_BG_COLOR, newRow)
+                newRow = re.sub(NAMU_RE.OLD_BG_COLOR.value, NAMU_RE.CONV_BG_COLOR.value, newRow)
 
                 # Ruby
-                if re.search(RE_MACRO_RUBY, newRow):
-                    rubyList = re.findall(RE_MACRO_RUBY, newRow)
+                if re.search(NAMU_RE.MACRO_RUBY.value, newRow):
+                    rubyList = re.findall(NAMU_RE.MACRO_RUBY.value, newRow)
                     
                     for rubyStr in rubyList:
-                        delRubyStr = re.sub(RE_RUBY_FRONT, '', rubyStr)
-                        delRubyStr = re.sub(RE_RUBY_BACK, '', delRubyStr)
+                        delRubyStr = re.sub(NAMU_RE.RUBY_FRONT.value, '', rubyStr)
+                        delRubyStr = re.sub(NAMU_RE.RUBY_BACK.value, '', delRubyStr)
                         newRow = newRow.replace(rubyStr, delRubyStr)
                 newTable.append(newRow)
             retTableList.append(newTable)
@@ -355,7 +242,7 @@ class NamuWikiParser:
 
         for row in table:
             newRow = []
-            spliteRowList = re.split(RE_ROW_SPLIT, row)[1:-1]
+            spliteRowList = re.split(NAMU_RE.ROW_SPLIT.value, row)[1:-1]
 
             for col in spliteRowList:
                 newRow.append(col)
@@ -373,9 +260,9 @@ class NamuWikiParser:
             newRow = []
 
             for col in row:
-                if re.search(RE_NEW_COL_SPAN, col):
-                    spanCnt = int(re.search(RE_NEW_COL_SPAN, col).group(0).replace('<-', '').replace('>', ''))
-                    newCol = re.sub(RE_NEW_COL_SPAN, '<cs>', col)
+                if re.search(NAMU_RE.NEW_COL_SPAN.value, col):
+                    spanCnt = int(re.search(NAMU_RE.NEW_COL_SPAN.value, col).group(0).replace('<-', '').replace('>', ''))
+                    newCol = re.sub(NAMU_RE.NEW_COL_SPAN.value, '<cs>', col)
                     for spIdx in range(spanCnt):
                         newRow.append(newCol)
                 else:
@@ -396,9 +283,9 @@ class NamuWikiParser:
             newRow = []
 
             for cIdx, col in enumerate(row):
-                if re.search(RE_NEW_ROW_SPAN, col):
-                    spanCnt = int(re.search(RE_NEW_ROW_SPAN, col).group(0).replace("<|", '').replace(">", ''))
-                    newCol = re.sub(RE_NEW_ROW_SPAN, '<rs>', col)
+                if re.search(NAMU_RE.NEW_ROW_SPAN.value, col):
+                    spanCnt = int(re.search(NAMU_RE.NEW_ROW_SPAN.value, col).group(0).replace("<|", '').replace(">", ''))
+                    newCol = re.sub(NAMU_RE.NEW_ROW_SPAN.value, '<rs>', col)
                     spanInfo = (cIdx, newCol, spanCnt-1)
                     spanInfoList.append(spanInfo)
 
