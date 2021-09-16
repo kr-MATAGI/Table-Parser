@@ -69,7 +69,7 @@ class NAMU_RE(Enum):
     # 3
     PARENT_ARTICLE_LINK = r'(\[\[)\.\./(\]\])'
     # CHILD_ARTICLIE_LINK = r'\[\[[/[\w]+]+'
-    EXTERNAL_LINK = r'\[\[https?://[^\|\t\n\r\f\v]+(\s?\|[^\]\t\n\r\f\v]+(\]\])?)?\]\]'
+    EXTERNAL_LINK = r'\[\[https?://[^\|(\]\])]\]\]'
 
     LINK_ALT_FRONT = r"\[\[[^\|\]]+\|"
     LINK_BASIC_FRONT = r"\[\["

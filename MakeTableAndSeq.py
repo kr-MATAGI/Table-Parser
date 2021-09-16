@@ -56,7 +56,7 @@ class ParagraphRelation:
     tableRelation = list()
 
 ## TEST MODE
-TEST_TARGET = 'SPARK!'
+TEST_TARGET = '마블 코믹스'
 TEST_MODE = True
 
 if __name__ == '__main__':
@@ -170,7 +170,7 @@ if __name__ == '__main__':
 
                 print('\n===============')
 
-        #print(document[DOC_TEXT])
+        print(document[DOC_TEXT])
         break
 
         '''

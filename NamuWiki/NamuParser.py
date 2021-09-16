@@ -229,6 +229,7 @@ class NamuWikiParser:
 
                 # Exception
                 newRow = re.sub(NAMU_RE.OLD_BG_COLOR.value, NAMU_RE.CONV_BG_COLOR.value, newRow)
+                newRow = re.sub(NAMU_RE.LINK_BACK.value, '', newRow)
 
                 # Ruby
                 if re.search(NAMU_RE.MACRO_RUBY.value, newRow):
