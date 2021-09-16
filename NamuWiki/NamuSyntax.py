@@ -13,6 +13,9 @@ class NAMU_RE(Enum):
     ## Paragraph
     PARAGRAPH = r"={2,}#? .+ #?={2,}"
 
+    # Is sentence end punctuation(.)?
+    SENTENCE_PUNCT = r"\.$|\]$"
+
     ## Table
     ROW_SPLIT = r'\|\|'
 
@@ -82,8 +85,7 @@ class NAMU_RE(Enum):
     NICO_VIDEO = r'\[nicovideo\(\w+(,\s?(start|width|height)=\w+%?)*\)\]'
     NAVER_VIDEO = r'\[include\(틀:(navertv|navervid){1}(,\s?(i=\w+|vid=\w+,\s?outkey=\w+)+)+(,\s?(start|width|height)=\w+%?)*\)\]'
     # 6 - deep syntax
-    HTML_VIDEO = r'\{\{\{#!html <video src=("|\').+("|\')></video>\}\}\}|' \
-                    r'\{\{\{#!html .+\}\}\}'
+    HTML_VIDEO = r'{{{#!html[^(}}})]+}}}'
 
     # 8
     ADD_LIST = r'v+(\w*\.|\*)?v*'
@@ -114,7 +116,7 @@ class NAMU_RE(Enum):
     CLEARFIX = r'\[clearfix\]'
 
     # 13.3.1
-    TABLE_ALIGN = r'<table\s?align=\'?(left|center|right)\'?>'
+    TABLE_ALIGN = r'<table\s?align=("|\')?(left|center|right)("|\')?>'
     TABLE_WIDTH = r'<table\s?width=\d+(px|%)?>'
 
     TABLE_BORDER_COLOR = r'<table\s?bordercolor=#?\w+(,#?\w+)?>'

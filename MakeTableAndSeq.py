@@ -116,11 +116,12 @@ if __name__ == '__main__':
 
                 # Compute sentence core per concatTable
                 tableSentenceDict = dict() # key: int - table index, value: list - sentenceIndex
+
                 for senIdx, sentence in enumerate(paragraph[2]):
                     scoreList = []
                     for concatTable in concatTableList:
                         namuTableTextScorer.SetConcatTable(concatTable)
-                        score = namuTableTextScorer.GetSentenceScore(paragraph[2][0])  # sequence
+                        score = namuTableTextScorer.GetSentenceScore(sentence)  # sequence
                         scoreList.append(score)
 
                     # Assign sentence to highest score table
@@ -169,9 +170,7 @@ if __name__ == '__main__':
 
                 print('\n===============')
 
-            print(document[DOC_TEXT])
-
-
+        #print(document[DOC_TEXT])
         break
 
         '''

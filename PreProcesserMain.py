@@ -45,7 +45,6 @@ if __name__ == '__main__':
         if 0 < len(tableList):
             newTableList = []
             modifiedTableList = namuParser.ModifyHTMLTags(tableList)
-            print(modifiedTableList)
             break
 
             for table in modifiedTableList:

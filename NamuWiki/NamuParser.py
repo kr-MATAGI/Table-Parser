@@ -134,6 +134,16 @@ class NamuWikiParser:
 
                 detailStr += (NAMU_RE.CUSTOM_BR.value + line)
 
+        # process last paragraph
+        if 0 < len(table):
+            convertedTable = self.__ConvertTableColSpanToken(table)
+            tableList.append(convertedTable)
+            table.clear()
+        if 0 < len(detailStr):
+            detailList.append(detailStr)
+            detailStr = ''
+        retList.append([currParagraphIdx, copy.deepcopy(tableList), copy.deepcopy(detailList)])
+
         return retList
 
     '''
