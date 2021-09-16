@@ -17,6 +17,9 @@ from NamuWiki.NamuParser import NamuWikiParser
 from NamuWiki.TextExtractor import TextExtractor
 from NamuWiki.ParagraphTextScorer import TableTextScorer
 
+### Hugging Face - transformer
+from transformers import AutoTokenizer, AutoModelForMaskedLM
+
 ### GLOBAL
 max_length = 512
 total_size = 300000
@@ -26,6 +29,9 @@ max_masking = 20
 
 # File Path
 SRC_JSON_PATH = './dataset/docData200302.json'
+
+# Tokenizer
+tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
 
 # Numpy
 sequence_has_ans = np.zeros(shape=[total_size, 2, max_length], dtype=np.int32)
@@ -56,11 +62,11 @@ class ParagraphRelation:
     tableRelation = list()
 
 ## TEST MODE
-TEST_TARGET = '삼성전자ㅋ'
+TEST_TARGET = 'SPARK!'
 TEST_MODE = True
+TEST_TEXT_PRINT = False
 
 if __name__ == '__main__':
-
     ### Parse Table
     docCnt = 0
     for document in namuParser.ParsingJSON():
@@ -125,7 +131,7 @@ if __name__ == '__main__':
                         score = namuTableTextScorer.GetSentenceScore(sentence)
                         scoreList.append(score)
 
-                    # Assign sentence to highest score table
+                    # Search highest score sentence
                     highScore = max(scoreList)
                     highSentenceIdx = scoreList.index(highScore)
                     tableSentenceDict[ctIdx] = highSentenceIdx
@@ -164,40 +170,10 @@ if __name__ == '__main__':
 
                 print('\n===============')
 
-        #print(document[DOC_TEXT])
+            if TEST_TEXT_PRINT:
+                print(document[DOC_TEXT])
+
+        ### Tokenizer
+
         break
 
-        '''
-        if 0 < len(tableAndDetailsList):
-            newTableList = []
-            namuParser.ModifyHTMLTags(docTableList)
-
-            for table in docTableList:
-                preprocessedTable = namuParser.PreprocessingTable(table)
-
-                if 2 <= len(preprocessedTable):
-                    newTableList.append(preprocessedTable)
-            normalTableList, infoBoxList = namuParser.ClassifyNormalTableOrInfoBox(newTableList)
-
-            # Extract Text, Remove <\w+>, [[.+]]
-            textTableList = namuParser.ExtractTextDataInColumn(normalTableList)
-
-            for textTable in textTableList:
-                table_data = textTable
-
-                new_data = []
-                num_row = len(table_data)
-                num_col = len(table_data[0])
-
-                for y in range(num_col):
-                    new_line = []
-
-                    for x in range(num_row):
-                        new_line.append(table_data[x][y])
-                    new_data.append(new_line)
-
-                ################### MY Sequence Text 개요 기준 테이블 관련 텍스트
-                seq_text = None
-                sentences = seq_text.split('. ')
-                ###################################
-        '''
