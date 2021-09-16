@@ -54,7 +54,7 @@ namuTableTextScorer = TableTextScorer()
 @dataclass
 class TableRelation:
     table = None
-    sentence = None
+    sentences = None
 
 @dataclass
 class ParagraphRelation:
@@ -143,7 +143,7 @@ if __name__ == '__main__':
                     table = paragraph[1][key]
                     tableRelation.table = table
 
-                    tableRelation.sentence = paragraph[2][val]
+                    tableRelation.sentences = paragraph[2][val]
                     paragraphRelation.tableRelation.append(tableRelation)
 
             else:
@@ -152,7 +152,7 @@ if __name__ == '__main__':
                     for table in paragraph[1]:
                         tableRelation = TableRelation()
                         tableRelation.table = table
-                        tableRelation.sentenceList = None
+                        tableRelation.sentences = None
 
                         paragraphRelation.tableRelation.append(tableRelation)
 
@@ -166,7 +166,7 @@ if __name__ == '__main__':
 
                 for test_tableRelation in test_paragraph.tableRelation:
                     print(test_tableRelation.table)
-                    print(test_tableRelation.sentence)
+                    print(test_tableRelation.sentences)
 
                 print('\n===============')
 
@@ -174,7 +174,28 @@ if __name__ == '__main__':
                 print(document[DOC_TEXT])
         ###############
 
-        ### Tokenizer
+        ### Tokenize
+        print(len(paragraphRelationList))
+        for paragraphRelation in paragraphRelationList:
+            paraIdx = paragraphRelation.paragraphIdx
+
+            tableTokenList = []
+            for tableRelation in paragraphRelation.tableRelation:
+                if not tableRelation.table: continue
+
+                table = tableRelation.table
+                sentences = tableRelation.sentences
+
+                # tokenize table
+                for lineIdx, line in enumerate(table):
+                    for wIdx, word in enumerate(line):
+                        wordTokenList = tokenizer.tokenize(word)
+                        for wordToken in wordTokenList:
+                            tableTokenList.append(wordToken)
+
+                # tokenize sentences
+
+
 
         break
 
