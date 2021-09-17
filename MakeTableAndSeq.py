@@ -61,7 +61,7 @@ tableHeaderExtractor = TableHeaderExtractor()
 @dataclass
 class TableRelation:
     table = None
-    sentences = None
+    sentences: str = ''
 
 @dataclass
 class ParagraphRelation:
@@ -70,7 +70,7 @@ class ParagraphRelation:
 
 ## TEST MODE
 TEST_TARGET = '리그 오브 레전드'
-TEST_MODE = True
+TEST_MODE = False
 TEST_TEXT_PRINT = False
 
 if __name__ == '__main__':
@@ -167,7 +167,7 @@ if __name__ == '__main__':
                     for table in paragraph[1]:
                         tableRelation = TableRelation()
                         tableRelation.table = table
-                        tableRelation.sentences = None
+                        tableRelation.sentences = ''
 
                         paragraphRelation.tableRelation.append(tableRelation)
 
@@ -292,8 +292,6 @@ if __name__ == '__main__':
                     label_weight[COUNT, idx] = 1.0
 
             COUNT += 1
-
-        break
 
 #### end paragraph parsing loop
 namuTokenizer = NamuTokenizer()
