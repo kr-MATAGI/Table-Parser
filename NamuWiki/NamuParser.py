@@ -52,6 +52,50 @@ class NamuWikiParser:
 
         return retRowList
 
+    '''
+        @Return
+            retValue - True: Meaningfulness, False: Deco
+    '''
+    def __CheckRowIsEmptyCells(self, table):
+        retValue = True
+
+        for row in table:
+            isEmpty = True
+            for col in row:
+                if 0 < len(str(col).lstrip()):
+                    isEmpty = False
+                    break
+
+            if isEmpty:
+                retValue = False
+                break
+
+        return retValue
+
+    '''
+        @Param
+            ratio - ratio <= empty cell ratios, deco table
+        @Return
+            retValue - True: Meaningfulness, False: Deco
+    '''
+    def __CheckEmptyCellsRatio(self, table, ratio=0.3):
+        retValue = True
+
+        emptyCellCnt = 0
+        totalCellCnt = 0
+        for row in table:
+            for col in row:
+                totalCellCnt += 1
+
+                stripCell = str(col).lstrip()
+                if 0 >= len(stripCell):
+                    emptyCellCnt += 1
+
+        if ratio <= (emptyCellCnt / totalCellCnt):
+            retValue = False
+
+        return retValue
+
     ### PUBLIC ###
     '''
         Parse wiki json using ijson
@@ -423,5 +467,25 @@ class NamuWikiParser:
                     newRow.append(newCol)
                 newTable.append(newRow)
             retTableList.append(newTable)
+
+        return retTableList
+
+    '''
+        Remove Deco Table
+    '''
+    def RemoveDecoTables(self, tableList):
+        retTableList = []
+
+        for table in tableList:
+            # Check Method 1
+            isMT = self.__CheckRowIsEmptyCells(table)
+            if not isMT:
+                continue
+
+            # Check Method 2
+            isMT = self.__CheckEmptyCellsRatio(table, ratio=0.3)
+
+            if isMT:
+                retTableList.append(table)
 
         return retTableList

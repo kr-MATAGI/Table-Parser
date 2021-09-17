@@ -18,6 +18,9 @@ from NamuWiki.NamuTextExtractor import TextExtractor
 from NamuWiki.NamuSentenceScorer import TableTextScorer
 from NamuWiki.NamuTokenizer import NamuTokenizer
 
+### Import Table Header Extractor
+from HeadExtractor import TableHeaderExtractor
+
 ### Hugging Face - transformer
 from transformers import AutoTokenizer, AutoModelForMaskedLM
 
@@ -52,6 +55,9 @@ namuParser = NamuWikiParser(SRC_JSON_PATH)
 namuTextExtractor = TextExtractor()
 namuTableTextScorer = TableTextScorer()
 
+## Table Head Extractor
+tableHeaderExtractor = TableHeaderExtractor()
+
 @dataclass
 class TableRelation:
     table = None
@@ -63,7 +69,7 @@ class ParagraphRelation:
     tableRelation = list()
 
 ## TEST MODE
-TEST_TARGET = 'SPARK!'
+TEST_TARGET = '리그 오브 레전드'
 TEST_MODE = True
 TEST_TEXT_PRINT = False
 
@@ -101,8 +107,16 @@ if __name__ == '__main__':
                         newTableList.append(preprocessedTable)
 
                 normalTableList, infoBoxList = namuParser.ClassifyNormalTableOrInfoBox(newTableList)
-                onlyTextTableList = namuTextExtractor.ExtractTextAtTable(normalTableList) # only use normal tables
-                paragraph[1] = onlyTextTableList
+                ### Remove Deco Tables - 2021.09.17
+                existedHeadTableList = tableHeaderExtractor.RemoveNoExistedTableHeaderTalbe(normalTableList)
+                ###
+                onlyTextTableList = namuTextExtractor.ExtractTextAtTable(existedHeadTableList) # only use normal tables
+
+                ### Remove Deco Tables - 2021.09.17
+                meaningTableList = namuParser.RemoveDecoTables(onlyTextTableList)
+                ###
+
+                paragraph[1] = meaningTableList
 
             ## Sequence
             if 0 < len(paragraph[2]): # exist paragraph text

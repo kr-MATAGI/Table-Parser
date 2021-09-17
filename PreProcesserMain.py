@@ -1,5 +1,5 @@
 from NamuWiki.NamuParser import DOC_TEXT, DOC_TITLE, NamuWikiParser
-from HeadExtractor import Extractor
+from HeadExtractor import TableHeaderExtractor
 
 # Definition
 SRC_JSON_PATH = './dataset/docData200302.json'
@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     # Make instance    
     namuParser = NamuWikiParser(SRC_JSON_PATH)
-    headExtractor = Extractor()
+    headExtractor = TableHeaderExtractor()
 
     docCount = 0
     for docItem in namuParser.ParsingJSON():

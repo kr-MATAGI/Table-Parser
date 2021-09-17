@@ -43,7 +43,7 @@ HEURI_6_COL_SPAN = r'<cs>'
 
 HEURI_7_EMPTY = r'<[\w]+>|[\s]+'
 
-class Extractor:
+class TableHeaderExtractor:
     ### VAR ###
 
     ### INIT ###
@@ -421,6 +421,22 @@ class Extractor:
 
         return retTable
 
+    '''
+        Check Existed Table Header
+    '''
+    def __CheckExistedTableHeader(self, scoreTable):
+        retValue = False
+
+        for row in scoreTable:
+            for col in row:
+                if 1.0 <= col:
+                    retValue = True
+                    break
+
+            if retValue:
+                break
+
+        return retValue
 
 
     ### PUBLIC ###
@@ -455,5 +471,30 @@ class Extractor:
 
             # Append to return
             retTableList.append(finalTable)
+
+        return retTableList
+
+    '''
+        if table head is not existed, remove the table
+    '''
+    def RemoveNoExistedTableHeaderTalbe(self, tableList):
+        retTableList = []
+
+        for table in tableList:
+            resHeuri_2 = self.__Heuristic_2(table) # Check <tbg> and <bg>
+            resHeuri_3 = self.__Heuristic_3(table) # Check Text Attribute
+            resHeuri_4 = self.__Heuristic_4(table) # Check instance types
+            resHeuri_5 = self.__Heuristic_5(table) # Check content pattern
+            resHeuri_6 = self.__Heuristic_6(table) # Check Row and Col Span
+            resHeuri_7 = self.__Heuristic_7(table) # Check table[0][0] empty
+
+            tableShape = resHeuri_7.shape
+            finalTable = self.__ComputeBinaryMatrices([resHeuri_2, resHeuri_3, resHeuri_4,
+                                                       resHeuri_5, resHeuri_6, resHeuri_7], tableShape,
+                                                      weight=[0.1, 0.2, 0.2, 0.1, 0.2, 0.2])
+
+            isExistedHead = self.__CheckExistedTableHeader(finalTable)
+            if isExistedHead:
+                retTableList.append(table)
 
         return retTableList
