@@ -30,15 +30,15 @@ class NamuTokenizer:
             ]
     '''
     def SaveTensorDataSet(self, count, maxLen, maxMasking, *srcDataList):
-        sequence_has_ans_ = np.zeros(shape=[count, 2, maxLen], dtype=np.int32)
-        segments_has_ans_ = np.zeros(shape=[count, 2, maxLen], dtype=np.int32)
-        masks_has_ans_ = np.zeros(shape=[count, 2, maxLen], dtype=np.int32)
-        cols_has_ans_ = np.zeros(shape=[count, 2, maxLen], dtype=np.int32)
-        rows_has_ans_ = np.zeros(shape=[count, 2, maxLen], dtype=np.int32)
+        sequence_has_ans_ = np.zeros(shape=[count, maxLen], dtype=np.int32)
+        segments_has_ans_ = np.zeros(shape=[count, maxLen], dtype=np.int32)
+        masks_has_ans_ = np.zeros(shape=[count, maxLen], dtype=np.int32)
+        cols_has_ans_ = np.zeros(shape=[count, maxLen], dtype=np.int32)
+        rows_has_ans_ = np.zeros(shape=[count, maxLen], dtype=np.int32)
 
-        label_ids_ = np.zeros(shape=[count, 2, maxMasking], dtype=np.int32)
-        label_position_ = np.zeros(shape=[count, 2, maxMasking], dtype=np.int32)
-        label_weight_ = np.zeros(shape=[count, 2, maxMasking], dtype=np.float32)
+        label_ids_ = np.zeros(shape=[count, maxMasking], dtype=np.int32)
+        label_position_ = np.zeros(shape=[count, maxMasking], dtype=np.int32)
+        label_weight_ = np.zeros(shape=[count, maxMasking], dtype=np.float32)
 
         for idx in range(count):
             sequence_has_ans_[idx] = srcDataList[0][idx]

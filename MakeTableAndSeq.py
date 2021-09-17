@@ -35,15 +35,15 @@ SRC_JSON_PATH = './dataset/docData200302.json'
 tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
 
 # Numpy
-sequence_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
-segments_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
-masks_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
-cols_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
-rows_has_ans = np.zeros(shape=[TOTAL_SIZE, 2, MAX_LENGTH], dtype=np.int32)
+sequence_has_ans = np.zeros(shape=[TOTAL_SIZE, MAX_LENGTH], dtype=np.int32)
+segments_has_ans = np.zeros(shape=[TOTAL_SIZE, MAX_LENGTH], dtype=np.int32)
+masks_has_ans = np.zeros(shape=[TOTAL_SIZE, MAX_LENGTH], dtype=np.int32)
+cols_has_ans = np.zeros(shape=[TOTAL_SIZE, MAX_LENGTH], dtype=np.int32)
+rows_has_ans = np.zeros(shape=[TOTAL_SIZE, MAX_LENGTH], dtype=np.int32)
 
-label_ids = np.zeros(shape=[TOTAL_SIZE, 2, MAX_MASKING], dtype=np.int32)
-label_position = np.zeros(shape=[TOTAL_SIZE, 2, MAX_MASKING], dtype=np.int32)
-label_weight = np.zeros(shape=[TOTAL_SIZE, 2, MAX_MASKING], dtype=np.float64)
+label_ids = np.zeros(shape=[TOTAL_SIZE, MAX_MASKING], dtype=np.int32)
+label_position = np.zeros(shape=[TOTAL_SIZE, MAX_MASKING], dtype=np.int32)
+label_weight = np.zeros(shape=[TOTAL_SIZE, MAX_MASKING], dtype=np.float64)
 
 ## NamuParser
 DOC_TITLE = 'title'
@@ -262,23 +262,22 @@ if __name__ == '__main__':
                 labelTokenIdList = tokenizer.convert_tokens_to_ids(tokens=labelTokenList)
 
                 for idx in range(maskingLen):
-                    sequence_has_ans[COUNT, 0, idx] = idList[idx]
-                    segments_has_ans[COUNT, 0, idx] = segmentList[idx]
-                    masks_has_ans[COUNT, 0, idx] = 1
-                    cols_has_ans[COUNT, 0, idx] = colList[idx]
-                    rows_has_ans[COUNT, 0, idx] = rowList[idx]
+                    sequence_has_ans[COUNT, idx] = idList[idx]
+                    segments_has_ans[COUNT, idx] = segmentList[idx]
+                    masks_has_ans[COUNT, idx] = 1
+                    cols_has_ans[COUNT, idx] = colList[idx]
+                    rows_has_ans[COUNT, idx] = rowList[idx]
 
                 labelTokenIdListLen = len(labelTokenIdList)
                 if MAX_MASKING < labelTokenIdListLen:
                     labelTokenIdListLen = MAX_MASKING
 
                 for idx in range(labelTokenIdListLen):
-                    label_ids[COUNT, 0, idx] = labelTokenIdList[idx]
-                    label_position[COUNT, 0, idx] = labelPositionList[idx]
-                    label_weight[COUNT, 0, idx] = 1.0
+                    label_ids[COUNT, idx] = labelTokenIdList[idx]
+                    label_position[COUNT, idx] = labelPositionList[idx]
+                    label_weight[COUNT, idx] = 1.0
 
-            ### TODO: ZERO CASE ###
-
+            COUNT += 1
 
         break
 
