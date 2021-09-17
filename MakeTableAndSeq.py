@@ -292,7 +292,7 @@ if __name__ == '__main__':
                     label_position[COUNT, idx] = labelPositionList[idx]
                     label_weight[COUNT, idx] = 1.0
 
-        COUNT += 1
+            COUNT += 1
 
 #### end paragraph parsing loop
 namuTokenizer = NamuTokenizer()
