@@ -276,7 +276,6 @@ if __name__ == '__main__':
                 labelTokenIdList = tokenizer.convert_tokens_to_ids(tokens=labelTokenList)
 
                 for idx in range(maskingLen):
-                    print(len(sequence_has_ans), len(idList))
                     sequence_has_ans[COUNT, idx] = idList[idx]
                     segments_has_ans[COUNT, idx] = segmentList[idx]
                     masks_has_ans[COUNT, idx] = 1
@@ -292,7 +291,7 @@ if __name__ == '__main__':
                     label_position[COUNT, idx] = labelPositionList[idx]
                     label_weight[COUNT, idx] = 1.0
 
-            COUNT += 1
+                COUNT += 1
 
 #### end paragraph parsing loop
 namuTokenizer = NamuTokenizer()
