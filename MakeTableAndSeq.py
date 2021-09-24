@@ -69,8 +69,8 @@ class ParagraphRelation:
     tableRelation = list()
 
 ## TEST MODE
-TEST_TARGET = '리그 오브 레전드'
-TEST_MODE = False
+TEST_TARGET = '백 평짜리 숲(킹덤 하츠)'
+TEST_MODE = True
 TEST_TEXT_PRINT = False
 
 if __name__ == '__main__':
@@ -187,6 +187,7 @@ if __name__ == '__main__':
 
             if TEST_TEXT_PRINT:
                 print(document[DOC_TEXT])
+            exit()
         ###############
 
         ### Tokenize

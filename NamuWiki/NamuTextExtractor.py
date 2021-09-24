@@ -36,9 +36,9 @@ class TextExtractor:
                 newRow = []
                 for col in row:
                     newCol = re.sub(r"<\w+>", '', col) # attr tag
-                    newCol = re.sub(NAMU_RE.LINK_ALT_FRONT.value, '', newCol) # [[.+|.+]]
-                    newCol = re.sub(NAMU_RE.LINK_BASIC_FRONT.value, '', newCol) # [[.+]]
-                    newCol = re.sub(NAMU_RE.LINK_BACK.value, '', newCol) # [[.+|.+]] and [[.+]]
+                    #newCol = re.sub(NAMU_RE.LINK_ALT_FRONT.value, '', newCol) # [[.+|.+]]
+                    #newCol = re.sub(NAMU_RE.LINK_BASIC_FRONT.value, '', newCol) # [[.+]]
+                    #newCol = re.sub(NAMU_RE.LINK_BACK.value, '', newCol) # [[.+|.+]] and [[.+]]
 
                     newRow.append(newCol)
                 newTable.append(newRow)
