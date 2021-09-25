@@ -69,8 +69,8 @@ class ParagraphRelation:
     tableRelation = list()
 
 ## TEST MODE
-TEST_TARGET = '백 평짜리 숲(킹덤 하츠)'
-TEST_MODE = True
+TEST_TARGET = '삼성전자'
+TEST_MODE = False
 TEST_TEXT_PRINT = False
 
 if __name__ == '__main__':
