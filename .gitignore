@@ -1,13 +1,21 @@
-# Dataset Json
+# Dataset
 *.json
+*.jsonl
+
+*.txtpb
+
 *.zip
+*gz
+
+/Tapas-Dataset-Parsing/SourceData/spider
+/Tapas-Dataset-Parsing/Preprocessing/Dataset
 
 # config directory
 __pycache__
 .idea
 
 # Table set
-/Tables
+/Namu-Table-Parser/Tables
 
 # *.npy
 *.npy

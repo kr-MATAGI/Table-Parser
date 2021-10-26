@@ -1,0 +1,35 @@
+*NL-SQL : natural language sql
+		  natural language to query
+
+1. Read tables from text files
+1. 텍스트 파일에서 테이블 읽기
+
+2. Read NL-SQL templates and sql component mapping file
+2. NL-SQL 템플릿을 읽고 sql 컴포넌트를 파일에 맵핑
+
+
+3. Unify and combine tables as databases
+3. 테이블을 데이터베이스로 통합 및 결합
+
+4. Start generate NL-SQL examples based on new databases and CFG grammars
+4. 새로운 데이터베이스와 CFG를 기반으로 NL-SQL 예제를 만들기 시작
+
+
+	4.1 detect question and SQL slots and process constraints
+	4.1 질문 및 SQL slot 찾기, 제약조건 처리
+	
+	4.2 Get classification label for each column based on SQL templates
+	4.2 SQL 템플릿을 기반으로 각 열에 대한 분류 label 가져오기
+	
+	4.3 Populate one example for a given database based on a given nl-SQL template and sql component mapping
+	4.3 주어진 NL-SQL 템플릿과 SQL 컴포넌트 맵핑을 기반으로 주어진 데이터베이스에서 예제를 채우기
+	
+	4.4 generate examples for all databases
+	4.4 모든 데이터베이스에 대한 예제 생성
+	
+	4.5 Map SQL labels of all augmented examples into numeric labels
+	4.5 모든 augmented examples의 SQL label을 numeric label로 맵핑
+	
+	4.6 Write and save file
+	
+	
