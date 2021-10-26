@@ -2,6 +2,7 @@ import os
 import json
 
 from Definition.PreprocDef import *
+from lib.dbengine import DBEngine
 
 class WikiSqlGenerator:
     ### PRIVATE ###
@@ -61,7 +62,7 @@ class WikiSqlGenerator:
         return tableDict
 
 
-    def GenerateWikiDataset(self, tableDict):
+    def GenerateWikiDataset(self, tableDict, dbPath):
         queryRelationList = list()
 
         if not self.isSetSrcFile:
@@ -71,8 +72,8 @@ class WikiSqlGenerator:
         print("Start - Generate Wiki Dataset")
         print(f"srcFile: {self.srcFile}\ntableFile: {self.tableFile}")
 
+        dbEngine = DBEngine(fdb=dbPath)
         with open(self.srcFile, mode="r", encoding="utf-8") as srcFile:
-
             while True:
                 jsonLine = srcFile.readline()
                 if not jsonLine:
@@ -88,19 +89,28 @@ class WikiSqlGenerator:
                 tableId = parser["table_id"]
                 question = parser["question"]
                 sqlObj= parser["sql"]
-                condList = sqlObj["conds"]
-                answer = ""
-                if 0 < len(condList): # Empty conds is existed
-                    answer = condList[0][-1]
+                sel = sqlObj["sel"]
+                agg = sqlObj["agg"]
+                conds = sqlObj["conds"]
 
                 # talbe mapping with table id
                 table2D = tableDict[tableId]
 
                 queryRelation.table2D = table2D
                 queryRelation.query = question
-                queryRelation.answer = answer
+                #queryRelation.answer = answer
+
+                # Exec SQL Query
+                dbResultDict = dbEngine.execute(table_id="1-1000181-1",
+                                 select_index=sel,
+                                 aggregation_index=agg,
+                                 conditions=conds)
+                print(dbResultDict)
+                dbRdx = dbResultDict["rdx"]
+                dbResult = dbResultDict["result"]
 
                 queryRelationList.append(queryRelation)
+                exit()
 
         return queryRelationList
 
@@ -115,9 +125,8 @@ if "__main__" == __name__:
 
     # Convert Origin Table to 2D List
     tableDict = wikiSqlGenerator.ConvertTableData()
-    print(tableDict["1-1000181-1"])
-    exit()
 
     # Make Generate dataset
-    queryRelationList = wikiSqlGenerator.GenerateWikiDataset(tableDict)
+    dbPath = "./Dataset/WikiSQL/data/train.db"
+    queryRelationList = wikiSqlGenerator.GenerateWikiDataset(tableDict, dbPath)
     print(len(queryRelationList))

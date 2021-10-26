@@ -18,7 +18,8 @@ class DBEngine:
     def execute(self, table_id, select_index, aggregation_index, conditions, lower=True):
         if not table_id.startswith('table'):
             table_id = 'table_{}'.format(table_id.replace('-', '_'))
-        table_info = self.conn.query('SELECT sql from sqlite_master WHERE tbl_name = :name', name=table_id).all()[0].sql
+        table_info = self.conn.query('SELECT sql from sqlite_master WHERE tbl_name = :name', name=table_id).first()
+        table_info = table_info.as_dict()["sql"]
         schema_str = schema_re.findall(table_info)[0]
         schema = {}
         for tup in schema_str.split(', '):
@@ -43,6 +44,9 @@ class DBEngine:
         where_str = ''
         if where_clause:
             where_str = 'WHERE ' + ' AND '.join(where_clause)
-        query = 'SELECT {} AS result FROM {} {}'.format(select, table_id, where_str)
-        out = self.conn.query(query, **where_map)
-        return [o.result for o in out]
+        query = 'SELECT rowid AS rdx, {} AS result FROM {} {}'.format(select, table_id, where_str)
+
+        # for key, val in where_map.items():
+        #     query = query.replace(":"+key, "'"+val+"'")
+        out = self.conn.query(query, fetchall=True, **where_map)
+        return out.first().as_dict()
