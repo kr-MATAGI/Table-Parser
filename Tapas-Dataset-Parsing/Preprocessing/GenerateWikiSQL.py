@@ -129,7 +129,6 @@ class WikiSqlGenerator:
                                 for addi in additionalList:
                                     rdx = addi["rdx"]
                                     queryRelation.labelTags.append((int(rdx)-1, int(sel)))
-                                    print(queryRelation.labelTags)
                             else:
                                 queryRelation.answer.append(0)
 
