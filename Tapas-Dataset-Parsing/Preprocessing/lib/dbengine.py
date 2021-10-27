@@ -16,6 +16,9 @@ import re
 from babel.numbers import parse_decimal, NumberFormatError
 from Preprocessing.lib.query import Query
 
+# Custom
+from Preprocessing.Definition.PreprocDef import QueryType
+
 schema_re = re.compile(r'\((.+)\)')
 num_re = re.compile(r'[-+]?\d*\.\d+|\d+')
 
@@ -58,8 +61,29 @@ class DBEngine:
         if where_clause:
             where_str = 'WHERE ' + ' AND '.join(where_clause)
         query = 'SELECT rowid AS rdx, {} AS result FROM {} {}'.format(select, table_id, where_str)
-
-        # for key, val in where_map.items():
-        #     query = query.replace(":"+key, "'"+val+"'")
         out = self.conn.query(query, fetchall=True, **where_map)
-        return out.first().as_dict()
+
+        # Custom
+        queryType = QueryType.NONE
+        additionalQuery = query
+        if "COUNT" in query:
+            additionalQuery = additionalQuery.replace("COUNT", "")
+            queryType = QueryType.COUNT
+        elif "MAX" in query:
+            additionalQuery = additionalQuery.replace("MAX", "")
+            queryType = QueryType.MAX
+        elif "MIN" in query:
+            additionalQuery = additionalQuery.replace("MIN", "")
+            queryType = QueryType.MIN
+        elif "SUM" in query:
+            additionalQuery = additionalQuery.replace("SUM", "")
+            queryType = QueryType.SUM
+        elif "AVG" in query:
+            additionalQuery = additionalQuery.replace("AVG", "")
+            queryType = QueryType.AVG
+
+        additionalOut = None
+        if QueryType.NONE.name != queryType.name:
+            additionalOut = self.conn.query(additionalQuery, fetchall=True, **where_map)
+
+        return out.as_dict(), queryType, additionalOut.as_dict()

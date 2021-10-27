@@ -98,19 +98,43 @@ class WikiSqlGenerator:
 
                 queryRelation.table2D = table2D
                 queryRelation.query = question
-                #queryRelation.answer = answer
+                queryRelation.labelTags.append((0, int(sel)))
 
                 # Exec SQL Query
-                dbResultDict = dbEngine.execute(table_id="1-1000181-1",
-                                 select_index=sel,
-                                 aggregation_index=agg,
-                                 conditions=conds)
-                print(dbResultDict)
-                dbRdx = dbResultDict["rdx"]
-                dbResult = dbResultDict["result"]
+                if 0 < len(conds):
+                    try:
+                        dbResultList, queryType, additionalList = dbEngine.execute(table_id=tableId,
+                                         select_index=sel,
+                                         aggregation_index=agg,
+                                         conditions=conds)
+                    except:
+                        continue
 
-                queryRelationList.append(queryRelation)
-                exit()
+                    for cond in conds:
+                        queryRelation.labelTags.append((0, int(cond[0])))
+
+                    for dbResult in dbResultList:
+                        if queryType.name == QueryType.NONE.name:
+                            rdx = dbResult["rdx"]
+                            result = dbResult["result"]
+
+                            if None != result:
+                                queryRelation.answer.append(result)
+                                queryRelation.labelTags.append((int(rdx), int(sel)))
+                        else:
+                            # COUNT, MAX, MIN, SUM, AVG
+                            result = dbResult["result"]
+                            if None != result:
+                                queryRelation.answer.append(result)
+                                for addi in additionalList:
+                                    rdx = addi["rdx"]
+                                    queryRelation.labelTags.append((int(rdx), int(sel)))
+                            else:
+                                queryRelation.answer.append(0)
+
+                    queryRelationList.append(queryRelation)
+                else:
+                    continue
 
         return queryRelationList
 
