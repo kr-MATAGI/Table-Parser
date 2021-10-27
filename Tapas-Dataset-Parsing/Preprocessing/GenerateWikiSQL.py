@@ -120,7 +120,7 @@ class WikiSqlGenerator:
 
                             if None != result:
                                 queryRelation.answer.append(result)
-                                queryRelation.labelTags.append((int(rdx), int(sel)))
+                                queryRelation.labelTags.append((int(rdx)-1, int(sel)))
                         else:
                             # COUNT, MAX, MIN, SUM, AVG
                             result = dbResult["result"]
@@ -128,7 +128,8 @@ class WikiSqlGenerator:
                                 queryRelation.answer.append(result)
                                 for addi in additionalList:
                                     rdx = addi["rdx"]
-                                    queryRelation.labelTags.append((int(rdx), int(sel)))
+                                    queryRelation.labelTags.append((int(rdx)-1, int(sel)))
+                                    print(queryRelation.labelTags)
                             else:
                                 queryRelation.answer.append(0)
 
