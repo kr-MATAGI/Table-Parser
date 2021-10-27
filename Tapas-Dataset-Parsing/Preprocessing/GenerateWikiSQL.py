@@ -151,7 +151,7 @@ if "__main__" == __name__:
     # Convert Origin Table to 2D List
     tableDict = wikiSqlGenerator.ConvertTableData()
 
-    # Make Generate dataset
+    # Make Generated dataset
     dbPath = "./Dataset/WikiSQL/data/train.db"
     queryRelationList = wikiSqlGenerator.GenerateWikiDataset(tableDict, dbPath)
     print(len(queryRelationList))
