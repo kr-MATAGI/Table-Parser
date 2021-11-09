@@ -1,6 +1,7 @@
 # Dataset
 *.json
 *.jsonl
+*.xml
 
 *.txtpb
 
