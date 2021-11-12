@@ -6,7 +6,8 @@
 *.txtpb
 
 *.zip
-*gz
+*.gz
+*.bz2
 
 /Tapas-Dataset-Parsing/SourceData/spider
 /Tapas-Dataset-Parsing/Preprocessing/Dataset
