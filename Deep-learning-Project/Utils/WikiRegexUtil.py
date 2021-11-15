@@ -6,7 +6,6 @@ import re
 
 def ParseWikiTableRegex(pageText:str):
     retTableList = []
-
     lineText = pageText.split("\n")
 
     table = []
@@ -29,33 +28,47 @@ def ParseWikiTableRegex(pageText:str):
     return retTableList
 
 
-
 def DivideTableRowColBySyntax(tableList=list):
     retTableList = []
 
+    # Rows
+    divideRowTableList = []
     for table in tableList:
-        # Rows
         newTable = []
         for element in table:
             if re.search(WIKI_RE.TABLE_START.value, element):
                 newTable.append(element)
 
             elif re.search(WIKI_RE.TABLE_ROW.value, element):
-                continue
+                newTable.append(element)
 
             elif re.search(WIKI_RE.TABLE_END.value, element):
-                retTableList.append(newTable)
+                divideRowTableList.append(newTable)
                 newTable = []
 
             else:
                 newTable.append(element)
 
-        # Cols
+    # Cols
+    for table in divideRowTableList:
         newTable = []
-        for tdx, table in enumerate(retTableList):
-            for row in table:
-                newRow = re.split(WIKI_RE.TABLE_COL.value, row)
+        newRow = []
+        for row in table:
+            if re.search(WIKI_RE.TABLE_DOUBLE_COL.value, row):
+                splitRow = re.split(WIKI_RE.TABLE_DOUBLE_COL.value, row)
+                if 0 < len(splitRow):
+                    newTable.append(splitRow)
+
+            elif re.search(WIKI_RE.TABLE_ROW.value, row):
                 newTable.append(newRow)
-            retTableList[tdx] = newTable
+                newRow = []
+
+            elif re.search(WIKI_RE.TABLE_NEWLINE_COL.value, row):
+                if 0 < len(row):
+                    newRow.append(row)
+
+        if 0 != len(newRow):
+            newTable.append(newRow)
+        retTableList.append(newTable)
 
     return retTableList
