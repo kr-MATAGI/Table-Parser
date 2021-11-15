@@ -5,6 +5,9 @@ from xml.etree.ElementTree import Element, dump, ElementTree
 # Namuwiki
 import ijson
 
+# Definition
+from Definition.WikiDef import *
+
 def ReadWikiDataset(filePath:str):
     print("Read Wikipedia dataset:", filePath)
 
@@ -22,8 +25,7 @@ def ReadWikiDataset(filePath:str):
 
 if "__main__" == __name__:
 
+    # Example
     for pageData in ReadWikiDataset("../Dataset/kor-wiki/test.xml"):
-        pageTitle = pageData[0]
-        pageText = pageData[1]
-
-        print(pageTitle, pageText)
+        wikipage = WikiPage(title=pageData[0],
+                            text=pageData[1])
