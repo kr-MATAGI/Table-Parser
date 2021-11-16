@@ -28,6 +28,7 @@ def RemoveWikipediaSyntax(tableList:list):
         newTable = []
         for row in table:
             newRow = []
+            isToken_th = False
             for col in row:
                 if re.search(WIKI_RE.TABLE_START.value, col):
                     newRow = []
@@ -105,6 +106,14 @@ def RemoveWikipediaSyntax(tableList:list):
                 newCol = re.sub(WIKI_RE.VERTICAL_BAR.value, "", newCol)
 
                 newCol = newCol.strip()
+
+                if isToken_th and -1 == newCol.find("<th>"):
+                    tempColList = newCol.split()
+                    tempColList.insert(0, "<th>")
+                    newCol = ' '.join(tempColList)
+                if -1 != newCol.find("<th>"):
+                    isToken_th = True
+
                 newRow.append(newCol)
 
             if 0 < len(newRow):
@@ -140,4 +149,3 @@ if "__main__" == __name__:
         wikipage = WikiPage(title=pageData[0], text=pageData[1])
 
         wikiTable = ParseWikipedia(wikipage)
-
