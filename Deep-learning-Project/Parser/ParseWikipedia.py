@@ -8,7 +8,6 @@ from Definition.WikiRegexDef import *
 from Utils.DataLoader import *
 from Utils.WikiRegexUtil import *
 
-
 ### Method
 def RemoveEmptyRowFromTable(tableList:list):
     retTableList = []
