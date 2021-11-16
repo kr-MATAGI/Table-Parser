@@ -56,8 +56,15 @@ class HeadExtractor:
             Namuwiki data is not used '<th>', just use '||'
     '''
     def __Heuristic_1(self, srcTable):
-        # TODO: For ko-wikipedia
-        pass
+        tableShape = (len(srcTable), len(srcTable[0]))
+        retNpTable = np.zeros(tableShape, dtype=np.float64)
+
+        for rdx, row in enumerate(srcTable):
+            for cdx, col in enumerate(row):
+                if -1 != str(col).find("<th>"):
+                    retNpTable[rdx, cdx] = 1
+
+        return retNpTable
 
     '''
         @Heuristic 2
@@ -475,10 +482,12 @@ class HeadExtractor:
     '''
         if table head is not existed, remove the table
     '''
-    def RemoveNoExistedTableHeaderTalbe(self, tableList):
+    def RemoveNoExistedTableHeaderTalbe(self, tableList, isUseThTag=False):
         retTableList = []
 
         for table in tableList:
+            if isUseThTag:
+                resHeuri_1 = self.__Heuristic_1(table) # Check <th> tag
             resHeuri_2 = self.__Heuristic_2(table) # Check <tbg> and <bg>
             resHeuri_3 = self.__Heuristic_3(table) # Check Text Attribute
             resHeuri_4 = self.__Heuristic_4(table) # Check instance types
@@ -487,9 +496,17 @@ class HeadExtractor:
             resHeuri_7 = self.__Heuristic_7(table) # Check table[0][0] empty
 
             tableShape = resHeuri_7.shape
-            finalTable = self.__ComputeBinaryMatrices([resHeuri_2, resHeuri_3, resHeuri_4,
-                                                       resHeuri_5, resHeuri_6, resHeuri_7], tableShape,
-                                                      weight=[0.1, 0.2, 0.2, 0.1, 0.2, 0.2])
+
+            # TODO: update right weight
+            finalTable = None
+            if isUseThTag:
+                finalTable = self.__ComputeBinaryMatrices([resHeuri_1, resHeuri_2, resHeuri_3, resHeuri_4,
+                                                           resHeuri_5, resHeuri_6, resHeuri_7], tableShape,
+                                                          weight=[0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+            else:
+                finalTable = self.__ComputeBinaryMatrices([resHeuri_2, resHeuri_3, resHeuri_4,
+                                                           resHeuri_5, resHeuri_6, resHeuri_7], tableShape,
+                                                          weight=[0.1, 0.2, 0.2, 0.1, 0.2, 0.2])
 
             isExistedHead = self.__CheckExistedTableHeader(finalTable)
             if isExistedHead:
