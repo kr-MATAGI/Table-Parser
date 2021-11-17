@@ -52,8 +52,6 @@ def DivideTableRowColBySyntax(tableList=list):
 
     # Cols
     for table in divideRowTableList:
-        rowSpanPair = [] # (idx, count, value)
-        colSpanPair = [] # (idx, count, value)
 
         newTable = []
         newRow = []
@@ -74,4 +72,5 @@ def DivideTableRowColBySyntax(tableList=list):
         if 0 != len(newRow):
             newTable.append(newRow)
         retTableList.append(newTable)
+
     return retTableList

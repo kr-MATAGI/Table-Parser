@@ -125,7 +125,61 @@ def RemoveWikipediaSyntax(tableList:list):
 def DivideRowColSpan(tableList:list):
     retTableList = []
 
-    print(tableList)
+    # Col span
+    divColSpanTableList = []
+    for table in tableList:
+        newTable = []
+        for rdx, row in enumerate(table):
+            newRow = []
+            for cdx, col in enumerate(row):
+                if re.search(WIKI_RE.COL_SPAN.value, col):
+                    corresStr = re.search(WIKI_RE.COL_SPAN.value, col).group(0)
+                    splitedStrList = corresStr.split("| ")
+
+                    spanCount = splitedStrList[0].replace("colspan=", "").strip()
+                    spanCount = int(spanCount.replace("\"", ""))
+
+                    spanValue = splitedStrList[1].strip()
+
+                    for sc in range(spanCount):
+                        newRow.append("<span> "+ spanValue)
+                else:
+                    newRow.append(col)
+            newTable.append(newRow)
+        divColSpanTableList.append(newTable)
+
+    # Row Span
+    for table in divColSpanTableList:
+        RowSpanPairList = [] # (idx, count, value)
+        newTable = []
+        for rdx, row in enumerate(table):
+            newRow = []
+            for cdx, col in enumerate(row):
+                for spIdx, spanPair in enumerate(RowSpanPairList):
+                    if cdx == spanPair[0]:
+                        newRow.append(spanPair[-1])
+
+                        updateCount = spanPair[1]-1
+                        if 0 >= updateCount:
+                            RowSpanPairList.remove(spanPair)
+                        else:
+                            RowSpanPairList[spIdx] = (spanPair[0], spanPair[1]-1, spanPair[-1])
+
+                if re.search(WIKI_RE.ROW_SPAN.value, col):
+                    corresStr = re.search(WIKI_RE.ROW_SPAN.value, col).group(0)
+                    splitedStrList = corresStr.split("| ")
+
+                    spanCount = splitedStrList[0].replace("rowspan=", "").strip()
+                    spanCount = int(spanCount.replace("\"", ""))
+
+                    spanValue = splitedStrList[1].strip()
+
+                    RowSpanPairList.append((cdx, spanCount-1, "<span> " + spanValue))
+                    newRow.append("<span> " + spanValue)
+                else:
+                    newRow.append(col)
+            newTable.append(newRow)
+        retTableList.append(newTable)
 
     return retTableList
 
