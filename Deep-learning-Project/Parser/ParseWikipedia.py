@@ -38,7 +38,7 @@ def RemoveWikipediaSyntax(tableList:list):
                     break
 
                 newCol = col.strip()
-                newCol = re.sub(WIKI_RE.TABLE_HEAD.value, "<th>", newCol)
+                newCol = re.sub(WIKI_RE.TABLE_HEAD.value, "<th> ", newCol)
                 newCol = re.sub(WIKI_RE.CLASS.value, "", newCol)
                 newCol = re.sub(WIKI_RE.BG_COLOR.value, "<bgc>", newCol)
                 newCol = re.sub(WIKI_RE.ALIGN.value, "", newCol)
