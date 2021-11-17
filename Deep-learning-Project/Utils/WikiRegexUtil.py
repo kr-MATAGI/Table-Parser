@@ -4,6 +4,7 @@ from Definition.WikiRegexDef import *
 # Built-in
 import re
 
+
 def ParseWikiTableRegex(pageText:str):
     retTableList = []
     lineText = pageText.split("\n")
@@ -51,9 +52,12 @@ def DivideTableRowColBySyntax(tableList=list):
 
     # Cols
     for table in divideRowTableList:
+        rowSpanPair = [] # (idx, count, value)
+        colSpanPair = [] # (idx, count, value)
+
         newTable = []
         newRow = []
-        for row in table:
+        for rdx, row in enumerate(table):
             if re.search(WIKI_RE.TABLE_DOUBLE_COL.value, row):
                 splitRow = re.split(WIKI_RE.TABLE_DOUBLE_COL.value, row)
                 if 0 < len(splitRow):
@@ -70,5 +74,4 @@ def DivideTableRowColBySyntax(tableList=list):
         if 0 != len(newRow):
             newTable.append(newRow)
         retTableList.append(newTable)
-
     return retTableList

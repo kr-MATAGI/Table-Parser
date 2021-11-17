@@ -13,13 +13,18 @@ def ReadWikiDataset(filePath:str):
 
     document = ET.parse(filePath)
     root = document.getroot()
+    docCount = 0
     for page in root.iter(tag="page"):
+        docCount += 1
         titleTag = page.find("title")
         revisionTag = page.find("revision")
         textTag = revisionTag.find("text")
 
         title = titleTag.text
         text = textTag.text
+
+        if 0 == (docCount % 1000):
+            print("docCount:", docCount, " title:", title)
 
         yield (title, text)
 

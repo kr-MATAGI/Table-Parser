@@ -122,6 +122,13 @@ def RemoveWikipediaSyntax(tableList:list):
 
     return retTableList
 
+def DivideRowColSpan(tableList:list):
+    retTableList = []
+
+    print(tableList)
+
+    return retTableList
+
 def ParseWikipedia(wikiPage:WikiPage):
     wikiTable = WikiTable(title=wikiPage.title, tableList=[])
 
@@ -132,14 +139,11 @@ def ParseWikipedia(wikiPage:WikiPage):
     tableList = DivideTableRowColBySyntax(tableList)
     tableList = RemoveEmptyRowFromTable(tableList)
 
+    # Divide RowSpan and ColSpan
+    tableList = DivideRowColSpan(tableList)
+
     # Remove Wikipeida Syntax
     tableList = RemoveWikipediaSyntax(tableList)
-
-    # TEST
-    for table in tableList:
-        print()
-        for row in table:
-            print(row)
 
     return wikiTable
 

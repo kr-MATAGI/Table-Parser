@@ -4,12 +4,15 @@ from enum import Enum
 class WIKI_RE(Enum):
     TABLE_START = r"{\|"
     TABLE_ROW = r"\|-"
-    TABLE_NEWLINE_COL = r"\b\|.+"
+    TABLE_NEWLINE_COL = r"\|.+"
     TABLE_DOUBLE_COL = r"\|\|"
     TABLE_END = r"\|}"
 
     TABLE_TITLE = r"\|\+"
     TABLE_HEAD = r"!\s"
+
+    ROW_SPAN = r"rowspan=\"[0-9]+\" \| [^\|]*"
+    COL_SPAN = r"colspan=\"[0-9]+\" \| [^\|]*"
 
     FILE = r"(\[\[)파일:[^\]]+(\]\])"
     MEDIA = r"(\[\[)미디어:[^\]]+(\]\])"
@@ -143,3 +146,35 @@ if "__main__" == __name__:
     if re.search(WIKI_RE.MEDIA.value, test_str17):
         corresStr = re.search(WIKI_RE.MEDIA.value, test_str17).group(0)
         print(corresStr)
+
+
+    test_str18 = "| colspan=\"2\" |  | a |  | colspan=\"2\" | F"
+    if re.search(WIKI_RE.COL_SPAN.value, test_str18):
+        a18 = re.findall(WIKI_RE.COL_SPAN.value, test_str18)
+
+        for elem in a18:
+            newStrList = []
+            splitElem = str(elem).split(" | ")
+            count = splitElem[0].replace("colspan=", "")
+            count = count.replace("\"", "")
+            count = int(count)
+
+            value = splitElem[1]
+            for c in range(count):
+                newStrList.append(value)
+
+            newStr = " | ".join(newStrList)
+            test_str18 = test_str18.replace(elem, newStr)
+
+    test_str19 = "| rowspan=\"2\" | A"
+
+    if re.search(WIKI_RE.ROW_SPAN.value, test_str19):
+        a19 = re.findall(WIKI_RE.ROW_SPAN.value, test_str19)
+
+        indexFind = test_str19.split("|")
+        print(indexFind)
+        for elem in a19:
+            splitElem = str(elem).split(" | ")
+
+            print(test_str19.index(elem))
+            print(splitElem)
