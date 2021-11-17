@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Defintion
 import re
 
@@ -42,6 +44,14 @@ def RemoveWikipediaSyntax(tableList:list):
                 newCol = re.sub(WIKI_RE.CLASS.value, "", newCol)
                 newCol = re.sub(WIKI_RE.BG_COLOR.value, "<bgc>", newCol)
                 newCol = re.sub(WIKI_RE.ALIGN.value, "", newCol)
+
+                # Ref
+                newCol = re.sub(WIKI_RE.REF.value, "", newCol)
+                newCol = re.sub(WIKI_RE.REF_2.value, "", newCol)
+                newCol = re.sub(WIKI_RE.REF_3.value, "", newCol)
+
+                # Comment
+                newCol = re.sub(WIKI_RE.COMMENT.value, "", newCol)
 
                 # <BR />
                 newCol = re.sub(WIKI_RE.BR.value, "", newCol)
@@ -101,7 +111,6 @@ def RemoveWikipediaSyntax(tableList:list):
                     convertedStr = re.split(WIKI_RE.VERTICAL_BAR.value, corresStr)[1]
                     newCol = newCol.replace(corresStr, convertedStr)
 
-
                 # Vertical bar
                 newCol = re.sub(WIKI_RE.VERTICAL_BAR.value, "", newCol)
 
@@ -134,7 +143,9 @@ def DivideRowColSpan(tableList:list):
             for cdx, col in enumerate(row):
                 if re.search(WIKI_RE.COL_SPAN.value, col):
                     corresStr = re.search(WIKI_RE.COL_SPAN.value, col).group(0)
-                    splitedStrList = corresStr.split("| ")
+                    splitedStrList = corresStr.split("|")
+                    for idx, splitedStr in enumerate(splitedStrList):
+                        splitedStrList[idx] = splitedStr.strip()
 
                     spanCount = splitedStrList[0].replace("colspan=", "").strip()
                     spanCount = int(spanCount.replace("\"", ""))
@@ -198,7 +209,10 @@ def ParseWikipedia(wikiPage:WikiPage):
 
     # Remove Wikipeida Syntax
     tableList = RemoveWikipediaSyntax(tableList)
+    print(tableList)
 
+    wikiTable.tableList = wikiPage.title
+    wikiTable.tableList = tableList
     return wikiTable
 
 if "__main__" == __name__:

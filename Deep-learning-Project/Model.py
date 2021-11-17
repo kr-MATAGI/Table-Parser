@@ -1,5 +1,5 @@
-from transformers import RobertaConfig, RobertaModel
-
+from transformers import AutoModel, AutoTokenizer
+from transformers import Trainer
 
 '''
     How to pretrained RoBERTa
@@ -8,12 +8,5 @@ from transformers import RobertaConfig, RobertaModel
 '''
 
 if "__main__" == __name__:
-    # Init a RoBERTa configuration
-    modelConfig = RobertaConfig()
-
-    # Init Model config
-    model = RobertaModel(modelConfig)
-    configuration = model.config
-
-    print(configuration)
-
+    model = AutoModel.from_pretrained("klue/roberta-base")
+    tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
