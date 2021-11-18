@@ -212,6 +212,46 @@ def DivideRowColSpan(tableList:list):
 
     return retTableList
 
+def FitTableRowLength(tableList:list):
+    retTableList = []
+
+    for table in tableList:
+        # Check max Length
+        maxRowLen = 0
+        for row in table:
+            maxRowLen = maxRowLen if maxRowLen > len(row) else len(row)
+
+        # Extend Column
+        for row in table:
+            if len(row) < maxRowLen:
+                diffLen = maxRowLen - len(row)
+                for loop in range(diffLen):
+                    backVal = row[-1]
+                    row.append(backVal)
+
+    retTableList = tableList
+
+    return retTableList
+
+def RemoveNotNeedRows(tableList:list):
+    retTableList = []
+
+    for table in tableList:
+        newTable = []
+        for row in table:
+            isExistedData = False
+            for col in row:
+                # Remove my custom tag
+                removeRegCol = re.sub(r"<[^>]+>", "", col).strip()
+                if 1 <= len(removeRegCol):
+                    isExistedData = True
+                    break
+            if isExistedData:
+                newTable.append(row)
+        retTableList.append(newTable)
+
+    return retTableList
+
 def ParseWikipedia(wikiPage:WikiPage):
     wikiTable = WikiTable(title=wikiPage.title, tableList=[])
 
@@ -227,7 +267,12 @@ def ParseWikipedia(wikiPage:WikiPage):
 
     # Remove Wikipeida Syntax
     tableList = RemoveWikipediaSyntax(tableList)
-    print(tableList)
+
+    # Fit Row length
+    tableList = FitTableRowLength(tableList)
+
+    # Remove Not Need Row
+    tableList = RemoveNotNeedRows(tableList)
 
     wikiTable.tableList = wikiPage.title
     wikiTable.tableList = tableList
