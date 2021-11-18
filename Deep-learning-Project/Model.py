@@ -1,12 +1,14 @@
-from transformers import AutoModel, AutoTokenizer
-from transformers import Trainer
+from transformers import AutoTokenizer, TapasForMaskedLM
+import pandas as pd
+import torch
 
-'''
-    How to pretrained RoBERTa
-    ref: https://github.com/pytorch/fairseq/blob/main/examples/roberta/README.pretraining.md
-    https://www.reddit.com/r/LanguageTechnology/comments/gyxwz3/how_to_further_pretrain_bert_or_roberta_model/
-'''
+
+
 
 if "__main__" == __name__:
-    model = AutoModel.from_pretrained("klue/roberta-base")
+    print("Model Pretrain")
+
+    # Init
+    pretrainedPath = "./ModelBinFiles/klue-tapas-base.bin",
     tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
+    model = TapasForMaskedLM.from_pretrained(pretrained_model_name_or_path=pretrainedPath)
