@@ -43,15 +43,23 @@ def RemoveWikipediaSyntax(tableList:list):
                 newCol = re.sub(WIKI_RE.TABLE_HEAD.value, "<th> ", newCol)
                 newCol = re.sub(WIKI_RE.CLASS.value, "", newCol)
                 newCol = re.sub(WIKI_RE.BG_COLOR.value, "<bgc>", newCol)
+
+                newCol = re.sub(WIKI_RE.V_ALIGN.value, "", newCol)
                 newCol = re.sub(WIKI_RE.ALIGN.value, "", newCol)
 
                 # Ref
                 newCol = re.sub(WIKI_RE.REF.value, "", newCol)
                 newCol = re.sub(WIKI_RE.REF_2.value, "", newCol)
                 newCol = re.sub(WIKI_RE.REF_3.value, "", newCol)
+                newCol = re.sub(WIKI_RE.REF_4.value, "", newCol)
+                newCol = re.sub(WIKI_RE.REF_5.value, "", newCol)
 
-                # Comment
+                # Comment, Pre
                 newCol = re.sub(WIKI_RE.COMMENT.value, "", newCol)
+                newCol = re.sub(WIKI_RE.PRE.value, "", newCol)
+
+                # Sentence Align
+                newCol = re.sub(WIKI_RE.SENT_ALIGN.value, "", newCol)
 
                 # <BR />
                 newCol = re.sub(WIKI_RE.BR.value, "", newCol)
@@ -59,6 +67,10 @@ def RemoveWikipediaSyntax(tableList:list):
                 # File & media
                 newCol = re.sub(WIKI_RE.FILE.value, "", newCol)
                 newCol = re.sub(WIKI_RE.MEDIA.value, "", newCol)
+
+                # Style
+                newCol = re.sub(WIKI_RE.STYLE.value, "", newCol)
+                newCol = re.sub(WIKI_RE.WIDTH.value, "", newCol)
 
                 # Font shape
                 if re.search(WIKI_RE.FONT_SHAPE_5.value, newCol):
@@ -113,6 +125,11 @@ def RemoveWikipediaSyntax(tableList:list):
 
                 # Vertical bar
                 newCol = re.sub(WIKI_RE.VERTICAL_BAR.value, "", newCol)
+
+                # etc
+                newCol = re.sub(r"}}", "", newCol)
+                newCol = re.sub(WIKI_RE.DEL_ROW_SPAN.value, "", newCol)
+                newCol = re.sub(WIKI_RE.DEL_COL_SPAN.value, "", newCol)
 
                 newCol = newCol.strip()
 
