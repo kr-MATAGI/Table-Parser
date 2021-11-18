@@ -130,6 +130,7 @@ def RemoveWikipediaSyntax(tableList:list):
                 newCol = re.sub(r"}}", "", newCol)
                 newCol = re.sub(WIKI_RE.DEL_ROW_SPAN.value, "", newCol)
                 newCol = re.sub(WIKI_RE.DEL_COL_SPAN.value, "", newCol)
+                newCol = re.sub(r"\[\[.+", "", newCol)
 
                 newCol = newCol.strip()
 
