@@ -166,7 +166,10 @@ def DivideRowColSpan(tableList:list):
                         splitedStrList[idx] = splitedStr.strip()
 
                     spanCount = splitedStrList[0].replace("colspan=", "").strip()
-                    spanCount = int(spanCount.replace("\"", ""))
+                    if -1 != spanCount.find("\""):
+                        spanCount = int(spanCount.replace("\"", ""))
+                    else:
+                        spanCount = int(spanCount)
 
                     spanValue = splitedStrList[1].strip()
 
@@ -199,7 +202,10 @@ def DivideRowColSpan(tableList:list):
                     splitedStrList = corresStr.split("| ")
 
                     spanCount = splitedStrList[0].replace("rowspan=", "").strip()
-                    spanCount = int(spanCount.replace("\"", ""))
+                    if -1 != spanCount.find("\""):
+                        spanCount = int(spanCount.replace("\"", ""))
+                    else:
+                        spanCount = int(spanCount)
 
                     spanValue = splitedStrList[1].strip()
 
@@ -280,7 +286,7 @@ def ParseWikipedia(wikiPage:WikiPage):
 
 if "__main__" == __name__:
     # Parse Wikipedia
-    for pageData in ReadWikiDataset("../Dataset/kor-wiki/test.xml"):
+    for pageData in ReadWikiDataset("../Dataset/kor-wiki/kowiki-latest-pages-articles-multistream.xml"):
         wikipage = WikiPage(title=pageData[0], text=pageData[1])
 
         wikiTable = ParseWikipedia(wikipage)
