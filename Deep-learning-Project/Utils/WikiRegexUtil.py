@@ -6,6 +6,7 @@ import re
 
 
 def ParseWikiTableRegex(pageText:str):
+
     retTableList = []
     lineText = pageText.split("\n")
 

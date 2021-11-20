@@ -9,6 +9,7 @@ from Definition.WikiRegexDef import *
 # Utils
 from Utils.DataLoader import *
 from Utils.WikiRegexUtil import *
+from Utils.HeadExtractor import *
 
 ### Method
 def RemoveEmptyRowFromTable(tableList:list):
@@ -120,8 +121,9 @@ def RemoveWikipediaSyntax(tableList:list):
                 # Cite
                 if re.search(WIKI_RE.CITE.value, newCol):
                     corresStr = re.search(WIKI_RE.CITE.value, newCol).group(0)
-                    convertedStr = re.split(WIKI_RE.VERTICAL_BAR.value, corresStr)[1]
-                    newCol = newCol.replace(corresStr, convertedStr)
+                    if re.search(WIKI_RE.VERTICAL_BAR.value, corresStr):
+                        convertedStr = re.split(WIKI_RE.VERTICAL_BAR.value, corresStr)[1]
+                        newCol = newCol.replace(corresStr, convertedStr)
 
                 # Vertical bar
                 newCol = re.sub(WIKI_RE.VERTICAL_BAR.value, "", newCol)
@@ -199,7 +201,7 @@ def DivideRowColSpan(tableList:list):
 
                 if re.search(WIKI_RE.ROW_SPAN.value, col):
                     corresStr = re.search(WIKI_RE.ROW_SPAN.value, col).group(0)
-                    splitedStrList = corresStr.split("| ")
+                    splitedStrList = corresStr.split("|")
 
                     spanCount = splitedStrList[0].replace("rowspan=", "").strip()
                     if -1 != spanCount.find("\""):
@@ -258,8 +260,26 @@ def RemoveNotNeedRows(tableList:list):
 
     return retTableList
 
+def SliceTableRow(tableList:list, limitSize:int=10):
+    retTableList = []
+
+    for table in tableList:
+        newTable = []
+        for row in table:
+            if limitSize < len(row):
+                newTable.append(row[:limitSize])
+            else:
+                newTable.append(row)
+        retTableList.append(newTable)
+
+    return retTableList
+
+
 def ParseWikipedia(wikiPage:WikiPage):
     wikiTable = WikiTable(title=wikiPage.title, tableList=[])
+
+    if not wikiPage.text:
+        return wikiTable
 
     # Parse table from text
     tableList = ParseWikiTableRegex(wikiPage.text)
@@ -280,13 +300,27 @@ def ParseWikipedia(wikiPage:WikiPage):
     # Remove Not Need Row
     tableList = RemoveNotNeedRows(tableList)
 
+    # Slice Row Len to 10
+    tableList = SliceTableRow(tableList, 15)
+
     wikiTable.tableList = wikiPage.title
     wikiTable.tableList = tableList
+
     return wikiTable
 
 if "__main__" == __name__:
     # Parse Wikipedia
-    for pageData in ReadWikiDataset("../Dataset/kor-wiki/kowiki-latest-pages-articles-multistream.xml"):
+    tableCount = 0
+    for pageData in ReadWikiDataset("../Dataset/kor-wiki/test.xml"):
         wikipage = WikiPage(title=pageData[0], text=pageData[1])
 
         wikiTable = ParseWikipedia(wikipage)
+        wikiTable.tableList = RemoveNoExistedTableHeaderTalbe(wikiTable.tableList, True)
+
+        if 0 < len(wikiTable.tableList):
+            tableCount += len(wikiTable.tableList)
+
+
+
+    print("Total Table Size:", tableCount) # 214,478
+
