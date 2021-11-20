@@ -43,7 +43,7 @@ def RemoveWikipediaSyntax(tableList:list):
                 newCol = col.strip()
                 newCol = re.sub(WIKI_RE.TABLE_HEAD.value, "<th> ", newCol)
                 newCol = re.sub(WIKI_RE.CLASS.value, "", newCol)
-                newCol = re.sub(WIKI_RE.BG_COLOR.value, "<bgc>", newCol)
+                newCol = re.sub(WIKI_RE.BG_COLOR.value, "<bg>", newCol)
 
                 newCol = re.sub(WIKI_RE.V_ALIGN.value, "", newCol)
                 newCol = re.sub(WIKI_RE.ALIGN.value, "", newCol)
@@ -309,18 +309,19 @@ def ParseWikipedia(wikiPage:WikiPage):
     return wikiTable
 
 if "__main__" == __name__:
+    # Class Instances
+    headExtractor = HeadExtractor()
+
     # Parse Wikipedia
     tableCount = 0
     for pageData in ReadWikiDataset("../Dataset/kor-wiki/test.xml"):
         wikipage = WikiPage(title=pageData[0], text=pageData[1])
 
         wikiTable = ParseWikipedia(wikipage)
-        wikiTable.tableList = RemoveNoExistedTableHeaderTalbe(wikiTable.tableList, True)
+        wikiTable.tableList = headExtractor.IsHeadLeftColumnOnWikiTable(wikiTable.tableList)
 
         if 0 < len(wikiTable.tableList):
             tableCount += len(wikiTable.tableList)
 
-
-
-    print("Total Table Size:", tableCount) # 214,478
+    print("Total Table Size:", tableCount) # 214,478 -> ?
 

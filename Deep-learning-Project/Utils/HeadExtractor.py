@@ -444,6 +444,39 @@ class HeadExtractor:
 
         return retValue
 
+    def __CheckLeftColumnHead(self, table, limitRatio=0.8):
+        retVal = False
+
+        totalCellCnt = 0
+        headCellCnt = 0
+        for row in table:
+            totalCellCnt += 1
+            if 1 == row[0]:
+                headCellCnt += 1
+
+        ratio = round(headCellCnt/totalCellCnt, 2)
+        if limitRatio <= ratio:
+            retVal = True
+
+        return retVal
+
+    def __DivideTopAndLeftHeadTable(self, table):
+        topHeadTable, leftHeadTable = [], []
+
+        # Make topHeadTable
+        for row in table:
+            topHeadTable.append(row[1:])
+
+        # Make leftHeadTable
+        # Left Col -> Top Row
+        for rdx, row in enumerate(table):
+            if 0 == rdx:
+                continue
+            leftHeadTable.append(row)
+        leftHeadTable = np.array(leftHeadTable).T.tolist()
+
+        return topHeadTable, leftHeadTable
+
     ### PUBLIC ###
     '''
         Extract Table Header
@@ -506,6 +539,7 @@ class HeadExtractor:
         return retTableList
 
     def IsHeadLeftColumnOnWikiTable(self, tableList):
+        retTableList = []
 
         for table in tableList:
             resHeuri_1 = self.__Heuristic_1(table)  # Check <th> tag
@@ -520,3 +554,14 @@ class HeadExtractor:
             finalTable = self.__ComputeBinaryMatrices([resHeuri_1, resHeuri_2, resHeuri_3, resHeuri_4,
                                                        resHeuri_5, resHeuri_6, resHeuri_7], tableShape,
                                                       weight=[0.125, 0.188, 0.125, 0.125, 0.0625, 0.1875, 0.187])
+
+            # Check left column
+            isLeftColHead = self.__CheckLeftColumnHead(finalTable, 0.8)
+            if isLeftColHead:
+                topHeadTable, leftHeadTable = self.__DivideTopAndLeftHeadTable(table)
+                retTableList.append(topHeadTable)
+                retTableList.append(leftHeadTable)
+            else:
+                retTableList.append(table)
+
+        return retTableList
