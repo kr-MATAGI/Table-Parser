@@ -11,6 +11,7 @@
 
 /Tapas-Dataset-Parsing/SourceData/spider
 /Tapas-Dataset-Parsing/Preprocessing/Dataset
+/Table-Parser/Deep-learning-Project/Dataset
 
 # config directory
 __pycache__

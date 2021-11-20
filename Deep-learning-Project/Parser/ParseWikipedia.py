@@ -274,6 +274,14 @@ def SliceTableRow(tableList:list, limitSize:int=10):
 
     return retTableList
 
+def RemoveEmptyTables(tableList:list):
+    retTableList = []
+
+    for table in tableList:
+        if 1 < len(table):
+            retTableList.append(table)
+
+    return retTableList
 
 def ParseWikipedia(wikiPage:WikiPage):
     wikiTable = WikiTable(title=wikiPage.title, tableList=[])
@@ -303,6 +311,9 @@ def ParseWikipedia(wikiPage:WikiPage):
     # Slice Row Len to 10
     tableList = SliceTableRow(tableList, 15)
 
+    # Remove Empty Tables
+    tableList = RemoveEmptyTables(tableList)
+
     wikiTable.tableList = wikiPage.title
     wikiTable.tableList = tableList
 
@@ -314,14 +325,14 @@ if "__main__" == __name__:
 
     # Parse Wikipedia
     tableCount = 0
-    for pageData in ReadWikiDataset("../Dataset/kor-wiki/test.xml"):
+    for pageData in ReadWikiDataset("../Dataset/kor-wiki/kowiki-latest-pages-articles-multistream.xml"):
         wikipage = WikiPage(title=pageData[0], text=pageData[1])
 
         wikiTable = ParseWikipedia(wikipage)
-        wikiTable.tableList = headExtractor.IsHeadLeftColumnOnWikiTable(wikiTable.tableList)
 
         if 0 < len(wikiTable.tableList):
+            # appx doc: 1663700, 185, 639 -> 246,203
+            wikiTable.tableList = headExtractor.IsHeadLeftColumnOnWikiTable(wikiTable.tableList)
             tableCount += len(wikiTable.tableList)
 
-    print("Total Table Size:", tableCount) # 214,478 -> ?
-
+    print("Total Table Size:", tableCount)
