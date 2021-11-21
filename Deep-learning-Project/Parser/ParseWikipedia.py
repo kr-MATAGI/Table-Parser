@@ -325,7 +325,9 @@ if "__main__" == __name__:
 
     # Parse Wikipedia
     tableCount = 0
+    pageCount = 0
     for pageData in ReadWikiDataset("../Dataset/kor-wiki/kowiki-latest-pages-articles-multistream.xml"):
+        pageCount += 1
         wikipage = WikiPage(title=pageData[0], text=pageData[1])
 
         wikiTable = ParseWikipedia(wikipage)
@@ -335,4 +337,5 @@ if "__main__" == __name__:
             wikiTable.tableList = headExtractor.IsHeadLeftColumnOnWikiTable(wikiTable.tableList)
             tableCount += len(wikiTable.tableList)
 
+    print("Total Page Size:", pageCount)
     print("Total Table Size:", tableCount)

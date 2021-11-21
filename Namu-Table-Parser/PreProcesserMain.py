@@ -6,21 +6,12 @@ SRC_JSON_PATH = './dataset/docData200302.json'
 WRITE_TABLE_DEST_PATH = './Tables'
 
 # TEST
-TEST_TAGET_TITLE = '백 평짜리 숲(킹덤 하츠)'
+TEST_TAGET_TITLE = '크레이지레이싱 카트라이더' #'백 평짜리 숲(킹덤 하츠)'
 TEST_MODE = True
-
-from eunjeon import Mecab
 
 if __name__ == '__main__':
 
-    # eunjeon.Mecab Test
-    #mecab = Mecab()
-    #text = "이모 여기 뚝배기 하나 추가요~!"
-    #a = mecab.pos(text)
-    #print(a)
-    #exit()
-
-    # Make instance    
+    # Make instance
     namuParser = NamuWikiParser(SRC_JSON_PATH)
     headExtractor = TableHeaderExtractor()
 
@@ -36,16 +27,9 @@ if __name__ == '__main__':
 
         tableList = namuParser.ParseTableFromText(docItem[DOC_TEXT])
 
-        #### TEST ###
-        #if TEST_MODE and TEST_TAGET_TITLE == docItem[DOC_TITLE]:
-            #retTestList = namuParser.ParseTableAndDetailsFromDocument(docItem[DOC_TITLE], docItem[DOC_TEXT])
-            #print(retTestList)
-            #break
-
         if 0 < len(tableList):
             newTableList = []
             modifiedTableList = namuParser.ModifyHTMLTags(tableList)
-            break
 
             for table in modifiedTableList:
                 preprocessedTable = namuParser.PreprocessingTable(table)
