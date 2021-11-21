@@ -218,6 +218,58 @@ def PreprocessingTable(tableList):
 
     return retTableList
 
+## Inner method of RemoveDecoTables
+def CheckRowIsEmptyCells(table):
+    retValue = True
+
+    for row in table:
+        isEmpty = True
+        for col in row:
+            if 0 < len(str(col).lstrip()):
+                isEmpty = False
+                break
+
+        if isEmpty:
+            retValue = False
+            break
+
+    return retValue
+
+def CheckEmptyCellsRatio(table, ratio=0.3):
+    retValue = True
+
+    emptyCellCnt = 0
+    totalCellCnt = 0
+    for row in table:
+        for col in row:
+            totalCellCnt += 1
+
+            stripCell = str(col).lstrip()
+            if 0 >= len(stripCell):
+                emptyCellCnt += 1
+
+    if ratio <= (emptyCellCnt / totalCellCnt):
+        retValue = False
+
+    return retValue
+
+def RemoveDecoTables(tableList):
+    retTableList = []
+
+    for table in tableList:
+        # Check Method 1
+        isMT = CheckRowIsEmptyCells(table)
+        if not isMT:
+            continue
+
+        # Check Method 2
+        isMT = CheckEmptyCellsRatio(table, ratio=0.3)
+
+        if isMT:
+            retTableList.append(table)
+
+    return retTableList
+
 
 if "__main__" == __name__:
     # Class Instances
@@ -239,6 +291,10 @@ if "__main__" == __name__:
         tableList = ParseTableFromText(doc[DOC_TEXT])
         tableList = ModifyHTMLTags(tableList)
         tableList = PreprocessingTable(tableList)
+
+        # Remove trash tables
+        tableList = headExtractor.RemoveNoExistedTableHeaderTalbe(tableList)
+        tableList = RemoveDecoTables(tableList)
 
         if 0 < len(tableList):
             # Document: 867,024 - Table: 1,591,912 -> 2,130,063
