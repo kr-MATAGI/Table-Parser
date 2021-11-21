@@ -270,6 +270,18 @@ def RemoveDecoTables(tableList):
 
     return retTableList
 
+def ClassifyNormalTableOrInfoBox(tableList):
+    normalTableList = []
+    infoBoxList = []
+
+    for table in tableList:
+        colLen = len(table[0])
+        if 3 <= colLen:
+            normalTableList.append(table)
+        else:
+            infoBoxList.append(table)
+
+    return normalTableList, infoBoxList
 
 if "__main__" == __name__:
     # Class Instances
@@ -291,14 +303,15 @@ if "__main__" == __name__:
         tableList = ParseTableFromText(doc[DOC_TEXT])
         tableList = ModifyHTMLTags(tableList)
         tableList = PreprocessingTable(tableList)
+        tableList, infoBoxList = ClassifyNormalTableOrInfoBox(tableList)
 
         # Remove trash tables
         tableList = headExtractor.RemoveNoExistedTableHeaderTalbe(tableList)
         tableList = RemoveDecoTables(tableList)
 
         if 0 < len(tableList):
-            # Document: 867,024 - Table: 1,591,912 -> 2,130,063
-            tableList = headExtractor.IsHeadLeftColumnOnWikiTable(tableList)
+            # Document: 867,024 - Table: 1432250 -> 2,130,063
+            #tableList = headExtractor.IsHeadLeftColumnOnWikiTable(tableList)
             tableCnt += len(tableList)
         wikiTable.tableList = tableList
 
