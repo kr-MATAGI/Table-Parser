@@ -310,7 +310,7 @@ if "__main__" == __name__:
         tableList = RemoveDecoTables(tableList)
 
         if 0 < len(tableList):
-            # Document: 867,024 - Table: 1432250 -> 2,130,063
+            # Document: 867,024 - Table: 1432250 -> 1878871
             #tableList = headExtractor.IsHeadLeftColumnOnWikiTable(tableList)
             tableCnt += len(tableList)
         wikiTable.tableList = tableList
