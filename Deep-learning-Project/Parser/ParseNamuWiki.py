@@ -241,7 +241,7 @@ if "__main__" == __name__:
         tableList = PreprocessingTable(tableList)
 
         if 0 < len(tableList):
-            # Document: 867,024 - Table: 1,591,912 ->
+            # Document: 867,024 - Table: 1,591,912 -> 2,130,063
             tableList = headExtractor.IsHeadLeftColumnOnWikiTable(tableList)
             tableCnt += len(tableList)
         wikiTable.tableList = tableList
