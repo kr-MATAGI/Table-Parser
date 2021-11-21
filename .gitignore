@@ -8,6 +8,7 @@
 *.zip
 *.gz
 *.bz2
+*.7z
 
 /Tapas-Dataset-Parsing/SourceData/spider
 /Tapas-Dataset-Parsing/Preprocessing/Dataset
