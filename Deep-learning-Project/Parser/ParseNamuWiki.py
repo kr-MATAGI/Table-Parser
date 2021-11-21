@@ -246,5 +246,5 @@ if "__main__" == __name__:
         wikiTable.tableList = tableList
 
     # Print doc/table counts
-    print("Document Counts:", document)
+    print("Document Counts:", docCnt)
     print("table Counts:", tableCnt)
