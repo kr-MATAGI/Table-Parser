@@ -331,7 +331,7 @@ if "__main__" == __name__:
         wikiTable = ParseWikipedia(wikipage)
 
         if 0 < len(wikiTable.tableList):
-            # appx doc: 1663700, 185, 639 -> 246,203
+            # doc: ABT 1663700, 185,639 ->246,203
             wikiTable.tableList = headExtractor.IsHeadLeftColumnOnWikiTable(wikiTable.tableList)
             tableCount += len(wikiTable.tableList)
 
