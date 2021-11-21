@@ -24,7 +24,7 @@ def ReadWikiDataset(filePath:str):
         title = titleTag.text
         text = textTag.text
 
-        if 0 == (docCount % 100):
+        if 0 == (docCount % 1000):
             print("docCount:", docCount, " title:", title)
 
         yield (title, text)
