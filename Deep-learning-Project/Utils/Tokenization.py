@@ -1,51 +1,65 @@
-from eunjeon import Mecab
-from tokenizers import ByteLevelBPETokenizer
+from transformers import AutoTokenizer
+import pandas as pd
+import numpy as np
+
 
 class MyTokenizer:
     def __init__(self):
-        # Mecab
-        self.mecab = Mecab(dicpath="C:/mecab/mecab-ko-dic").morphs
-        print("Mecab Check: 안녕하세요, 최재훈 입니다. ->", self.mecab("안녕하세요, 최재훈 입니다."))
+        # Init
+        self.input_ids_list = []
+        self.token_type_ids_list = []
+        self.attention_mask_list = []
 
-        # BPE Tokenizer
-        self.tokenizer = ByteLevelBPETokenizer()
-        print("Tokenizer Init - Using Mecab (eunjeon)")
+        # keys = dict_keys(['input_ids', 'token_type_ids', 'attention_mask'])
+        self.tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
 
-    def Tokenization(self, sentenceList):
-        total_morph = []
+        # input_ids.type = torch.Tensor, len = 512
+        # keys = dict_keys(['input_ids', 'attention_mask', 'token_type_ids'])
+        #self.tokenizer = AutoTokenizer.from_pretrained("google/tapas-base-masklm")
+        print("INIT - MyTokenizer")
 
-        for sent in sentenceList:
-            morph_sentece = []
-            count = 0
-            for token_mecab in self.mecab(sent):
-                token_mecab_save = token_mecab
-                if count > 0:
-                    token_mecab_save = "##" + token_mecab_save
-                    morph_sentece.append(token_mecab_save)
-                else:
-                    morph_sentece.append(token_mecab_save)
-                    count += 1
-            total_morph.append(morph_sentece)
+    def Tokenize(self, table):
+        # Table flatten
+        tableFlatten = ""
+        for row in table:
+            tableFlatten += " ".join(row)
 
-        return total_morph
+        tokenizedDict = self.tokenizer(text=tableFlatten)
+        input_ids = tokenizedDict["input_ids"]
+        token_type_ids = tokenizedDict["token_type_ids"]
+        attention_mask = tokenizedDict["attention_mask"]
 
-    def TrainTokenizer(self, corpus_files, vocab_size=32000, min_frequency=5, show_progress=True):
-        self.tokenizer.train(files=corpus_files,
-                             vocab_size=vocab_size,
-                             min_frequency=min_frequency,
-                             show_progress=show_progress)
-        print("Train Complete !")
+        # Check Length
+        tokenizedLen = len(input_ids)
+        if 512 > tokenizedLen:
+            zeroList = [ 0 for _ in range(512 - tokenizedLen) ]
+            input_ids.extend(zeroList)
+            token_type_ids.extend(zeroList)
+            attention_mask.extend(zeroList)
 
+        if len(input_ids) == len(token_type_ids) and \
+            len(token_type_ids) == len(attention_mask):
+            self.input_ids_list.append(input_ids)
+            self.token_type_ids_list.append(token_type_ids)
+            self.attention_mask_list.append(attention_mask)
+
+    def SaveTrainToken(self):
+        np.save("./test.npy", self.input_ids_list)
 
 if "__main__" == __name__:
-    myTokenizer = MyTokenizer()
+    print("Start Tokenization")
 
-    testSent = ["안녕하세요 저는 최재훈입니다.",
-                "국물이 끝내줘요~",
-                "아브라카다브라",
-                "이것이 과연 어떻게 토큰화 될것인가?",
-                "나는 오늘 아침밥을 먹었다."]
-    ans = myTokenizer.Tokenization(testSent)
+    testTable = [[ "트랙", "제목", "링크" , "러닝 타임", "작곡가" ],
+                [ "1", "Way Back then 옛날 옛적에", "", "2:32", "정재일" ],
+                [ "2", "Round I 1라운드", "", "1:20", "정재일" ],
+                [ "3", "The Rope is Tied 밧줄은 묶여 있다", "", "3:19", "정재일" ],
+                [ "4", "Pink Soldiers 분홍 병정", "", "0:39", "김성수" ],
+                [ "5", "Hostage Crisis 인질극", "", "2:23", "김성수" ],
+                [ "6", "I Remember My Name · TITLE 내 이름이 기억났어", "", "3:14", "정재일" ]]
 
-    for a in ans:
-        print(a)
+
+    myToken = MyTokenizer()
+    myToken.Tokenize(testTable)
+    myToken.Tokenize(testTable)
+    #myToken.SaveTrainToken()
+    print(np.load("./test.npy"))

@@ -1,7 +1,21 @@
 from transformers import AutoTokenizer, TapasForMaskedLM, TapasConfig
 from transformers import Trainer
 import pandas as pd
+
+from torch.utils.data import Dataset, DataLoader
 import torch
+
+
+## Dataset
+class TableDataset(Dataset):
+    def __init__(self):
+        return
+
+    def __getitem__(self, item):
+        return
+
+    def __len__(self):
+        return
 
 
 if "__main__" == __name__:
@@ -9,12 +23,4 @@ if "__main__" == __name__:
 
     # Init
     modelPtDirPath = "./"
-    tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
     model = TapasForMaskedLM.from_pretrained(pretrained_model_name_or_path=modelPtDirPath)
-
-    # Train
-    trainer = Trainer(
-        model=model,
-        train_dataset="",
-        eval_dataset="",
-    )
