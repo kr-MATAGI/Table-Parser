@@ -46,6 +46,27 @@ class MyTokenizer:
     def SaveTrainToken(self):
         np.save("./test.npy", self.input_ids_list)
 
+    def TestMethod(self):
+        a = self.tokenizer.convert_tokens_to_ids("[MASK]")
+        print("[MASK]", a)
+
+        b = self.tokenizer.convert_tokens_to_ids("[SEP]")
+        print("[SEP]", b)
+
+        c = self.tokenizer.convert_tokens_to_ids("[CLS]")
+        print("[CLS]", c)
+
+        d = self.tokenizer.convert_ids_to_tokens(1)
+        print("1", d)
+
+        e = self.tokenizer.convert_ids_to_tokens(3)
+        print("3", e)
+
+        f = self.tokenizer.convert_ids_to_tokens(5)
+        print("5", f)
+
+
+
 if "__main__" == __name__:
     print("Start Tokenization")
 
@@ -62,4 +83,5 @@ if "__main__" == __name__:
     myToken.Tokenize(testTable)
     myToken.Tokenize(testTable)
     #myToken.SaveTrainToken()
-    print(np.load("./test.npy"))
+
+    myToken.TestMethod()
