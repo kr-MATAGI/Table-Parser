@@ -59,7 +59,13 @@ class MyTokenizer:
 
     def MakeDatasets(self, srcTableList):
         # Init
-        pretrainDatasetDict = datasets.DatasetDict({"train": [], "test": []})
+        trainDataDict = {'input_ids': [],
+                         'token_type_ids': [],
+                         'attention_mask': []}
+        testDataDict = {'input_ids': [],
+                         'token_type_ids': [],
+                         'attention_mask': []}
+        procCount = 0
 
         # Shuffle
         srcTableListLen = len(srcTableList)
@@ -76,15 +82,35 @@ class MyTokenizer:
 
         # Tokenization - Train dataset
         for table in trainTableList:
+            procCount += 1
+            if 0 == (procCount % 1000):
+                print(procCount, "Processing...")
+
             tokenizedData = self.Tokenize(table)
-            pretrainDatasetDict["train"].append(tokenizedData)
+            trainDataDict['input_ids'].append(tokenizedData['input_ids'])
+            trainDataDict['token_type_ids'].append(tokenizedData['token_type_ids'])
+            trainDataDict['attention_mask'].append(tokenizedData['attention_mask'])
 
         # Tokenization - Test dataset
         for table in testTableList:
-            tokenizedData = self.Tokenize(table)
-            pretrainDatasetDict["test"].append(tokenizedData)
+            procCount += 1
+            if 0 == (procCount % 1000):
+                print(procCount, "Processing...")
 
-        return pretrainDatasetDict
+            tokenizedData = self.Tokenize(table)
+            testDataDict['input_ids'].append(tokenizedData['input_ids'])
+            testDataDict['token_type_ids'].append(tokenizedData['token_type_ids'])
+            testDataDict['attention_mask'].append(tokenizedData['attention_mask'])
+            #pretrainDatasetDict["test"].append(tokenizedData)
+
+        trainDatasets = datasets.Dataset.from_dict(trainDataDict)
+        testDatasets = datasets.Dataset.from_dict(testDataDict)
+
+        tokenizedDatasets = datasets.DatasetDict({
+            "train": trainDatasets,
+            "test": testDatasets
+        })
+        tokenizedDatasets.save_to_disk("../Dataset/Tokenization")
 
 if "__main__" == __name__:
     print("Start Test - Tokenization")
@@ -101,4 +127,5 @@ if "__main__" == __name__:
     testTableList.append(testTable)
 
     myTokenizere = MyTokenizer()
-    pretrainDatasets = myTokenizere.MakeDatasets(testTableList)
+    #myTokenizere.MakeDatasets(testTableList)
+    a = datasets.load_from_disk("../Dataset/Tokenization")
