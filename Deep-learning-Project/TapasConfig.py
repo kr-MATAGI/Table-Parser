@@ -84,6 +84,11 @@ def CheckModelKeyShape(path_1, path_2, key):
     print("key :", key)
     print("{ masklm -", path_1_dict[key].shape, " : mybin -", path_2_dict[key].shape, "}")
 
+def PrintStateDictKeyValueLen(dictPath):
+    stateDict = torch.load(dictPath)
+
+    for key, val in stateDict.items():
+        print(key, "-", len(val))
 
 if "__main__" == __name__:
     tapas_path = "./ModelBinFiles/tapas.bin"
@@ -95,8 +100,22 @@ if "__main__" == __name__:
     #                        targetPath=targetPath)
 
     print("\n-----------------------------------------\n")
+
+    '''
     CheckModelKeyShape(tapas_mask_lm_path, targetPath, "tapas.embeddings.word_embeddings.weight")
     CheckModelKeyShape(tapas_mask_lm_path, targetPath, "tapas.embeddings.position_embeddings.weight")
     CheckModelKeyShape(tapas_mask_lm_path, targetPath, "cls.predictions.bias")
     CheckModelKeyShape(tapas_mask_lm_path, targetPath, "cls.predictions.decoder.weight")
     CheckModelKeyShape(tapas_mask_lm_path, targetPath, "cls.predictions.decoder.bias")
+    '''
+
+
+    '''
+        klue - roberta.embeddings.position_embeddings.weight - 514
+        tapas-mask-lm - tapas.embeddings.position_embeddings.weight - 1024
+        target - tapas.embeddings.position_embeddings.weight - 1024
+    '''
+    PrintStateDictKeyValueLen(klue_path)
+
+
+

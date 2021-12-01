@@ -1,15 +1,29 @@
+import torch
 from transformers import AutoTokenizer
 import pandas as pd
 import numpy as np
+import datasets
+import random
 
+'''
+    klue/roberta-base
+    0 - [CLS]
+    1 - [PAD]
+    2 - [SEP]
+    3 - [UNK]
+    4 - [MASK]
+    5 - !
+    
+    google/tapas-mask-lm
+    101 - [CLS]
+    0 - [PAD]
+    102 - [SEP]
+    100 - [100]
+    103 - [MASK]
+'''
 
 class MyTokenizer:
     def __init__(self):
-        # Init
-        self.input_ids_list = []
-        self.token_type_ids_list = []
-        self.attention_mask_list = []
-
         # keys = dict_keys(['input_ids', 'token_type_ids', 'attention_mask'])
         self.tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
 
@@ -37,17 +51,43 @@ class MyTokenizer:
             token_type_ids.extend(zeroList)
             attention_mask.extend(zeroList)
 
-        if len(input_ids) == len(token_type_ids) and \
-            len(token_type_ids) == len(attention_mask):
-            self.input_ids_list.append(input_ids)
-            self.token_type_ids_list.append(token_type_ids)
-            self.attention_mask_list.append(attention_mask)
+            tokenizedDict["input_ids"] = input_ids
+            tokenizedDict["token_type_ids"] = token_type_ids
+            tokenizedDict["attention_mask"] = attention_mask
 
-    def SaveTrainToken(self):
-        np.save("./test.npy", self.input_ids_list)
+        return tokenizedDict
+
+    def MakeDatasets(self, srcTableList):
+        # Init
+        pretrainDatasetDict = datasets.DatasetDict({"train": [], "test": []})
+
+        # Shuffle
+        srcTableListLen = len(srcTableList)
+        print("TotalTable Size:", srcTableListLen, "\n")
+
+        shuffledTableList = srcTableList
+        random.shuffle(shuffledTableList)
+
+        # Slice train and test datasets
+        splitIdx = int(srcTableListLen * 0.8)
+
+        trainTableList = srcTableList[:splitIdx]
+        testTableList = srcTableList[splitIdx:]
+
+        # Tokenization - Train dataset
+        for table in trainTableList:
+            tokenizedData = self.Tokenize(table)
+            pretrainDatasetDict["train"].append(tokenizedData)
+
+        # Tokenization - Test dataset
+        for table in testTableList:
+            tokenizedData = self.Tokenize(table)
+            pretrainDatasetDict["test"].append(tokenizedData)
+
+        return pretrainDatasetDict
 
 if "__main__" == __name__:
-    print("Start Tokenization")
+    print("Start Test - Tokenization")
 
     testTable = [[ "트랙", "제목", "링크" , "러닝 타임", "작곡가" ],
                 [ "1", "Way Back then 옛날 옛적에", "", "2:32", "정재일" ],
@@ -57,16 +97,8 @@ if "__main__" == __name__:
                 [ "5", "Hostage Crisis 인질극", "", "2:23", "김성수" ],
                 [ "6", "I Remember My Name · TITLE 내 이름이 기억났어", "", "3:14", "정재일" ]]
 
-    '''
-        0 - [CLS]
-        1 - [PAD]
-        2 - [SEP]
-        3 - [UNK]
-        4 - [MASK]
-        5 - !
-    '''
+    testTableList = []
+    testTableList.append(testTable)
 
-    myToken = MyTokenizer()
-    myToken.Tokenize(testTable)
-    myToken.Tokenize(testTable)
-    #myToken.SaveTrainToken()
+    myTokenizere = MyTokenizer()
+    pretrainDatasets = myTokenizere.MakeDatasets(testTableList)
