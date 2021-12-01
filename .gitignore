@@ -31,3 +31,4 @@ __pycache__
 
 # pycharm env
 /venv
+*.DS_Store
