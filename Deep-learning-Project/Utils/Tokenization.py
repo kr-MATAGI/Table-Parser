@@ -21,41 +21,33 @@ import random
     100 - [100]
     103 - [MASK]
 '''
-
 class MyTokenizer:
     def __init__(self):
         # keys = dict_keys(['input_ids', 'token_type_ids', 'attention_mask'])
-        self.tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
+        self.tokenizer = AutoTokenizer.from_pretrained("google/tapas-base-masklm")
 
         # input_ids.type = torch.Tensor, len = 512
         # keys = dict_keys(['input_ids', 'attention_mask', 'token_type_ids'])
-        #self.tokenizer = AutoTokenizer.from_pretrained("google/tapas-base-masklm")
+        # self.tokenizer = AutoTokenizer.from_pretrained("google/tapas-base-masklm")
         print("INIT - MyTokenizer")
 
     def Tokenize(self, table):
-        # Table flatten
-        tableFlatten = ""
-        for row in table:
-            tableFlatten += " ".join(row)
+        # Not Need on tokenizer of tapas
+        # tableFlatten = ""
+        # for row in table:
+        #     tableFlatten += " ".join(row)
 
-        tokenizedDict = self.tokenizer(text=tableFlatten)
-        input_ids = tokenizedDict["input_ids"]
-        token_type_ids = tokenizedDict["token_type_ids"]
-        attention_mask = tokenizedDict["attention_mask"]
+        table_dict = {}
+        for rdx, row in enumerate(table):
+            for cdx, col in enumerate(row):
+                if 0 == rdx:
+                    table_dict[col] = []
+                else:
+                    table_dict[table[0][cdx]].append(col)
+        table_df = pd.DataFrame.from_dict(table_dict)
+        tokenizedTensor = self.tokenizer(table=table_df, padding="max_length", return_tensors="pt")
 
-        # Check Length
-        tokenizedLen = len(input_ids)
-        if 512 > tokenizedLen:
-            zeroList = [ 0 for _ in range(512 - tokenizedLen) ]
-            input_ids.extend(zeroList)
-            token_type_ids.extend(zeroList)
-            attention_mask.extend(zeroList)
-
-            tokenizedDict["input_ids"] = input_ids
-            tokenizedDict["token_type_ids"] = token_type_ids
-            tokenizedDict["attention_mask"] = attention_mask
-
-        return tokenizedDict
+        return tokenizedTensor
 
     def MakeDatasets(self, srcTableList):
         # Init
@@ -80,35 +72,42 @@ class MyTokenizer:
         trainTableList = srcTableList[:splitIdx]
         testTableList = srcTableList[splitIdx:]
 
+
         # Tokenization - Train dataset
+        trainDataDict = {
+            "input_ids": [],
+            "token_type_ids": [],
+            "attention_mask": []
+        }
         for table in trainTableList:
             procCount += 1
             if 0 == (procCount % 1000):
                 print(procCount, "Processing...")
 
             tokenizedData = self.Tokenize(table)
-            trainDataDict['input_ids'].append(tokenizedData['input_ids'])
-            trainDataDict['token_type_ids'].append(tokenizedData['token_type_ids'])
-            trainDataDict['attention_mask'].append(tokenizedData['attention_mask'])
+            trainDataDict["input_ids"].append(tokenizedData["input_ids"])
+            trainDataDict["token_type_ids"].append(tokenizedData["token_type_ids"])
+            trainDataDict["attention_mask"].append(tokenizedData["attention_mask"])
 
         # Tokenization - Test dataset
+        testDataDict = {
+            "input_ids": [],
+            "token_type_ids": [],
+            "attention_mask": []
+        }
         for table in testTableList:
             procCount += 1
             if 0 == (procCount % 1000):
                 print(procCount, "Processing...")
 
             tokenizedData = self.Tokenize(table)
-            testDataDict['input_ids'].append(tokenizedData['input_ids'])
-            testDataDict['token_type_ids'].append(tokenizedData['token_type_ids'])
-            testDataDict['attention_mask'].append(tokenizedData['attention_mask'])
-            #pretrainDatasetDict["test"].append(tokenizedData)
-
-        trainDatasets = datasets.Dataset.from_dict(trainDataDict)
-        testDatasets = datasets.Dataset.from_dict(testDataDict)
+            testDataDict["input_ids"].append(tokenizedData["input_ids"])
+            testDataDict["token_type_ids"].append(tokenizedData["token_type_ids"])
+            testDataDict["attention_mask"].append(tokenizedData["attention_mask"])
 
         tokenizedDatasets = datasets.DatasetDict({
-            "train": trainDatasets,
-            "test": testDatasets
+            "train": datasets.Dataset.from_dict(trainDataDict),
+            "test": datasets.Dataset.from_dict(testDataDict)
         })
         tokenizedDatasets.save_to_disk("../Dataset/Tokenization")
 
@@ -127,5 +126,4 @@ if "__main__" == __name__:
     testTableList.append(testTable)
 
     myTokenizere = MyTokenizer()
-    #myTokenizere.MakeDatasets(testTableList)
-    a = datasets.load_from_disk("../Dataset/Tokenization")
+    myTokenizere.MakeDatasets(testTableList)
