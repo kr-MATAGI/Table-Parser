@@ -11,7 +11,7 @@ class MyTableDataset(datasets.Dataset):
 
     def __getitem__(self, idx):
         data = self.tables[idx]
-        items = {key: torch.tensor(val[0]) for key, val in data.items()}
+        items = {key: torch.tensor(val) for key, val in data.items()}
 
         return items
 
@@ -29,12 +29,6 @@ if "__main__" == __name__:
 
     train_dataloader = torch.utils.data.DataLoader(trainDataset, batch_size=1)
     test_dataloader = torch.utils.data.DataLoader(testDataset, batch_size=1)
-
-    batch = next(iter(test_dataloader))
-
-    print(batch["input_ids"].shape)
-    print(batch["token_type_ids"].shape)
-    print(batch["attention_mask"].shape)
 
     # Model
     modelPtDirPath = "./"
@@ -63,4 +57,4 @@ if "__main__" == __name__:
 
             loss = outputs.loss
 
-            # TODO: Get Loss
+            # TODO: Get Loss, backword, step

@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoTokenizer
+from transformers import TapasTokenizer
 import pandas as pd
 import numpy as np
 import datasets
@@ -24,19 +24,29 @@ import random
 class MyTokenizer:
     def __init__(self):
         # keys = dict_keys(['input_ids', 'token_type_ids', 'attention_mask'])
-        self.tokenizer = AutoTokenizer.from_pretrained("google/tapas-base-masklm")
 
-        # input_ids.type = torch.Tensor, len = 512
-        # keys = dict_keys(['input_ids', 'attention_mask', 'token_type_ids'])
-        # self.tokenizer = AutoTokenizer.from_pretrained("google/tapas-base-masklm")
         print("INIT - MyTokenizer")
 
-    def Tokenize(self, table):
-        # Not Need on tokenizer of tapas
-        # tableFlatten = ""
-        # for row in table:
-        #     tableFlatten += " ".join(row)
+    def AddNewToken2Vocab(self, vocabPath, destPath):
+        tapasToeknzier = TapasTokenizer.from_pretrained("google/tapas-base-masklm")
 
+        print("vocabPath:", vocabPath)
+        print("destPath:", destPath)
+        with open(vocabPath, mode="r", encoding="utf-8") as kf:
+            addTokenCnt = 0
+            for klueToken in kf:
+                klueToken = klueToken.strip()
+                addTokenCnt += 1
+                if 0 == (addTokenCnt % 1000):
+                    print(addTokenCnt, "Adding...", klueToken)
+                tapasToeknzier.add_tokens(klueToken)
+        tapasToeknzier.save_pretrained(destPath)
+
+    def LoadNewTokenizer(self, path):
+        self.tokenizer = TapasTokenizer.from_pretrained("./TokenizeConfig")
+
+    def Tokenize(self, table):
+        # Tapas
         table_dict = {}
         for rdx, row in enumerate(table):
             for cdx, col in enumerate(row):
@@ -46,6 +56,12 @@ class MyTokenizer:
                     table_dict[table[0][cdx]].append(col)
         table_df = pd.DataFrame.from_dict(table_dict)
         tokenizedTensor = self.tokenizer(table=table_df, padding="max_length", return_tensors="pt")
+
+        # klue
+        # tableFlatten = ""
+        # for row in table:
+        #     tableFlatten += " ".join(row)
+        # tokenizedTensor = self.tokenizer(text=tableFlatten)
 
         return tokenizedTensor
 
@@ -125,5 +141,8 @@ if "__main__" == __name__:
     testTableList = []
     testTableList.append(testTable)
 
-    myTokenizere = MyTokenizer()
-    myTokenizere.MakeDatasets(testTableList)
+    myTokenizer = MyTokenizer()
+
+    myTokenizer.AddNewToken2Vocab(vocabPath="./TokenizeConfig/klue-vocab.txt", destPath="./NewTokenizer")
+    myTokenizer.LoadNewTokenizer(path="./NewTokenizer")
+    myTokenizer.MakeDatasets(testTableList)
