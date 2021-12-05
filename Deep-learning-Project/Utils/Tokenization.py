@@ -24,7 +24,6 @@ import random
 class MyTokenizer:
     def __init__(self):
         # keys = dict_keys(['input_ids', 'token_type_ids', 'attention_mask'])
-
         print("INIT - MyTokenizer")
 
     def AddNewToken2Vocab(self, vocabPath, destPath):
@@ -41,9 +40,12 @@ class MyTokenizer:
                     print(addTokenCnt, "Adding...", klueToken)
                 tapasToeknzier.add_tokens(klueToken)
         tapasToeknzier.save_pretrained(destPath)
+        # tapasToeknzier.save_vocabulary(destPath+"/new_vocab.txt")
 
-    def LoadNewTokenizer(self, path):
-        self.tokenizer = TapasTokenizer.from_pretrained("./TokenizeConfig")
+    def LoadNewTokenizer(self, path="./NewTokenizer"):
+        print("Start - LoadNewTokenizer {", path, "}")
+        self.tokenizer = TapasTokenizer.from_pretrained(path)
+        print("Complete - LoadNewTokenizer {", path, "}")
 
     def Tokenize(self, table):
         # Tapas
@@ -121,11 +123,14 @@ class MyTokenizer:
             testDataDict["token_type_ids"].append(tokenizedData["token_type_ids"])
             testDataDict["attention_mask"].append(tokenizedData["attention_mask"])
 
+            print(self.tokenizer.decode(tokenizedData["input_ids"]))
+
         tokenizedDatasets = datasets.DatasetDict({
             "train": datasets.Dataset.from_dict(trainDataDict),
             "test": datasets.Dataset.from_dict(testDataDict)
         })
         tokenizedDatasets.save_to_disk("../Dataset/Tokenization")
+        print("Complete - MyTokenizer.MakeDataset()")
 
 if "__main__" == __name__:
     print("Start Test - Tokenization")

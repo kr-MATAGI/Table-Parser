@@ -11,6 +11,8 @@ from Utils.DataLoader import *
 from Utils.WikiRegexUtil import *
 from Utils.HeadExtractor import *
 
+from Utils.Tokenization import *
+
 ### Method
 def RemoveEmptyRowFromTable(tableList:list):
     retTableList = []
@@ -322,10 +324,13 @@ def ParseWikipedia(wikiPage:WikiPage):
 if "__main__" == __name__:
     # Class Instances
     headExtractor = HeadExtractor()
+    myTokenizer = MyTokenizer()
+    myTokenizer.LoadNewTokenizer(path="../Utils/NewTokenizer")
 
     # Parse Wikipedia
     tableCount = 0
     pageCount = 0
+    allTableList = []
     for pageData in ReadWikiDataset("../Dataset/kor-wiki/kowiki-latest-pages-articles-multistream.xml"):
         pageCount += 1
         wikipage = WikiPage(title=pageData[0], text=pageData[1])
@@ -337,5 +342,11 @@ if "__main__" == __name__:
             wikiTable.tableList = headExtractor.IsHeadLeftColumnOnWikiTable(wikiTable.tableList)
             tableCount += len(wikiTable.tableList)
 
+            for table in wikiTable.tableList:
+                allTableList.append(table)
+
     print("Total Page Size:", pageCount)
     print("Total Table Size:", tableCount)
+
+    # Tokenization
+    myTokenizer.MakeDatasets(allTableList)
