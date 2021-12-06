@@ -1,7 +1,6 @@
 import datasets
 import torch
 from transformers import TapasForMaskedLM
-from transformers import Trainer
 from transformers import AdamW
 
 
@@ -27,8 +26,8 @@ if "__main__" == __name__:
     trainDataset = MyTableDataset(totalDatasets["train"])
     testDataset = MyTableDataset(totalDatasets["test"])
 
-    train_dataloader = torch.utils.data.DataLoader(trainDataset, batch_size=1)
-    test_dataloader = torch.utils.data.DataLoader(testDataset, batch_size=1)
+    train_dataloader = torch.utils.data.DataLoader(trainDataset, batch_size=2)
+    test_dataloader = torch.utils.data.DataLoader(testDataset, batch_size=2)
 
     # Model
     modelPtDirPath = "./"
@@ -37,6 +36,7 @@ if "__main__" == __name__:
 
     # Train
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Train Device:", device)
     model.to(device)
 
     optimizer = AdamW(model.parameters(), lr=5e-5)
@@ -46,6 +46,11 @@ if "__main__" == __name__:
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             token_type_ids = batch["token_type_ids"].to(device)
+
+            # Test - Check Shape
+            print("input_ids.shape", input_ids.shape)
+            print("attention_mask.shape", attention_mask.shape)
+            print("token_type_ids.shape", token_type_ids.shape)
 
             # zero the parameter gradients
             optimizer.zero_grad()
@@ -58,3 +63,8 @@ if "__main__" == __name__:
             loss = outputs.loss
 
             # TODO: Get Loss, backword, step
+
+
+    # Save Model
+    savePath = "./SavedModel/kor-wiki"
+    model.save_pretrained(savePath)

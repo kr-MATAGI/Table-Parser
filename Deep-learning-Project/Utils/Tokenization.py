@@ -1,5 +1,5 @@
 import torch
-from transformers import TapasTokenizer
+from transformers import AutoTokenizer
 import pandas as pd
 import numpy as np
 import datasets
@@ -26,44 +26,42 @@ class MyTokenizer:
         # keys = dict_keys(['input_ids', 'token_type_ids', 'attention_mask'])
         print("INIT - MyTokenizer")
 
-    def AddNewToken2Vocab(self, vocabPath, destPath):
-        tapasToeknzier = TapasTokenizer.from_pretrained("google/tapas-base-masklm")
-
-        print("vocabPath:", vocabPath)
-        print("destPath:", destPath)
-        with open(vocabPath, mode="r", encoding="utf-8") as kf:
-            addTokenCnt = 0
-            for klueToken in kf:
-                klueToken = klueToken.strip()
-                addTokenCnt += 1
-                if 0 == (addTokenCnt % 1000):
-                    print(addTokenCnt, "Adding...", klueToken)
-                tapasToeknzier.add_tokens(klueToken)
-        tapasToeknzier.save_pretrained(destPath)
-        # tapasToeknzier.save_vocabulary(destPath+"/new_vocab.txt")
-
-    def LoadNewTokenizer(self, path="./NewTokenizer"):
+    def LoadNewTokenizer(self, path):
         print("Start - LoadNewTokenizer {", path, "}")
-        self.tokenizer = TapasTokenizer.from_pretrained(path)
+        self.tokenizer = AutoTokenizer.from_pretrained(path)
         print("Complete - LoadNewTokenizer {", path, "}")
 
     def Tokenize(self, table):
         # Tapas
-        table_dict = {}
-        for rdx, row in enumerate(table):
-            for cdx, col in enumerate(row):
-                if 0 == rdx:
-                    table_dict[col] = []
-                else:
-                    table_dict[table[0][cdx]].append(col)
-        table_df = pd.DataFrame.from_dict(table_dict)
-        tokenizedTensor = self.tokenizer(table=table_df, padding="max_length", return_tensors="pt")
+        # table_dict = {}
+        # for rdx, row in enumerate(table):
+        #     for cdx, col in enumerate(row):
+        #         if 0 == rdx:
+        #             table_dict[col] = []
+        #         else:
+        #             table_dict[table[0][cdx]].append(col)
+        # table_df = pd.DataFrame.from_dict(table_dict)
+        # tokenizedTensor = self.tokenizer(table=table_df, padding="max_length", return_tensors="pt")
 
         # klue
-        # tableFlatten = ""
-        # for row in table:
-        #     tableFlatten += " ".join(row)
-        # tokenizedTensor = self.tokenizer(text=tableFlatten)
+        tableFlatten = ""
+        for row in table:
+            tableFlatten += " ".join(row)
+        tokenizedTensor = self.tokenizer(text=tableFlatten)
+
+        tokenSentLen = len(tokenizedTensor["input_ids"])
+        if 512 > tokenSentLen:
+            addPadList = [ 1 for _ in range(512-tokenSentLen) ]
+            zeroPadList = [ 0 for _ in range(512-tokenSentLen) ]
+
+            tokenizedTensor["input_ids"].extend(addPadList)
+            tokenizedTensor["attention_mask"].extend(addPadList)
+            tokenizedTensor["token_type_ids"].extend(addPadList)
+
+        for dataIdx, data in enumerate(tokenizedTensor["token_type_ids"]):
+            addzero_7_list = np.zeros(7, dtype=np.int64)
+            addzero_7_list[0] = data
+            tokenizedTensor["token_type_ids"][dataIdx] = addzero_7_list
 
         return tokenizedTensor
 
@@ -89,7 +87,6 @@ class MyTokenizer:
 
         trainTableList = srcTableList[:splitIdx]
         testTableList = srcTableList[splitIdx:]
-
 
         # Tokenization - Train dataset
         trainDataDict = {
@@ -123,12 +120,14 @@ class MyTokenizer:
             testDataDict["token_type_ids"].append(tokenizedData["token_type_ids"])
             testDataDict["attention_mask"].append(tokenizedData["attention_mask"])
 
-            print(self.tokenizer.decode(tokenizedData["input_ids"]))
+            # test - decode print
+            #print(self.tokenizer.decode(tokenizedData["input_ids"]))
 
         tokenizedDatasets = datasets.DatasetDict({
             "train": datasets.Dataset.from_dict(trainDataDict),
             "test": datasets.Dataset.from_dict(testDataDict)
         })
+
         tokenizedDatasets.save_to_disk("../Dataset/Tokenization")
         print("Complete - MyTokenizer.MakeDataset()")
 
@@ -148,6 +147,5 @@ if "__main__" == __name__:
 
     myTokenizer = MyTokenizer()
 
-    myTokenizer.AddNewToken2Vocab(vocabPath="./TokenizeConfig/klue-vocab.txt", destPath="./NewTokenizer")
-    myTokenizer.LoadNewTokenizer(path="./NewTokenizer")
+    myTokenizer.LoadNewTokenizer(path="klue/roberta-base")
     myTokenizer.MakeDatasets(testTableList)
