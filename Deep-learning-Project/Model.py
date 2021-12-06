@@ -1,5 +1,7 @@
 import datasets
 import torch
+import numpy as np
+
 from transformers import TapasForMaskedLM
 from transformers import AdamW
 
@@ -10,7 +12,7 @@ class MyTableDataset(datasets.Dataset):
 
     def __getitem__(self, idx):
         data = self.tables[idx]
-        items = {key: torch.tensor(val) for key, val in data.items()}
+        items = {key: torch.tensor(np.array(val[0], dtype=np.int64)) for key, val in data.items()}
 
         return items
 
@@ -61,6 +63,7 @@ if "__main__" == __name__:
                             token_type_ids=token_type_ids)
 
             loss = outputs.loss
+            print(loss)
 
             # TODO: Get Loss, backword, step
 

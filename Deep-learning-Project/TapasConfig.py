@@ -2,9 +2,9 @@ import torch
 import numpy as np
 
 
-def rename_state_dict_keys(tapasBinPath:str, klueBinPath:str,
-                           targetPath:str):
+def rename_state_dict_keys(tapasBinPath:str, klueBinPath:str, targetPath:str):
     print("Rename state dict keys")
+
     tapasStateDict = torch.load(tapasBinPath)
     klueStateDict = torch.load(klueBinPath)
 
@@ -36,11 +36,11 @@ def rename_state_dict_keys(tapasBinPath:str, klueBinPath:str,
         klueVal = klueStateDict[addKey]
         if "roberta.embeddings.word_embeddings.weight" == addKey:
             needAddkeyCount += 1
-            tapasStateDict["tapas.embeddings.word_embeddings.weight"] = klueVal[:30522]
+            tapasStateDict["tapas.embeddings.word_embeddings.weight"] = klueVal
 
         elif "lm_head.bias" == addKey:
             needAddkeyCount += 1
-            tapasStateDict["cls.predictions.bias"] = klueVal[:30522]
+            tapasStateDict["cls.predictions.bias"] = klueVal
 
         elif "lm_head.dense.weight" == addKey:
             needAddkeyCount += 1
@@ -60,11 +60,11 @@ def rename_state_dict_keys(tapasBinPath:str, klueBinPath:str,
 
         elif "lm_head.decoder.weight" == addKey:
             needAddkeyCount += 1
-            tapasStateDict["cls.predictions.decoder.weight"] = klueVal[:30522]
+            tapasStateDict["cls.predictions.decoder.weight"] = klueVal
 
         elif "lm_head.decoder.bias" == addKey:
             needAddkeyCount += 1
-            tapasStateDict["cls.predictions.decoder.bias"] = klueVal[:30522]
+            tapasStateDict["cls.predictions.decoder.bias"] = klueVal
 
     # re-init
     curVal = tapasStateDict["tapas.embeddings.position_embeddings.weight"]
@@ -95,9 +95,9 @@ if "__main__" == __name__:
     tapas_mask_lm_path = "./ModelBinFiles/tapas-base-masklm.bin"
     klue_path = "./ModelBinFiles/klue-roberta.bin"
     targetPath = "./pytorch_model.bin"
-    # rename_state_dict_keys(tapasBinPath=tapas_mask_lm_path,
-    #                        klueBinPath=klue_path,
-    #                        targetPath=targetPath)
+    rename_state_dict_keys(tapasBinPath=tapas_mask_lm_path,
+                           klueBinPath=klue_path,
+                           targetPath=targetPath)
 
     print("\n-----------------------------------------\n")
 

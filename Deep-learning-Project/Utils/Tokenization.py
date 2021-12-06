@@ -47,21 +47,29 @@ class MyTokenizer:
         tableFlatten = ""
         for row in table:
             tableFlatten += " ".join(row)
-        tokenizedTensor = self.tokenizer(text=tableFlatten)
+        tokenizedTensor = self.tokenizer(text=tableFlatten, return_tensors="pt")
 
-        tokenSentLen = len(tokenizedTensor["input_ids"])
+        tokenSentLen = len(tokenizedTensor["input_ids"][0])
         if 512 > tokenSentLen:
-            addPadList = [ 1 for _ in range(512-tokenSentLen) ]
-            zeroPadList = [ 0 for _ in range(512-tokenSentLen) ]
+            diffLen = 512-tokenSentLen
+            new_input_ids = torch.tensor(np.ones((1, diffLen), dtype=np.int64)) # [PAD]
+            new_input_ids = torch.cat([tokenizedTensor["input_ids"], new_input_ids], dim=1)
 
-            tokenizedTensor["input_ids"].extend(addPadList)
-            tokenizedTensor["attention_mask"].extend(addPadList)
-            tokenizedTensor["token_type_ids"].extend(addPadList)
+            new_attention_mask = torch.tensor(np.zeros((1, diffLen), dtype=np.int64))
+            new_attention_mask = torch.cat([tokenizedTensor["attention_mask"], new_attention_mask], dim=1)
 
-        for dataIdx, data in enumerate(tokenizedTensor["token_type_ids"]):
-            addzero_7_list = np.zeros(7, dtype=np.int64)
-            addzero_7_list[0] = data
-            tokenizedTensor["token_type_ids"][dataIdx] = addzero_7_list
+            new_token_type_ids = torch.tensor(np.zeros((1, diffLen), dtype=np.int64))
+            new_token_type_ids = torch.cat([tokenizedTensor["token_type_ids"], new_token_type_ids], dim=1)
+
+            tokenizedTensor["input_ids"] = new_input_ids
+            tokenizedTensor["attention_mask"] = new_attention_mask
+            tokenizedTensor["token_type_ids"] = new_token_type_ids
+
+        new_token_type_ids = torch.tensor(np.zeros([tokenizedTensor["token_type_ids"].shape[0],
+                                                    tokenizedTensor["token_type_ids"].shape[1],
+                                                    7],
+                                                   dtype=np.int64))
+        tokenizedTensor["token_type_ids"] = new_token_type_ids
 
         return tokenizedTensor
 
@@ -70,6 +78,7 @@ class MyTokenizer:
         trainDataDict = {'input_ids': [],
                          'token_type_ids': [],
                          'attention_mask': []}
+
         testDataDict = {'input_ids': [],
                          'token_type_ids': [],
                          'attention_mask': []}
@@ -148,4 +157,5 @@ if "__main__" == __name__:
     myTokenizer = MyTokenizer()
 
     myTokenizer.LoadNewTokenizer(path="klue/roberta-base")
+    #myTokenizer.LoadNewTokenizer(path="google/tapas-base-masklm")
     myTokenizer.MakeDatasets(testTableList)
