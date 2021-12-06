@@ -74,10 +74,15 @@ class WikiSqlGenerator:
 
         dbEngine = DBEngine(fdb=dbPath)
         with open(self.srcFile, mode="r", encoding="utf-8") as srcFile:
+            procCount = 0
             while True:
                 jsonLine = srcFile.readline()
                 if not jsonLine:
                     break
+
+                procCount += 1
+                if 0 == (procCount % 500):
+                    print("ProcCount ", procCount, "-", jsonLine)
 
                 queryRelation = QueryRelation()
                 queryRelation.table2D = list()
