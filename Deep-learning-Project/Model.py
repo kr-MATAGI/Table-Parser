@@ -23,17 +23,19 @@ if "__main__" == __name__:
     print("Model Pretrain")
 
     # Load Tokenized Datasets
-    totalDatasets = datasets.load_from_disk("./Dataset/Tokenization")
+    totalDatasets = datasets.load_from_disk("./Dataset/Tokenization/ko-wiki")
 
-    trainDataset = MyTableDataset(totalDatasets["train"])
-    testDataset = MyTableDataset(totalDatasets["test"])
+    trainDataset = totalDatasets["train"]
+    testDataset = totalDatasets["test"]
 
-    train_dataloader = torch.utils.data.DataLoader(trainDataset, batch_size=2)
-    test_dataloader = torch.utils.data.DataLoader(testDataset, batch_size=2)
+    summarize_dataset = datasets.concatenate_datasets([trainDataset, testDataset])
+    summarize_dataset = MyTableDataset(summarize_dataset)
+    pt_dataloader = torch.utils.data.DataLoader(summarize_dataset, batch_size=1024)
 
     # Model
     modelPtDirPath = "./"
-    model = TapasForMaskedLM.from_pretrained(pretrained_model_name_or_path=modelPtDirPath)
+    model = TapasForMaskedLM.from_pretrained(pretrained_model_name_or_path=modelPtDirPath,
+                                             return_dict=True)
     #model = TapasForMaskedLM.from_pretrained("google/tapas-base-masklm")
 
     # Train
@@ -43,16 +45,16 @@ if "__main__" == __name__:
 
     optimizer = AdamW(model.parameters(), lr=5e-5)
     for epoch in range(10):
-        print("Epoch:", epoch)
-        for idx, batch in enumerate(test_dataloader):
+        print("Epoch:", epoch+1)
+        for idx, batch in enumerate(pt_dataloader):
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             token_type_ids = batch["token_type_ids"].to(device)
 
             # Test - Check Shape
-            print("input_ids.shape", input_ids.shape)
-            print("attention_mask.shape", attention_mask.shape)
-            print("token_type_ids.shape", token_type_ids.shape)
+            # print("input_ids.shape", input_ids.shape)
+            # print("attention_mask.shape", attention_mask.shape)
+            # print("token_type_ids.shape", token_type_ids.shape)
 
             # zero the parameter gradients
             optimizer.zero_grad()
@@ -63,10 +65,9 @@ if "__main__" == __name__:
                             token_type_ids=token_type_ids)
 
             loss = outputs.loss
-            print(loss)
-
-            # TODO: Get Loss, backword, step
-
+            print("Loss:", loss.item())
+            loss.backward()
+            optimizer.step()
 
     # Save Model
     savePath = "./SavedModel/kor-wiki"

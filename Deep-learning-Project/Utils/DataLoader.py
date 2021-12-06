@@ -1,9 +1,6 @@
 # Kor wiki
 import xml.etree.ElementTree as ET
-
-# Namuwiki
 import ijson
-import pandas as pd
 
 # Definition
 from Definition.WikiDef import *

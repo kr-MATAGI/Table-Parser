@@ -10,6 +10,8 @@
 *.bz2
 *.7z
 
+*.arrow
+
 /Tapas-Dataset-Parsing/SourceData/spider
 /Tapas-Dataset-Parsing/Preprocessing/Dataset
 /Table-Parser/Deep-learning-Project/Dataset

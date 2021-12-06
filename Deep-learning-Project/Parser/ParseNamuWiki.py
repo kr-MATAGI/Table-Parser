@@ -6,6 +6,8 @@ import re
 from Utils.DataLoader import *
 from Utils.HeadExtractor import *
 
+from Utils.Tokenization import *
+
 # Def
 from Definition.WikiDef import *
 
@@ -286,10 +288,14 @@ def ClassifyNormalTableOrInfoBox(tableList):
 if "__main__" == __name__:
     # Class Instances
     headExtractor = HeadExtractor()
+    myTokenizer = MyTokenizer()
+    myTokenizer.LoadNewTokenizer(path="klue/roberta-base")
 
     # Parsing
     docCnt = 0
     tableCnt = 0
+    allTableList = []
+
     for doc in ReadNamuwikiDataset("../Dataset/namu-wiki/namuwiki_20210301.json"):
         docCnt += 1
 
@@ -315,6 +321,16 @@ if "__main__" == __name__:
             tableCnt += len(tableList)
         wikiTable.tableList = tableList
 
+        for table in wikiTable.tableList:
+            allTableList.append(table)
+
     # Print doc/table counts
     print("Document Counts:", docCnt)
     print("table Counts:", tableCnt)
+
+    # Tokenization
+    print("All Table List Size:", len(allTableList))
+    myTokenizer.MakeDatasets(srcTableList=allTableList,
+                             savedPath="../Dataset/Tokenization/namu-wiki")
+
+    print("Complete - Make Namu wiki datasets")

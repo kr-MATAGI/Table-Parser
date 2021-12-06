@@ -325,13 +325,15 @@ if "__main__" == __name__:
     # Class Instances
     headExtractor = HeadExtractor()
     myTokenizer = MyTokenizer()
-    myTokenizer.LoadNewTokenizer(path="../Utils/NewTokenizer")
+    myTokenizer.LoadNewTokenizer(path="klue/roberta-base")
 
     # Parse Wikipedia
     tableCount = 0
     pageCount = 0
     allTableList = []
-    for pageData in ReadWikiDataset("../Dataset/kor-wiki/kowiki-latest-pages-articles-multistream.xml"):
+
+    wikiPath = "../Dataset/kor-wiki/kowiki-latest-pages-articles-multistream.xml"
+    for pageData in ReadWikiDataset(wikiPath):
         pageCount += 1
         wikipage = WikiPage(title=pageData[0], text=pageData[1])
 
@@ -349,4 +351,10 @@ if "__main__" == __name__:
     print("Total Table Size:", tableCount)
 
     # Tokenization
-    myTokenizer.MakeDatasets(allTableList)
+    print("All Table List Size:", len(allTableList))
+    myTokenizer.MakeDatasets(srcTableList=allTableList,
+                             savedPath="../Dataset/Tokenization/ko-wiki")
+    # train - 196962
+    # test - 49241
+
+    print("Complete - Make Wikipedia datasets")

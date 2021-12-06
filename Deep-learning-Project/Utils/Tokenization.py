@@ -64,6 +64,19 @@ class MyTokenizer:
             tokenizedTensor["input_ids"] = new_input_ids
             tokenizedTensor["attention_mask"] = new_attention_mask
             tokenizedTensor["token_type_ids"] = new_token_type_ids
+        elif 512 < tokenSentLen:
+            new_input_ids = torch.tensor(np.ones((1, 512), dtype=np.int64))  # [PAD]
+            new_input_ids += tokenizedTensor["input_ids"][:, 512]
+
+            new_attention_mask = torch.tensor(np.zeros((1, 512), dtype=np.int64))
+            new_attention_mask += tokenizedTensor["attention_mask"][:, 512]
+
+            new_token_type_ids = torch.tensor(np.zeros((1, 512), dtype=np.int64))
+            new_token_type_ids += tokenizedTensor["token_type_ids"][:, 512]
+
+            tokenizedTensor["input_ids"] = new_input_ids
+            tokenizedTensor["attention_mask"] = new_attention_mask
+            tokenizedTensor["token_type_ids"] = new_token_type_ids
 
         new_token_type_ids = torch.tensor(np.zeros([tokenizedTensor["token_type_ids"].shape[0],
                                                     tokenizedTensor["token_type_ids"].shape[1],
@@ -73,16 +86,10 @@ class MyTokenizer:
 
         return tokenizedTensor
 
-    def MakeDatasets(self, srcTableList):
+    def MakeDatasets(self, srcTableList, savedPath):
         # Init
-        trainDataDict = {'input_ids': [],
-                         'token_type_ids': [],
-                         'attention_mask': []}
-
-        testDataDict = {'input_ids': [],
-                         'token_type_ids': [],
-                         'attention_mask': []}
         procCount = 0
+        print("MakeDatasets savedPath:", savedPath)
 
         # Shuffle
         srcTableListLen = len(srcTableList)
@@ -137,25 +144,16 @@ class MyTokenizer:
             "test": datasets.Dataset.from_dict(testDataDict)
         })
 
-        tokenizedDatasets.save_to_disk("../Dataset/Tokenization")
+        tokenizedDatasets.save_to_disk(savedPath)
         print("Complete - MyTokenizer.MakeDataset()")
 
 if "__main__" == __name__:
     print("Start Test - Tokenization")
 
-    testTable = [[ "트랙", "제목", "링크" , "러닝 타임", "작곡가" ],
-                [ "1", "Way Back then 옛날 옛적에", "", "2:32", "정재일" ],
-                [ "2", "Round I 1라운드", "", "1:20", "정재일" ],
-                [ "3", "The Rope is Tied 밧줄은 묶여 있다", "", "3:19", "정재일" ],
-                [ "4", "Pink Soldiers 분홍 병정", "", "0:39", "김성수" ],
-                [ "5", "Hostage Crisis 인질극", "", "2:23", "김성수" ],
-                [ "6", "I Remember My Name · TITLE 내 이름이 기억났어", "", "3:14", "정재일" ]]
+    ones_tensor = torch.tensor(np.ones(shape=(1, 874), dtype=np.int64))
+    print(ones_tensor.shape)
 
-    testTableList = []
-    testTableList.append(testTable)
+    convert_tensor = torch.tensor(np.zeros(shape=(1, 512), dtype=np.int64))
+    convert_tensor += ones_tensor[:, :512]
 
-    myTokenizer = MyTokenizer()
-
-    myTokenizer.LoadNewTokenizer(path="klue/roberta-base")
-    #myTokenizer.LoadNewTokenizer(path="google/tapas-base-masklm")
-    myTokenizer.MakeDatasets(testTableList)
+    print(convert_tensor.shape)
