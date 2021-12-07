@@ -66,6 +66,7 @@ if "__main__" == __name__:
 
             loss = outputs.loss
             print("Loss:", loss.item())
+
             loss.backward()
             optimizer.step()
 
