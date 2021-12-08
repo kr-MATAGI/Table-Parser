@@ -1,7 +1,6 @@
 from transformers import TapasForMaskedLM
-from transformers import TapasForQuestionAnswering
-from transformers import TapasConfig
 from transformers import AdamW
+from Utils.Tokenization import *
 
 import torch
 import datasets
@@ -23,7 +22,7 @@ class KorQuadDataset(datasets.Dataset):
         items = {
             "labels": None,
             "input_ids": None,
-            # "attention_mask": torch.tensor(np.zeros(512)),
+            "attention_mask": None,
             "token_type_ids": None
         }
 
@@ -40,6 +39,7 @@ class KorQuadDataset(datasets.Dataset):
         items["input_ids"] = torch.tensor(data["input_ids"][0], dtype=torch.int64)
 
         ## attention_mask
+        items["attention_mask"] = torch.tensor(np.zeros(512), dtype=torch.int64)
 
         ## token_type_ids
         # segment_ids
@@ -62,9 +62,12 @@ class KorQuadDataset(datasets.Dataset):
 
         # numeric_relations
         numeric_relation_tensor = torch.tensor(np.zeros(512), dtype=torch.int64)
-        items["token_type_ids"] = torch.column_stack([segment_ids_tensor, column_ids_tensor,
-                                                     row_ids_tensor, pre_labels_tensor,
-                                                      column_ranks_tensor, inv_column_ranks,
+        items["token_type_ids"] = torch.column_stack([segment_ids_tensor,
+                                                      column_ids_tensor,
+                                                      row_ids_tensor,
+                                                      pre_labels_tensor,
+                                                      column_ranks_tensor,
+                                                      inv_column_ranks,
                                                       numeric_relation_tensor])
 
         return items
@@ -73,6 +76,8 @@ class KorQuadDataset(datasets.Dataset):
         return len(self.srcData)
 
 if "__main__" == __name__:
+    myTokenizer = MyTokenizer()
+    myTokenizer.LoadNewTokenizer("klue/roberta-base")
     print("Start - Fine-tuning using by korquad 2.0")
 
     # Load kor-quad Npy Files
@@ -111,7 +116,7 @@ if "__main__" == __name__:
     train_dataset = datasets.Dataset.from_dict(train_data_dict)
     train_dataset = KorQuadDataset(train_dataset)
     print("Train Datasets Size:", len(train_dataset))
-    train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=2)
+    train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1)
 
     test_data_dict = {
         "labels": [],
@@ -131,7 +136,7 @@ if "__main__" == __name__:
     test_dataset = datasets.Dataset.from_dict(test_data_dict)
     test_dataset = KorQuadDataset(test_dataset)
     print("Test Datasets Size:", len(test_dataset))
-    test_data_loader = torch.utils.data.DataLoader(test_data_dict, batch_size=2)
+    test_data_loader = torch.utils.data.DataLoader(test_data_dict, batch_size=1)
 
     # Fine tuning
     modelPtDirPath = "./"
@@ -146,31 +151,31 @@ if "__main__" == __name__:
         print("Epoch:", epoch+1)
         for idx, batch in enumerate(train_data_loader):
             input_ids = batch["input_ids"].to(device)
-            # attention_mask = batch["attention_mask"].to(device)
+            attention_mask = batch["attention_mask"].to(device)
             token_type_ids = batch["token_type_ids"].to(device)
             labels = batch["labels"].to(device) # shape (batch_size, 2)
-
-            # Test - Check Shape
-            # print("input_ids.shape", input_ids.shape)
-            # print("token_type_ids.shape", token_type_ids.shape)
 
             # zero the parameter gradients
             optimizer.zero_grad()
 
             outputs = model(input_ids=input_ids,
+                            attention_mask=attention_mask,
                             token_type_ids=token_type_ids,
                             labels=labels)
 
             loss = outputs.loss
             logits = outputs.logits
-            print("Loss:", loss.item()) # loss == None
-            print("Logits:", logits)
+            print("Loss:", loss.item())
 
             loss.backward()
             optimizer.step()
 
 
-        for idx, batch in enumerate(test_data_loader):
-            input_ids = batch["input_ids"].to(device)
-            # attention_mask = batch["attention_mask"].to(device)
-            token_type_ids = batch["token_type_ids"].to(device)
+# Sample
+# testTable = [["트랙", "제목", "링크", "러닝 타임", "작곡가"],
+#              ["1", "Way Back then 옛날 옛적에", "", "2:32", "정재일"],
+#              ["2", "Round I 1라운드", "", "1:20", "정재일"],
+#              ["3", "The Rope is Tied 밧줄은 묶여 있다", "", "3:19", "정재일"],
+#              ["4", "Pink Soldiers 분홍 병정", "", "0:39", "김성수"],
+#              ["5", "Hostage Crisis 인질극", "", "2:23", "김성수"],
+#              ["6", "I Remember My Name · TITLE 내 이름이 기억났어", "", "3:14", "정재일"]]
