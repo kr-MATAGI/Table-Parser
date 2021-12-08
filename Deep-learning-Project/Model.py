@@ -1,6 +1,7 @@
 import datasets
 import torch
 import numpy as np
+import random
 
 from transformers import TapasForMaskedLM
 from transformers import AdamW
@@ -12,7 +13,32 @@ class MyTableDataset(datasets.Dataset):
 
     def __getitem__(self, idx):
         data = self.tables[idx]
-        items = {key: torch.tensor(np.array(val[0], dtype=np.int64)) for key, val in data.items()}
+
+        items = {
+            "input_ids": None,
+            "attention_mask": None,
+            "token_type_ids": None,
+            "labels": None
+        }
+
+        ## input_ids
+        randIdx = 1
+        try:
+            padStart_idx = data["input_ids"][0].index(1)
+            randIdx = random.randrange(1, padStart_idx)
+        except:
+            randIdx = random.randrange(1, 512)
+        items["input_ids"] = torch.tensor(np.array(data["input_ids"][0], dtype=np.int64))
+        items["input_ids"][randIdx] = 4 # [MASK]
+
+        ## attention_mask
+        items["attention_mask"] = torch.tensor(np.array(data["attention_mask"][0], dtype=np.int64))
+
+        ## token_type_ids
+        items["token_type_ids"] = torch.tensor(np.array(data["token_type_ids"][0], dtype=np.int64))
+
+        ## labels
+        items["labels"] = torch.tensor(np.array(data["input_ids"][0], dtype=np.int64))
 
         return items
 
@@ -50,6 +76,7 @@ if "__main__" == __name__:
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             token_type_ids = batch["token_type_ids"].to(device)
+            labels = batch["labels"].to(device)
 
             # Test - Check Shape
             # print("input_ids.shape", input_ids.shape)
@@ -62,7 +89,8 @@ if "__main__" == __name__:
             # forward + backward + optimize
             outputs = model(input_ids=input_ids,
                             attention_mask=attention_mask,
-                            token_type_ids=token_type_ids)
+                            token_type_ids=token_type_ids,
+                            labels=labels)
 
             loss = outputs.loss
             print("Loss:", loss.item())
