@@ -1,4 +1,5 @@
 from transformers import TapasForMaskedLM
+from transformers import TapasForQuestionAnswering
 from transformers import TapasConfig
 from transformers import AdamW
 
@@ -120,15 +121,15 @@ if "__main__" == __name__:
         "row_ids": [],
         # "column_ranks": [],
     }
-    test_data_dict["labels"] = answer_span_table_npy[data_split_idx:-1]
-    test_data_dict["input_ids"] = sequence_table_npy[data_split_idx:-1]
-    test_data_dict["segment_ids"] = segments_table_npy[data_split_idx:-1]
-    test_data_dict["column_ids"] = cols_table_npy[data_split_idx:-1]
-    test_data_dict["row_ids"] = rows_table_npy[data_split_idx:-1]
+    test_data_dict["labels"] = answer_span_table_npy[data_split_idx:]
+    test_data_dict["input_ids"] = sequence_table_npy[data_split_idx:]
+    test_data_dict["segment_ids"] = segments_table_npy[data_split_idx:]
+    test_data_dict["column_ids"] = cols_table_npy[data_split_idx:]
+    test_data_dict["row_ids"] = rows_table_npy[data_split_idx:]
     # test_data_dict["column_ranks"]
 
     test_dataset = datasets.Dataset.from_dict(test_data_dict)
-    test_dataset = KorQuadDataset(test_data_dict)
+    test_dataset = KorQuadDataset(test_dataset)
     print("Test Datasets Size:", len(test_dataset))
     test_data_loader = torch.utils.data.DataLoader(test_data_dict, batch_size=2)
 
@@ -161,7 +162,9 @@ if "__main__" == __name__:
                             labels=labels)
 
             loss = outputs.loss
+            logits = outputs.logits
             print("Loss:", loss.item()) # loss == None
+            print("Logits:", logits)
 
             loss.backward()
             optimizer.step()
