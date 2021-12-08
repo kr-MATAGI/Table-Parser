@@ -16,6 +16,9 @@
 /Tapas-Dataset-Parsing/Preprocessing/Dataset
 /Table-Parser/Deep-learning-Project/Dataset
 
+/Deep-learning-Project/QuestionAnswering.py
+/Deep-learning-Project/train_torch.py
+
 # config directory
 __pycache__
 .idea
