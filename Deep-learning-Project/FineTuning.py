@@ -39,7 +39,7 @@ class KorQuadDataset(datasets.Dataset):
         items["input_ids"] = torch.tensor(data["input_ids"][0], dtype=torch.int64)
 
         ## attention_mask
-        items["attention_mask"] = torch.tensor(np.zeros(512), dtype=torch.int64)
+        items["attention_mask"] = torch.tensor(data["attention_mask"][0], dtype=torch.int64)
 
         ## token_type_ids
         # segment_ids
@@ -55,7 +55,7 @@ class KorQuadDataset(datasets.Dataset):
         pre_labels_tensor = torch.tensor(np.zeros(512), dtype=torch.int64)
 
         # column_ranks
-        column_ranks_tensor = torch.tensor(np.zeros(512), dtype=torch.int64)
+        column_ranks_tensor = torch.tensor(data["column_ranks"][0], dtype=torch.int64)
 
         # inv_column_ranks
         inv_column_ranks = torch.flip(column_ranks_tensor, dims=[0])
@@ -86,7 +86,8 @@ if "__main__" == __name__:
     answer_span_table_npy = LoadNpyFile(rootDir+"/answer_span_table.npy") # shape: (12660, 2) # labels
     cols_table_npy = LoadNpyFile(rootDir+"/cols_table.npy") # shape: (12660, 3, 512)
     rows_table_npy = LoadNpyFile(rootDir+"/rows_table.npy") # shape: (12660, 3, 512)
-    # column_rank_npy = LoadNpyFile(rootDir"/")
+    column_rank_npy = LoadNpyFile(rootDir+"/ranks_table.npy") # shape: (12660, 3, 512)
+    attention_mask_npy = LoadNpyFile(rootDir+"/mask_table.npy") # shape: (12660, 3, 512)
     segments_table_npy = LoadNpyFile(rootDir+"/segments_table.npy") # shape: (12660, 3, 512)
     sequence_table_npy = LoadNpyFile(rootDir+"/sequence_table.npy") # shape: (12660, 3, 512) -> input_ids
 
@@ -101,17 +102,19 @@ if "__main__" == __name__:
     train_data_dict = {
         "labels": [],
         "input_ids": [],
+        "attention_mask": [],
         "segment_ids": [],
         "column_ids": [],
         "row_ids": [],
-        # "column_ranks": [],
+        "column_ranks": []
     }
     train_data_dict["labels"] = answer_span_table_npy[:data_split_idx]
     train_data_dict["input_ids"] = sequence_table_npy[:data_split_idx]
+    train_data_dict["attention_mask"] = attention_mask_npy[:data_split_idx]
     train_data_dict["segment_ids"] = segments_table_npy[:data_split_idx]
     train_data_dict["column_ids"] = cols_table_npy[:data_split_idx]
     train_data_dict["row_ids"] = rows_table_npy[:data_split_idx]
-    # train_data_dict["column_ranks"]
+    train_data_dict["column_ranks"] = column_rank_npy[:data_split_idx]
 
     train_dataset = datasets.Dataset.from_dict(train_data_dict)
     train_dataset = KorQuadDataset(train_dataset)
@@ -121,17 +124,19 @@ if "__main__" == __name__:
     test_data_dict = {
         "labels": [],
         "input_ids": [],
+        "attention_mask": [],
         "segment_ids": [],
         "column_ids": [],
         "row_ids": [],
-        # "column_ranks": [],
+        "column_ranks": []
     }
     test_data_dict["labels"] = answer_span_table_npy[data_split_idx:]
     test_data_dict["input_ids"] = sequence_table_npy[data_split_idx:]
+    test_data_dict["attention_mask"] = attention_mask_npy[data_split_idx:]
     test_data_dict["segment_ids"] = segments_table_npy[data_split_idx:]
     test_data_dict["column_ids"] = cols_table_npy[data_split_idx:]
     test_data_dict["row_ids"] = rows_table_npy[data_split_idx:]
-    # test_data_dict["column_ranks"]
+    test_data_dict["column_ranks"] = column_rank_npy[data_split_idx:]
 
     test_dataset = datasets.Dataset.from_dict(test_data_dict)
     test_dataset = KorQuadDataset(test_dataset)
@@ -170,6 +175,14 @@ if "__main__" == __name__:
             loss.backward()
             optimizer.step()
 
+    # Save Model
+    output_model_file = "./output_model_korquad.bin"
+    n_gpu = torch.cuda.device_count()
+    print('n gpu:', n_gpu)
+    if n_gpu > 1:
+        torch.save(model.module.state_dict(), output_model_file)
+    else:
+        torch.save(model.state_dict(), output_model_file)
 
 # Sample
 # testTable = [["트랙", "제목", "링크", "러닝 타임", "작곡가"],
