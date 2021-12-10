@@ -18,6 +18,8 @@
 
 /Deep-learning-Project/QuestionAnswering.py
 /Deep-learning-Project/train_torch.py
+/Deep-learning-Project/Evaluation/evaluate2.py
+/Deep-learning-Project/Evaluation/evaluation_torch.py
 
 # config directory
 __pycache__

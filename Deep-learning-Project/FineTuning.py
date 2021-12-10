@@ -23,7 +23,9 @@ class KorQuadDataset(datasets.Dataset):
             "labels": None,
             "input_ids": None,
             "attention_mask": None,
-            "token_type_ids": None
+            "token_type_ids": None,
+            "start_ids": None,
+            "end_ids": None
         }
 
         ## labels
@@ -90,6 +92,12 @@ if "__main__" == __name__:
     attention_mask_npy = LoadNpyFile(rootDir+"/mask_table.npy") # shape: (12660, 3, 512)
     segments_table_npy = LoadNpyFile(rootDir+"/segments_table.npy") # shape: (12660, 3, 512)
     sequence_table_npy = LoadNpyFile(rootDir+"/sequence_table.npy") # shape: (12660, 3, 512) -> input_ids
+
+    # start ids
+
+
+    # end_ids
+
 
     # My Custom
     data_num = answer_span_table_npy.shape[0]
