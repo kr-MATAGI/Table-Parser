@@ -56,7 +56,7 @@ if "__main__" == __name__:
 
     summarize_dataset = datasets.concatenate_datasets([trainDataset, testDataset])
     summarize_dataset = MyTableDataset(summarize_dataset)
-    pt_dataloader = torch.utils.data.DataLoader(summarize_dataset, batch_size=1024)
+    pt_dataloader = torch.utils.data.DataLoader(summarize_dataset, batch_size=16)
 
     # Model
     modelPtDirPath = "./"
@@ -70,7 +70,7 @@ if "__main__" == __name__:
     model.to(device)
 
     optimizer = AdamW(model.parameters(), lr=5e-5)
-    for epoch in range(10):
+    for epoch in range(5):
         print("Epoch:", epoch+1)
         for idx, batch in enumerate(pt_dataloader):
             input_ids = batch["input_ids"].to(device)

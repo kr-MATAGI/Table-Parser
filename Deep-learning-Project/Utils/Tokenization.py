@@ -150,10 +150,14 @@ class MyTokenizer:
 if "__main__" == __name__:
     print("Start Test - Tokenization")
 
-    ones_tensor = torch.tensor(np.ones(shape=(1, 874), dtype=np.int64))
-    print(ones_tensor.shape)
+    # ones_tensor = torch.tensor(np.ones(shape=(1, 874), dtype=np.int64))
+    # print(ones_tensor.shape)
+    #
+    # convert_tensor = torch.tensor(np.zeros(shape=(1, 512), dtype=np.int64))
+    # convert_tensor += ones_tensor[:, :512]
+    #
+    # print(convert_tensor.shape)
 
-    convert_tensor = torch.tensor(np.zeros(shape=(1, 512), dtype=np.int64))
-    convert_tensor += ones_tensor[:, :512]
-
-    print(convert_tensor.shape)
+    tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
+    print(tokenizer.convert_ids_to_tokens(7995))
+    print(tokenizer.convert_tokens_to_ids('#'))

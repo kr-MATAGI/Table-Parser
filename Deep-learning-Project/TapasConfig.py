@@ -1,3 +1,5 @@
+import collections
+
 import torch
 import numpy as np
 
@@ -90,24 +92,39 @@ def PrintStateDictKeyValueLen(dictPath):
     for key, val in stateDict.items():
         print(key, "-", len(val))
 
+def RemoveWordInStateDict(bin_path, remove_word, target_path):
+    origin_dict = torch.load(bin_path)
+
+    origin_key_list = list(origin_dict.keys())
+
+    # remove word
+    new_dict = collections.OrderedDict()
+    for ori_key in origin_key_list:
+        remove_key = ori_key.replace(remove_word+".", "")
+        new_dict[remove_key] = origin_dict[ori_key]
+
+    origin_dict = new_dict
+    torch.save(new_dict, target_path)
+    print("Made:", target_path)
+
 if "__main__" == __name__:
     tapas_path = "./ModelBinFiles/tapas.bin"
     tapas_mask_lm_path = "./ModelBinFiles/tapas-base-masklm.bin"
     klue_path = "./ModelBinFiles/klue-roberta.bin"
     targetPath = "./pytorch_model.bin"
-    rename_state_dict_keys(tapasBinPath=tapas_mask_lm_path,
-                           klueBinPath=klue_path,
-                           targetPath=targetPath)
+    # rename_state_dict_keys(tapasBinPath=tapas_mask_lm_path,
+    #                        klueBinPath=klue_path,
+    #                        targetPath=targetPath)
 
     print("\n-----------------------------------------\n")
 
-    '''
-    CheckModelKeyShape(tapas_mask_lm_path, targetPath, "tapas.embeddings.word_embeddings.weight")
-    CheckModelKeyShape(tapas_mask_lm_path, targetPath, "tapas.embeddings.position_embeddings.weight")
-    CheckModelKeyShape(tapas_mask_lm_path, targetPath, "cls.predictions.bias")
-    CheckModelKeyShape(tapas_mask_lm_path, targetPath, "cls.predictions.decoder.weight")
-    CheckModelKeyShape(tapas_mask_lm_path, targetPath, "cls.predictions.decoder.bias")
-    '''
+
+    # CheckModelKeyShape(tapas_mask_lm_path, targetPath, "tapas.embeddings.word_embeddings.weight")
+    # CheckModelKeyShape(tapas_mask_lm_path, targetPath, "tapas.embeddings.position_embeddings.weight")
+    # CheckModelKeyShape(tapas_mask_lm_path, targetPath, "cls.predictions.bias")
+    # CheckModelKeyShape(tapas_mask_lm_path, targetPath, "cls.predictions.decoder.weight")
+    # CheckModelKeyShape(tapas_mask_lm_path, targetPath, "cls.predictions.decoder.bias")
+
 
 
     '''
@@ -115,7 +132,12 @@ if "__main__" == __name__:
         tapas-mask-lm - tapas.embeddings.position_embeddings.weight - 1024
         target - tapas.embeddings.position_embeddings.weight - 1024
     '''
-    PrintStateDictKeyValueLen(klue_path)
+    # PrintStateDictKeyValueLen("./output/korwiki_1.bin")
 
 
-
+    # fin-tuning remove 'module.'
+    origin_file = "./output/korwiki_1.bin"
+    remove_word = "module"
+    target_path = "./output/korwiki_1_redict.bin"
+    RemoveWordInStateDict(origin_file, remove_word, target_path)
+    PrintStateDictKeyValueLen(target_path)
