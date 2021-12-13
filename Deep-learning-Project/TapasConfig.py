@@ -103,7 +103,6 @@ def RemoveWordInStateDict(bin_path, remove_word, target_path):
         remove_key = ori_key.replace(remove_word+".", "")
         new_dict[remove_key] = origin_dict[ori_key]
 
-    origin_dict = new_dict
     torch.save(new_dict, target_path)
     print("Made:", target_path)
 
@@ -136,8 +135,8 @@ if "__main__" == __name__:
 
 
     # fin-tuning remove 'module.'
-    origin_file = "./output/korwiki_1.bin"
+    origin_file = "./output/korquad_1.bin"
     remove_word = "module"
-    target_path = "./output/korwiki_1_redict.bin"
+    target_path = "output/sh_korwiki_token_none_redict.bin"
     RemoveWordInStateDict(origin_file, remove_word, target_path)
     PrintStateDictKeyValueLen(target_path)

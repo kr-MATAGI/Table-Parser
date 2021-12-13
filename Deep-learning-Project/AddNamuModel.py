@@ -49,12 +49,20 @@ if "__main__" == __name__:
     print("Model Pretrain")
 
     # Load Tokenized Datasets
-    totalDatasets = datasets.load_from_disk("./Dataset/Tokenization/ko-wiki")
+    wiki_Datasets = datasets.load_from_disk("./Dataset/Tokenization/ko-wiki")
+    wiki_trainDataset = wiki_Datasets["train"]
+    wiki_testDataset = wiki_Datasets["test"]
 
-    trainDataset = totalDatasets["train"]
-    testDataset = totalDatasets["test"]
+    namu_Datasets = datasets.load_from_disk("./Dataset/Tokenization/namu-wiki")
+    namu_trainDataset = namu_Datasets["train"]
+    namu_testDataset = namu_Datasets["test"]
 
-    summarize_dataset = datasets.concatenate_datasets([trainDataset, testDataset])
+    train_summarize = datasets.concatenate_datasets([wiki_trainDataset, namu_trainDataset])
+    teset_summarize = datasets.concatenate_datasets([wiki_testDataset, namu_testDataset])
+
+    summarize_dataset = datasets.concatenate_datasets([train_summarize, teset_summarize])
+    print("summarize_datasets:", summarize_dataset)
+
     summarize_dataset = MyTableDataset(summarize_dataset)
     pt_dataloader = torch.utils.data.DataLoader(summarize_dataset, batch_size=16)
 
@@ -99,5 +107,5 @@ if "__main__" == __name__:
             optimizer.step()
 
     # Save Model
-    savePath = "./SavedModel/kor-wiki"
+    savePath = "./SavedModel/namu-wiki"
     model.save_pretrained(savePath)

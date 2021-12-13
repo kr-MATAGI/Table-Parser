@@ -159,5 +159,3 @@ if "__main__" == __name__:
     # print(convert_tensor.shape)
 
     tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
-    print(tokenizer.convert_ids_to_tokens(7995))
-    print(tokenizer.convert_tokens_to_ids('#'))

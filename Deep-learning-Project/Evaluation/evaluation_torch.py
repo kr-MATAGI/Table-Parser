@@ -192,9 +192,10 @@ def evaluation_torch_start():
     test_sampler = SequentialSampler(test_dataset)
     test_dataloader = DataLoader(test_dataset, sampler=test_sampler, batch_size=train_batch_size)
 
-    output_model_file = "../output/korwiki_1_redict.bin"
+    output_model_file = "../output/sh_korwiki_token_none_redict.bin"
 
-    modelPath = "../SavedModel/kor-wiki"
+    modelPath = "../SavedModel/sh_korwiki"
+    #modelPath = "klue/roberta-base"
     model = QuestionAnswering.QuestionAnswering(modelPath)
     model.load_state_dict(torch.load(output_model_file))
     model = model.cuda()
