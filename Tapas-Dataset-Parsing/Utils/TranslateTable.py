@@ -37,7 +37,7 @@ class TableTranslator:
         pd_df = pd.DataFrame(src_table, columns=None, index=None)
         pd_df.to_excel(
             src_table_excel_path,
-            sheet_name="origin",
+            sheet_name="1",
             header=False,
             columns=None,
             index=False,
@@ -91,6 +91,18 @@ class TableTranslator:
         res = requests.get(url, headers=self.header)
         print(res.text)
 
+    def ReadTableXlsxFiles(self, src_path):
+        ret_table_list = []
+
+        xlsx_files = os.listdir(src_path)
+        print("xlsx file size:", len(xlsx_files))
+
+        for xlsx_file in xlsx_files:
+            table_xlsx = pd.read_excel(src_path+"/"+xlsx_file)
+            ret_table_list.append(table_xlsx.values.tolist())
+
+        return ret_table_list
+
 if "__main__" == __name__:
     ### TEST CODE ####
     testTable = [['Season', 'Premier', 'Runner-up', 'Score', 'Margin', 'Venue', 'Attendance'], [1960, 'Melbourne', 'Collingwood', '8.14 (62) – 2.2 (14)', 48, 'MCG', 97457], [1964, 'Melbourne', 'Collingwood', '8.16 (64) – 8.12 (60)', 4, 'MCG', 102469], [1966, 'St Kilda', 'Collingwood', '10.14 (74) – 10.13 (73)', 1, 'MCG', 101655], [1970, 'Carlton', 'Collingwood', '17.9 (111) – 14.17 (101)', 10, 'MCG', 121696], [1977, 'North Melbourne', 'Collingwood', '10.16 (76) – 9.22 (76)', 0, 'MCG', 108244], [1977, 'North Melbourne', 'Collingwood', '21.25 (151) – 19.10 (124)', 27, 'MCG', 98366], [1979, 'Carlton', 'Collingwood', '11.16 (82) – 11.11 (77)', 5, 'MCG', 113545], [1980, 'Richmond', 'Collingwood', '23.21 (159) – 9.24 (78)', 81, 'MCG', 113461]]
@@ -110,7 +122,7 @@ if "__main__" == __name__:
 
         req_url_list = []
         req_url = tableTranslator.TranslateTable(src_table=testTable, save_path=save_path, file_name=file_name,
-                                       ids_path="./TranslatedTable/request_ids.txt")
+                                                 ids_path="./TranslatedTable/request_ids.txt")
         if 0 < len(req_url):
             req_url_list.append(req_url)
 
@@ -118,7 +130,13 @@ if "__main__" == __name__:
             pickle.dump(req_url_list, wf)
 
     # Download
-    download_strat = True
+    download_strat = False
     if download_strat:
         tableTranslator.DownloadDocument(txt_path="./TranslatedTable/request_ids.txt",
                                          target_path="./TranslatedTable/target")
+
+    # Read
+    xlsx_read_start = True
+    if xlsx_read_start:
+        table_list = tableTranslator.ReadTableXlsxFiles(src_path="./TranslatedTable/target")
+        print(table_list)
