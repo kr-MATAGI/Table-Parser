@@ -103,7 +103,7 @@ class WikiSqlGenerator:
 
                 queryRelation.table2D = table2D
                 queryRelation.query = question
-                queryRelation.labelTags.append((0, int(sel)))
+                # queryRelation.labelTags.append((0, int(sel)))
 
                 # Exec SQL Query
                 if 0 < len(conds):
@@ -116,7 +116,8 @@ class WikiSqlGenerator:
                         continue
 
                     for cond in conds:
-                        queryRelation.labelTags.append((0, int(cond[0])))
+                        #queryRelation.labelTags.append((0, int(cond[0])))
+                        pass
 
                     for dbResult in dbResultList:
                         if queryType.name == QueryType.NONE.name:
