@@ -139,4 +139,3 @@ if "__main__" == __name__:
     xlsx_read_start = True
     if xlsx_read_start:
         table_list = tableTranslator.ReadTableXlsxFiles(src_path="./TranslatedTable/target")
-        print(table_list)
