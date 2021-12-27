@@ -92,6 +92,7 @@ class TableTranslator:
                     res_json = json.loads(response.text)
                     req_id = str(res_json["data"]["requestId"])
                     req_url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/download?requestId=" + req_id
+                    print("Req URL:", req_url)
                     req_url_list.append(req_url)
                 else:
                     print('ERROR - Response Status', res_status)
