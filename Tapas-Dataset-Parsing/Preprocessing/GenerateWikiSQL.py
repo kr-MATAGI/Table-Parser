@@ -1,8 +1,26 @@
 import os
+import sys
 import json
 
-from Definition.PreprocDef import *
-from lib.dbengine import DBEngine
+#from lib.dbengine import DBEngine
+
+from dataclasses import dataclass
+from enum import Enum
+
+@dataclass
+class QueryRelation:
+    table2D = list()
+    labelTags = list() # element is tuple()
+    query: str = "" # Question
+    answer = list()
+
+class QueryType(Enum):
+    NONE = 0
+    COUNT = 1
+    MAX = 2
+    MIN = 3
+    SUM = 4
+    AVG = 5
 
 class WikiSqlGenerator:
     ### PRIVATE ###
@@ -72,7 +90,7 @@ class WikiSqlGenerator:
         print("Start - Generate Wiki Dataset")
         print(f"srcFile: {self.srcFile}\ntableFile: {self.tableFile}")
 
-        dbEngine = DBEngine(fdb=dbPath)
+        #dbEngine = DBEngine(fdb=dbPath)
         with open(self.srcFile, mode="r", encoding="utf-8") as srcFile:
             procCount = 0
             while True:

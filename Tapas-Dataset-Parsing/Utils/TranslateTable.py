@@ -9,7 +9,6 @@ import json
 from requests_toolbelt import MultipartEncoder
 
 class TableTranslator:
-
     ## PRIVATE ##
     def __init__(self, client_id, client_key):
         self.client_id = client_id
@@ -57,17 +56,18 @@ class TableTranslator:
         multipart_encoder = MultipartEncoder(request_data, boundary=uuid.uuid4())
         self.header["Content-Type"] = multipart_encoder.content_type
         url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/translate"
-        response = requests.post(url, headers=self.header, data=multipart_encoder.to_string())
 
         # Download
         ret_url = ""
         try:
-            res_json = json.loads(response.text)
-            req_id = res_json["data"]["requestId"]
-            with open(ids_path, mode="a", encoding="utf-8") as id_file:
-                ret_url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/download?requestId="+req_id
+            response = requests.post(url, headers=self.header, data=multipart_encoder.to_string()).json()
+            req_id = str(response["data"]["requestId"])
+            ret_url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/download?requestId="+req_id
         except Exception as e:
-            print("ERR:", e)
+            print(file_name)
+            print("Translate ERR:", e)
+            exit()
+
 
         return ret_url
 
@@ -84,7 +84,8 @@ class TableTranslator:
                 print("Download URL:", url)
 
                 res = requests.get(url, headers=self.header)
-                with open(target_path+"/"+str(count)+".xlsx", "wb") as wf:
+                file_name = str(line.split("=")[-1])
+                with open(target_path+"/"+file_name+".xlsx", "wb") as wf:
                     wf.write(res.content)
 
     def CheckTranslateStatus(self, url):
@@ -105,7 +106,7 @@ class TableTranslator:
 
 if "__main__" == __name__:
     ### TEST CODE ####
-    testTable = [['Season', 'Premier', 'Runner-up', 'Score', 'Margin', 'Venue', 'Attendance'], [1960, 'Melbourne', 'Collingwood', '8.14 (62) – 2.2 (14)', 48, 'MCG', 97457], [1964, 'Melbourne', 'Collingwood', '8.16 (64) – 8.12 (60)', 4, 'MCG', 102469], [1966, 'St Kilda', 'Collingwood', '10.14 (74) – 10.13 (73)', 1, 'MCG', 101655], [1970, 'Carlton', 'Collingwood', '17.9 (111) – 14.17 (101)', 10, 'MCG', 121696], [1977, 'North Melbourne', 'Collingwood', '10.16 (76) – 9.22 (76)', 0, 'MCG', 108244], [1977, 'North Melbourne', 'Collingwood', '21.25 (151) – 19.10 (124)', 27, 'MCG', 98366], [1979, 'Carlton', 'Collingwood', '11.16 (82) – 11.11 (77)', 5, 'MCG', 113545], [1980, 'Richmond', 'Collingwood', '23.21 (159) – 9.24 (78)', 81, 'MCG', 113461]]
+    testTable = [['Aircraft', 'Description', 'Max Gross Weight', 'Total disk area', 'Max disk Loading']]
 
     # Header Info
     header = {
@@ -125,12 +126,13 @@ if "__main__" == __name__:
                                                  ids_path="./TranslatedTable/request_ids.txt")
         if 0 < len(req_url):
             req_url_list.append(req_url)
+            req_url_list.append(req_url)
 
         with open("./TranslatedTable/request_ids.txt", mode="wb") as wf:
             pickle.dump(req_url_list, wf)
 
     # Download
-    download_strat = False
+    download_strat = True
     if download_strat:
         tableTranslator.DownloadDocument(txt_path="./TranslatedTable/request_ids.txt",
                                          target_path="./TranslatedTable/target")
