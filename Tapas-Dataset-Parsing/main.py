@@ -19,7 +19,7 @@ if "__main__" == __name__:
     table_dict = gen_wikiSQL.ConvertTableData()
 
     # Check Total Request Size
-    CHECK_TOTAL_CHAR = True
+    CHECK_TOTAL_CHAR = False
     if CHECK_TOTAL_CHAR:
         total_len = 0
         for key, val in table_dict.items():
@@ -30,18 +30,17 @@ if "__main__" == __name__:
             total_len += len(curr_join_str)
         print("ToTal Table Len:", total_len)
 
-    print(table_dict["1-10006830-1"])
+    api_header = {
+        "id": "ph7wz3gf0z",  # User_Client_ID
+        "key": "VelHVcmwXQh8Eah81iuuc3cm1Iyec2hJDISp4Vgy",  # User_Client_Key(Secret)
+    }
+    tableTranslator = TableTranslator(client_id=api_header["id"], client_key=api_header["key"])
 
-    ### Make Requst ID Process
-    MAKE_REQ_ID_PROC = False
-    if MAKE_REQ_ID_PROC:
+    ### Make xlsx files
+    MAKE_XLSX_ID_PROC = False
+    if MAKE_XLSX_ID_PROC:
         # Init
-        LIMIT_BYTES = 10000
-        api_header = {
-            "id": "ph7wz3gf0z",  # User_Client_ID
-            "key": "VelHVcmwXQh8Eah81iuuc3cm1Iyec2hJDISp4Vgy",  # User_Client_Key(Secret)
-        }
-        tableTranslator = TableTranslator(client_id=api_header["id"], client_key=api_header["key"])
+        LIMIT_BYTES = 5000000
 
         # already made origin files
         already_made_origin_files = os.listdir("./Utils/TranslatedTable/origin")
@@ -82,20 +81,20 @@ if "__main__" == __name__:
 
                 # Make request ids
                 origin_table_path = "./Utils/TranslatedTable/origin"
-                request_ids_path = "./Utils/TranslatedTable/request_ids.txt"
-
-                req_url = tableTranslator.TranslateTable(src_table=curr_table,
+                req_url = tableTranslator.MakeRequestIDs(src_table=curr_table,
                                                          save_path=origin_table_path,
-                                                         file_name=table_ids,
-                                                         ids_path=request_ids_path)
-                if 0 < len(req_url):
-                    req_url_list.append(req_url)
-                else:
-                    print("ERR - Make Req URL:", table_ids)
+                                                         file_name=table_ids)
 
-            # Make Request ID file
-            with open(request_ids_path, mode="wb") as req_wf:
-                pickle.dump(req_url_list, req_wf)
+    ### Request Process
+    REQUEST_PROCESS = True
+    if REQUEST_PROCESS:
+        origin_table_path = "./Utils/TranslatedTable/origin"
+        request_ids_path = "./Utils/TranslatedTable/request_ids.txt"
+        req_url_list = tableTranslator.RequsetTranslate(origin_table_path)
+
+        # Make Request ID file
+        with open(request_ids_path, mode="wb") as req_wf:
+            pickle.dump(req_url_list, req_wf)
 
     ### Download Process
     DOWNLOAD_PROC = False

@@ -1,5 +1,6 @@
 import os
 import pickle
+import time
 
 import requests
 
@@ -22,13 +23,14 @@ class TableTranslator:
         print(f"Init Table Translator - client [id: {self.client_id}, key: {self.client_key}]")
 
     ## PUBLIC ##
-    def TranslateTable(self, src_table, save_path, file_name, ids_path):
+    def MakeRequestIDs(self, src_table, save_path, file_name):
         if not os.path.exists(save_path):
             print("Not existed directory - ", save_path)
             os.mkdir(save_path)
             print("Made directory - ", save_path)
 
         # Config *.xlsx file path
+        file_name = file_name.replace("-", "_")
         src_table_excel_path = save_path + "/" + file_name + "_origin.xlsx"
         print("src_excel:", src_table_excel_path)
 
@@ -42,34 +44,6 @@ class TableTranslator:
             index=False,
             encoding="utf-8"
         )
-
-        # Request
-        request_data = {
-            'source': 'en',
-            'target': 'ko',
-            'file': (src_table_excel_path, open(src_table_excel_path, mode='rb'),
-                     'application/octet-stream',
-                     {'Content-Transfer-Encoding': 'binary'}
-                    )
-        }
-
-        multipart_encoder = MultipartEncoder(request_data, boundary=uuid.uuid4())
-        self.header["Content-Type"] = multipart_encoder.content_type
-        url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/translate"
-
-        # Download
-        ret_url = ""
-        try:
-            response = requests.post(url, headers=self.header, data=multipart_encoder.to_string()).json()
-            req_id = str(response["data"]["requestId"])
-            ret_url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/download?requestId="+req_id
-        except Exception as e:
-            print(file_name)
-            print("Translate ERR:", e)
-            exit()
-
-
-        return ret_url
 
     def DownloadDocument(self, txt_path, target_path):
         count = 0
@@ -87,6 +61,36 @@ class TableTranslator:
                 file_name = str(line.split("=")[-1])
                 with open(target_path+"/"+file_name+".xlsx", "wb") as wf:
                     wf.write(res.content)
+
+    def RequsetTranslate(self, xlsx_path):
+        req_url_list = []
+
+        xlsx_list = os.listdir(xlsx_path)
+        for xlsx_file in xlsx_list:
+            full_xlsx_path = xlsx_path + "/" + xlsx_file
+            request_data = {
+                'source': 'en',
+                'target': 'ko',
+                'file': (full_xlsx_path, open(full_xlsx_path, mode='rb'),
+                         'application/octet-stream',
+                         {'Content-Transfer-Encoding': 'binary'})
+            }
+
+            multipart_encoder = MultipartEncoder(request_data, boundary=uuid.uuid4())
+            self.header["Content-Type"] = multipart_encoder.content_type
+            url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/translate"
+
+            try:
+                response = requests.post(url, headers=self.header, data=multipart_encoder.to_string()).json()
+                req_id = str(response["data"]["requestId"])
+                req_url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/download?requestId=" + req_id
+                req_url_list.append(req_url)
+            except Exception as e:
+                print(full_xlsx_path)
+                print("Translate ERR:", e)
+                exit()
+
+        return req_url_list
 
     def CheckTranslateStatus(self, url):
         res = requests.get(url, headers=self.header)
@@ -106,7 +110,12 @@ class TableTranslator:
 
 if "__main__" == __name__:
     ### TEST CODE ####
-    testTable = [['Aircraft', 'Description', 'Max Gross Weight', 'Total disk area', 'Max disk Loading']]
+    testTable = [['Aircraft', 'Description', 'Max Gross Weight', 'Total disk area', 'Max disk Loading'],
+                 ['Robinson R-22', 'Light utility helicopter', '1,370 lb (635 kg)', '497 ft² (46.2 m²)', '2.6 lb/ft² (14 kg/m²)'],
+                 ['Bell 206B3 JetRanger', 'Turboshaft utility helicopter', '3,200 lb (1,451 kg)', '872 ft² (81.1 m²)', '3.7 lb/ft² (18 kg/m²)'],
+                 ['CH-47D Chinook', 'Tandem rotor helicopter', '50,000 lb (22,680 kg)', '5,655 ft² (526 m²)', '8.8 lb/ft² (43 kg/m²)'],
+                 ['Mil Mi-26', 'Heavy-lift helicopter', '123,500 lb (56,000 kg)', '8,495 ft² (789 m²)', '14.5 lb/ft² (71 kg/m²)'],
+                 ['CH-53E Super Stallion', 'Heavy-lift helicopter', '73,500 lb (33,300 kg)', '4,900 ft² (460 m²)', '15 lb/ft² (72 kg/m²)']]
 
     # Header Info
     header = {
@@ -122,22 +131,21 @@ if "__main__" == __name__:
         file_name = "test"
 
         req_url_list = []
-        req_url = tableTranslator.TranslateTable(src_table=testTable, save_path=save_path, file_name=file_name,
+        req_url = tableTranslator.MakeRequestIDs(src_table=testTable, save_path=save_path, file_name=file_name,
                                                  ids_path="./TranslatedTable/request_ids.txt")
         if 0 < len(req_url):
-            req_url_list.append(req_url)
             req_url_list.append(req_url)
 
         with open("./TranslatedTable/request_ids.txt", mode="wb") as wf:
             pickle.dump(req_url_list, wf)
 
     # Download
-    download_strat = True
-    if download_strat:
+    download_start = True
+    if download_start:
         tableTranslator.DownloadDocument(txt_path="./TranslatedTable/request_ids.txt",
                                          target_path="./TranslatedTable/target")
 
     # Read
-    xlsx_read_start = True
+    xlsx_read_start = False
     if xlsx_read_start:
         table_list = tableTranslator.ReadTableXlsxFiles(src_path="./TranslatedTable/target")
