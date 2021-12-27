@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 from Utils.TranslateTable import TableTranslator
 from Preprocessing.Definition import PreprocDef
@@ -90,11 +91,18 @@ if "__main__" == __name__:
     if REQUEST_PROCESS:
         origin_table_path = "./Utils/TranslatedTable/origin"
         request_ids_path = "./Utils/TranslatedTable/request_ids.txt"
-        req_url_list = tableTranslator.RequsetTranslate(origin_table_path)
+        err_list_path = "./Utils/TranslatedTable/err_list.txt"
+        req_url_list, err_list = tableTranslator.RequsetTranslate(origin_table_path)
 
         # Make Request ID file
         with open(request_ids_path, mode="wb") as req_wf:
+            print("request_ids_list Len:", len(req_url_list))
             pickle.dump(req_url_list, req_wf)
+
+        # Make Error List (Not 200 status)
+        with open(err_list_path, mode="wb") as err_wf:
+            print("err_list Len:", err_list)
+            pickle.dump(err_list, err_wf)
 
     ### Download Process
     DOWNLOAD_PROC = False

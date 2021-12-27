@@ -64,7 +64,9 @@ class TableTranslator:
 
     def RequsetTranslate(self, xlsx_path):
         req_url_list = []
+        err_status_list = []
 
+        request_count = 0
         xlsx_list = os.listdir(xlsx_path)
         for xlsx_file in xlsx_list:
             full_xlsx_path = xlsx_path + "/" + xlsx_file
@@ -81,16 +83,26 @@ class TableTranslator:
             url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/translate"
 
             try:
-                response = requests.post(url, headers=self.header, data=multipart_encoder.to_string()).json()
-                req_id = str(response["data"]["requestId"])
-                req_url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/download?requestId=" + req_id
-                req_url_list.append(req_url)
+                request_count += 1
+                print("Request Count:", request_count)
+
+                response = requests.post(url, headers=self.header, data=multipart_encoder.to_string())
+                res_status = response.status_code
+                if res_status == 200:
+                    res_json = json.loads(response.text)
+                    req_id = str(res_json["data"]["requestId"])
+                    req_url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/download?requestId=" + req_id
+                    req_url_list.append(req_url)
+                else:
+                    print('ERROR - Response Status', res_status)
+                    err_status_list.append(xlsx_file)
+
+                time.sleep(2) # for solving 429 status.
             except Exception as e:
                 print(full_xlsx_path)
                 print("Translate ERR:", e)
-                exit()
 
-        return req_url_list
+        return req_url_list, err_status_list
 
     def CheckTranslateStatus(self, url):
         res = requests.get(url, headers=self.header)
