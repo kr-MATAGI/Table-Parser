@@ -33,7 +33,7 @@ if "__main__" == __name__:
 
     api_header = {
         "id": "ph7wz3gf0z",  # User_Client_ID
-        "key": "VelHVcmwXQh8Eah81iuuc3cm1Iyec2hJDISp4Vgy",  # User_Client_Key(Secret)
+        "key": "MGpdwQ0PQ1nf7VcZeV6s3sHGD0hM7PncjiUoR1jG",  # User_Client_Key(Secret)
     }
     tableTranslator = TableTranslator(client_id=api_header["id"], client_key=api_header["key"])
 
@@ -87,7 +87,7 @@ if "__main__" == __name__:
                                                          file_name=table_ids)
 
     ### Request Process
-    REQUEST_PROCESS = True
+    REQUEST_PROCESS = False
     if REQUEST_PROCESS:
         origin_table_path = "./Utils/TranslatedTable/origin"
         request_ids_path = "./Utils/TranslatedTable/request_ids.txt"
@@ -105,8 +105,10 @@ if "__main__" == __name__:
             pickle.dump(err_list, err_wf)
 
     ### Download Process
-    DOWNLOAD_PROC = False
+    DOWNLOAD_PROC = True
     if DOWNLOAD_PROC:
+        except_list = ["20211228_1640680122871_039", "20211228_1640698488957_045"]
         request_ids_path = "./Utils/TranslatedTable/request_ids.txt"
         tableTranslator.DownloadDocument(txt_path=request_ids_path,
-                                         target_path="./Utils/TranslatedTable/target")
+                                         target_path="./Utils/TranslatedTable/target",
+                                         except_list=except_list)

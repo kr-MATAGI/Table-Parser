@@ -45,8 +45,11 @@ class TableTranslator:
             encoding="utf-8"
         )
 
-    def DownloadDocument(self, txt_path, target_path):
+    def DownloadDocument(self, txt_path, target_path, except_list):
         count = 0
+
+        already_download_list = os.listdir(target_path)
+
         with open(txt_path, mode="rb") as tf:
             readList = pickle.load(tf)
             for line in readList:
@@ -55,11 +58,24 @@ class TableTranslator:
                 if 0 >= len(url):
                     break
 
-                print("Download URL:", url)
-
-                res = requests.get(url, headers=self.header)
                 file_name = str(line.split("=")[-1])
-                with open(target_path+"/"+file_name+".xlsx", "wb") as wf:
+                download_path = target_path+"/"+file_name+".xlsx"
+
+                if download_path in except_list:
+                    print("PASS: ", download_path)
+                    continue
+
+                is_pass = False
+                for already_download in already_download_list:
+                    if download_path in already_download:
+                        is_pass = True
+                        break
+                if is_pass:
+                    continue
+
+                print(count, "Download URL:", url)
+                res = requests.get(url, headers=self.header)
+                with open(download_path, "wb") as wf:
                     wf.write(res.content)
 
     def RequsetTranslate(self, xlsx_path):
@@ -94,11 +110,21 @@ class TableTranslator:
                     req_url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/download?requestId=" + req_id
                     print("Req URL:", req_url)
                     req_url_list.append(req_url)
+
+                    # Check Status
+                    status_url = "https://naveropenapi.apigw.ntruss.com/doc-trans/v1/status?requestId=" + req_id
+                    while True:
+                        time.sleep(1)
+                        status_json = requests.get(status_url, headers=self.header).json()
+                        print(status_json)
+                        status_res = str(status_json["data"]["status"]).lower()
+                        print(status_res, status_url)
+                        if ("complete" == status_res) or ("failed" == status_res):
+                            break
                 else:
                     print('ERROR - Response Status', res_status)
                     err_status_list.append(xlsx_file)
 
-                time.sleep(2) # for solving 429 status.
             except Exception as e:
                 print(full_xlsx_path)
                 print("Translate ERR:", e)
