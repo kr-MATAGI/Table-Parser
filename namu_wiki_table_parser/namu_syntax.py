@@ -138,19 +138,3 @@ class NAMU_RE(Enum):
     # Remove [[ TEXT ]], CONV [[ TEXT | TEXT ]]
     DISPLAY_TEXT = r"\[\[[^|\]]+\|[^\]]+\]\]"
     HYPER_LINK = r"\[\[[^\]]+\]\]"
-
-import re
-test_str = " [[츄오-소부 완행선]]前 [[츄오-소부 완행선]][[츄오-소부 완행선]],[[도쿄메트로 도자이선|도자이선]] [[도쿄메트로 도자이선|도자이선]]차량 "
-if re.search(NAMU_RE.DISPLAY_TEXT.value, test_str):
-    target_list = re.findall(NAMU_RE.DISPLAY_TEXT.value, test_str)
-    for target_word in target_list:
-        rhs_txt = target_word.split("|")[-1].replace("]]", "")
-        test_str = test_str.replace(target_word, rhs_txt)
-print(test_str)
-
-if re.search(NAMU_RE.HYPER_LINK.value, test_str):
-    target_list = re.findall(NAMU_RE.HYPER_LINK.value, test_str)
-    for target_word in target_list:
-        conv_word = target_word.replace("[[", "").replace("]]", "")
-        test_str = test_str.replace(target_word, conv_word)
-print(test_str)

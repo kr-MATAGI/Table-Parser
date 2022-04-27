@@ -75,8 +75,27 @@ def find_table_content(table: List[List[str]], sent_list: List[str]):
     if 0 >= len(sent_list):
         return ret_related_sent_list
 
-    split_sent_list = sent_list[0].split(". ")
+    concat_sent_list = ""
+    for sent in sent_list:
+        concat_sent_list += sent
+    split_sent_list = concat_sent_list.split(". ")
+    table_content_set = set()
+    for row in table:
+        for col in row:
+            table_content = col.strip()
+            if 0 >= len(table_content):
+                continue
+            table_content_set.add(table_content)
+    table_content_set = list(table_content_set)
+
+    ret_related_sent_list = list(map(lambda x, y: y if x in y else None, table_content_set, split_sent_list))
+    while None in ret_related_sent_list:
+        ret_related_sent_list.remove(None)
+
     print(table)
+    print(table_content_set)
+    print(ret_related_sent_list)
     print(split_sent_list, "\n")
+
 
     return ret_related_sent_list
