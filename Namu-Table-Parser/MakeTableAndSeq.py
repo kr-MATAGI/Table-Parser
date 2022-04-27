@@ -32,7 +32,7 @@ TOTAL_SIZE = 300000
 COUNT = 0
 
 # File Path
-SRC_JSON_PATH = './dataset/docData200302.json'
+SRC_JSON_PATH = './dataset/namuwiki_20210301.json'
 
 # Tokenizer
 tokenizer = AutoTokenizer.from_pretrained("klue/roberta-base")
@@ -105,7 +105,6 @@ if __name__ == '__main__':
 
                     if 2 <= len(preprocessedTable):
                         newTableList.append(preprocessedTable)
-
                 normalTableList, infoBoxList = namuParser.ClassifyNormalTableOrInfoBox(newTableList)
                 ### Remove Deco Tables - 2021.09.17
                 existedHeadTableList = tableHeaderExtractor.RemoveNoExistedTableHeaderTalbe(normalTableList)
