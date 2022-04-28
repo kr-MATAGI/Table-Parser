@@ -302,7 +302,7 @@ class NamuWikiParser:
                     conv_word = target_word.replace("[[", "").replace("]]", "")
                     newRow = newRow.replace(target_word, conv_word)
 
-            newTable.append(newRow)
+            newTable.append(newRow.strip())
         return newTable
 
     '''

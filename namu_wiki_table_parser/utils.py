@@ -92,10 +92,4 @@ def find_table_content(table: List[List[str]], sent_list: List[str]):
     while None in ret_related_sent_list:
         ret_related_sent_list.remove(None)
 
-    print(table)
-    print(table_content_set)
-    print(ret_related_sent_list)
-    print(split_sent_list, "\n")
-
-
     return ret_related_sent_list
