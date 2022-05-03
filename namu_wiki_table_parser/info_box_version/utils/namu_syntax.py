@@ -216,6 +216,8 @@ def ModifyHTMLTags(table):
         newRow = re.sub(r"(http|https)://[^\|]+\|", "", newRow)
         # Exception - {{{#!wiki style="margin: -5px -10px;"
         newRow = re.sub(r"\{\{\{#!wiki .+", "", newRow)
+        # Exception - '<table color=#373a3c,#dddddd> 장르'
+        newRow = re.sub(r"<table[^>]+>", "", newRow)
 
         newTable.append(newRow.strip())
     return newTable
