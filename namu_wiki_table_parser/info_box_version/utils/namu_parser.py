@@ -2,6 +2,7 @@ import re
 import os
 import copy
 import ijson
+import pickle
 
 from dataclasses import dataclass, field
 from typing import List
@@ -127,7 +128,7 @@ if "__main__" == __name__:
     json_path = "../../data/namuwiki_20210301.json"
 
     # write file
-    IS_WRITE_FILE = True
+    IS_EG_WRITE_FILE = True
     write_file = open("./output.txt", mode="w", encoding="utf-8")
 
     all_results = []
@@ -162,7 +163,7 @@ if "__main__" == __name__:
 
         all_results.append(classify_data)
 
-        if IS_WRITE_FILE:
+        if IS_EG_WRITE_FILE:
             write_file.write(classify_data.title + "\n")
             write_file.write("TABLE: \n")
             for row in classify_data.table:
@@ -174,6 +175,10 @@ if "__main__" == __name__:
                 write_file.write(sent + "\n")
             write_file.write("\n")
     write_file.close()
+
+    # Write *.pkl file
+    with open("./namu_info_box.pkl", mode="wb") as pkl_file:
+        pickle.dump(all_results, pkl_file)
 
     # Check count
     print(f"Complete - {len(all_results)}")
