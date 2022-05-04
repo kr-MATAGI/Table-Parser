@@ -101,7 +101,7 @@ if "__main__" == __name__:
     # 만들어진 table head_dict을 통해 merge table에 쓰일 head를 계산한다.
     HEAD_CRITERIA_SCORE = 0.5 # head_val 테이블에서 얼마나 등장하는지
     ROW_INFO_CRITERIA_SCORE = 0.5 # row가 얼만큼 merge table에 정보를 채웠는지
-    for proc_idx, head_key, head_val in enumerate(head_dict.items()):
+    for proc_idx, (head_key, head_val) in enumerate(head_dict.items()):
         if 0 == (proc_idx % 100):
             print(f"{proc_idx} Processing... : {head_key}")
         total_info_size = len(head_val)
@@ -134,7 +134,8 @@ if "__main__" == __name__:
                 # merge head를 key로써 값을 찾아 merge table의 새로운 행을 만듦
                 merge_row = []
                 for merge_head in merge_table_head_list:
-                    merge_row.append(row.get(merge_head, ""))
+                    if "" != row.get(merge_head, "") and merge_head != row.get(merge_head, ""):
+                        merge_row.append(row.get(merge_head, ""))
                 merge_row[-1] = data_idx # 맨 마지막은 info idx
                 merge_row_list.append(merge_row)
         ## end, head_val loop
@@ -166,4 +167,30 @@ if "__main__" == __name__:
         merge_data_list.append(merge_result)
     # end, head_dict loop
 
-    print(f"Complete - Make Merge Info Box Table: {len(merge_data_list)} !, TIME: {start_time - time.time()}")
+    print(f"Complete - Make Merge Info Box Table: {len(merge_data_list)} !, TIME: {time.time() - start_time}")
+
+    # Write File and Check Count
+    table_count = 0
+    sent_count = 0
+    with open("./merge_info_box.pkl", mode="wb") as pkl_file:
+        pickle.dump(merge_data_list, pkl_file)
+    with open("./merge_output.txt", mode="w", encoding="utf-8") as output_txt:
+        for target_data in merge_data_list:
+            output_txt.write("TITLE: \n")
+            for x, y in target_data.title_idx_pair:
+                output_txt.write("("+x+"-"+str(y)+")\t")
+            output_txt.write("\n\nTABLE:\n")
+
+            table_count += 1
+            for r in target_data.table:
+                for c in r:
+                    output_txt.write(str(c)+"\t")
+                output_txt.write("\n")
+            output_txt.write("\n\nSENT:\n")
+
+            sent_count += len(target_data.sent_list)
+            for s, i in target_data.sent_list:
+                output_txt.write("(" + s + ", " + str(i) + ")")
+            output_txt.write("\n\n")
+    # PRINT TABLE, SENT COUNT
+    print(f"COUNT - table: {table_count}, sent: {sent_count}")
