@@ -5,5 +5,8 @@
 3. 전체 본문을 '.' 단위로 나누고 위 2번의 list에 포함되는 단어가 있다면 산출 목록에 넣음
 
 ------------------- 2 단계
->>>>>> info box를 오른쪽으로 회전 시킨다. (rotate 구현, 위 1단계에서도 사용가능할 것으로 보임)
-회전해서 비슷한 정보를 가지는 table들의 row를 vstack한다.
+* pandas를 이용하면 column을 전체로 drop하기 편하다.
+* 가장 많이 사용되는 column set을 만들고 이를 기준으로 infobox의 정보를 넣는다
+  (HEAD별 각 table에 사용되는 횟수를 구하고 이를 일정 수치 이상일 경우 merge table의 HEAD로 사용)
+* 넣을 때, 해당 되는 column field(HEAD)가 아니라면 'empty'.
+* empty가 일정 수준 이상이라면 해당 행은 merge table에 넣지 않는다.

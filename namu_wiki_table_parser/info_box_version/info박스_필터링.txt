@@ -35,7 +35,6 @@ MY STORY(2004)	←	(miss)understood(2006)	→	Secret(2006)
 
 
 >>>>> info box의 열의 개수가 2개 초과인 경우의 예
->>>>> HEAD의 구분이 필요함...
 
 
 
