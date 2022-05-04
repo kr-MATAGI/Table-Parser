@@ -124,6 +124,8 @@ if "__main__" == __name__:
         merge_row_list = []
         use_info_idx_list = []
         for data_idx in head_val:
+            if data_idx in check_used_info_idx_set:
+                continue
             info_data_df = pd.DataFrame(info_box_list[data_idx].table[1:], columns=info_box_list[data_idx].table[0])
             for _, row in info_data_df.iterrows():
                 # keys()로 먼저 merge table head에 얼만큼 해당하는지 판단하고 continue 결정
@@ -134,11 +136,17 @@ if "__main__" == __name__:
                 # merge head를 key로써 값을 찾아 merge table의 새로운 행을 만듦
                 merge_row = []
                 for merge_head in merge_table_head_list:
-                    if "" != row.get(merge_head, "") and merge_head != row.get(merge_head, ""):
-                        merge_row.append(row.get(merge_head, ""))
+                    extract_str = row.get(merge_head, "")
+                    if type(extract_str) is not str:
+                        merge_row.append("")
+                    elif extract_str != merge_head:
+                        merge_row.append(extract_str)
+                    else:
+                        merge_row.append("")
                 merge_row[-1] = data_idx # 맨 마지막은 info idx
                 merge_row_list.append(merge_row)
         ## end, head_val loop
+
         merge_row_list.insert(0, merge_table_head_list)
 
         use_info_idx = list(set(use_info_idx_list))
@@ -147,7 +155,7 @@ if "__main__" == __name__:
         # 이미 사용했던 idx 조합은 최종 결과물에 넣지 않는다.
         if use_info_idx in check_used_info_idx_set:
             continue
-        check_used_info_idx_set.append(use_info_idx)
+        check_used_info_idx_set.extend(use_info_idx)
         
         # info box에서 사용된 문장 뽑아내기
         merge_table_sent_list = []
