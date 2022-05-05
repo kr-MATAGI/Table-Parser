@@ -99,8 +99,8 @@ if "__main__" == __name__:
     check_used_info_idx_set = []
 
     # 만들어진 table head_dict을 통해 merge table에 쓰일 head를 계산한다.
-    HEAD_CRITERIA_SCORE = 0.5 # head_val 테이블에서 얼마나 등장하는지
-    ROW_INFO_CRITERIA_SCORE = 0.5 # row가 얼만큼 merge table에 정보를 채웠는지
+    DICT_CRITERIA_SCORE = 0.5 # head_val 테이블에서 얼마나 등장하는지
+    HEAD_CRITERIA_SCORE = 0.5 # 기준 되는 merge table head를 얼마나 포함하고 있는지
     for proc_idx, (head_key, head_val) in enumerate(head_dict.items()):
         if 0 == (proc_idx % 100):
             print(f"{proc_idx} Processing... : {head_key}")
@@ -113,67 +113,35 @@ if "__main__" == __name__:
                     table_head_dict[head] = 1
                 else:
                     table_head_dict[head] += 1
-        table_head_dict = sorted(table_head_dict.items(), key=lambda item: item[1], reverse=True)
-        head_score_base_line = math.floor(len(head_val) * HEAD_CRITERIA_SCORE)
-        merge_table_head_list = list(map(lambda x: x[0] if head_score_base_line <= x[1] else None, table_head_dict))
-        merge_table_head_list = list(filter(lambda x: True if x is not None else False, merge_table_head_list))
-        merge_table_head_list.append("INFO_IDX") # 출처를 알고 나중에 자를 때 쓰기 위해
 
-        # 정해진 merge table HEAD에 따라 info box table의 데이터를 삽입
-        head_fit_base_line = math.floor(len(merge_table_head_list) * HEAD_CRITERIA_SCORE)
-        merge_row_list = []
-        use_info_idx_list = []
+        table_head_dict = sorted(table_head_dict.items(), key=lambda item: item[1], reverse=True)
+        # head_dict에서 일정 수준 이상의 val를 가진 것을 자르기 위함
+        dict_base_line_score = math.floor(len(head_val) * DICT_CRITERIA_SCORE)
+        merge_table_head_list = [x[0] for x in table_head_dict if dict_base_line_score <= x[1]]
+        merge_table_head_list.append("INFO_IDX") # 나중에 테이블을 일정 크기별로 자를 때 출처를 알기 위해
+
+        # 정해진 merge table head에 얼마나 head가 일치하는지
+        head_fit_base_line_score = math.floor(len(merge_table_head_list) * HEAD_CRITERIA_SCORE)
+        merge_row_list = [] # merge table의 ROW들
+        use_idx_list = []
         for data_idx in head_val:
-            info_data_df = pd.DataFrame(info_box_list[data_idx].table[1:], columns=info_box_list[data_idx].table[0])
-            for _, row in info_data_df.iterrows():
-                # keys()로 먼저 merge table head에 얼만큼 해당하는지 판단하고 continue 결정
-                fit_score = len(list(filter(lambda x: True if x in merge_table_head_list else False, row.keys())))
-                if head_fit_base_line > fit_score:
-                    continue
-                use_info_idx_list.append(data_idx)
-                # merge head를 key로써 값을 찾아 merge table의 새로운 행을 만듦
+            curr_df = pd.DataFrame(info_box_list[data_idx].table[1:], columns=info_box_list[data_idx].table[0])
+            fit_score = len(list(filter(lambda x: True if x in merge_table_head_list[:-1] else False, info_box_list[data_idx].table[0])))
+            if head_fit_base_line_score <= fit_score:
+                continue
+
+            use_idx_list.append(data_idx)
+            for _, row_item in curr_df.iterrows():
+                # merge table head에 맞게 행을 생성
                 merge_row = []
                 for merge_head in merge_table_head_list:
-                    extract_str = row.get(merge_head, "")
-                    if type(extract_str) is not str:
-                        merge_row.append("")
-                    elif extract_str != merge_head:
-                        merge_row.append(extract_str)
-                    else:
-                        merge_row.append("")
-                insert_count = len(list(filter(lambda x: True if x != "" else False, merge_row)))
-                row_insert_base_line = math.floor(len(merge_table_head_list) * ROW_INFO_CRITERIA_SCORE)
-                if row_insert_base_line <= insert_count:
-                    merge_row[-1] = data_idx # 맨 마지막은 info idx
-                    merge_row_list.append(merge_row)
-        ## end, head_val loop
+                    col_item = row_item.get(merge_head, "")
+                    if type(col_item) is not str:
+                        print(col_item)
+                        print("\n")
+                        print(curr_df)
+                        input()
 
-        merge_row_list.insert(0, merge_table_head_list)
-
-        use_info_idx = list(set(use_info_idx_list))
-        use_info_idx.sort()
-
-        # 이미 사용했던 idx 조합은 최종 결과물에 넣지 않는다.
-        if use_info_idx in check_used_info_idx_set:
-            continue
-        check_used_info_idx_set.extend(use_info_idx)
-        
-        # info box에서 사용된 문장 뽑아내기
-        merge_table_sent_list = []
-        for data_idx in use_info_idx_list:
-            for body_text in info_box_list[data_idx].body_text:
-                merge_table_sent_list.append((body_text, data_idx))
-
-        # 사용된 title과 info idx pair 만들기
-        title_info_idx_pair = []
-        for data_idx in use_info_idx_list:
-            title_info_idx_pair.append((info_box_list[data_idx].title, data_idx))
-
-        # make merge result
-        merge_result = Merge_Data(title_idx_pair=title_info_idx_pair,
-                                  table=merge_row_list,
-                                  sent_list=merge_table_sent_list)
-        merge_data_list.append(merge_result)
     # end, head_dict loop
 
     print(f"Complete - Make Merge Info Box Table: {len(merge_data_list)} !, TIME: {time.time() - start_time}")
