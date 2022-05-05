@@ -8,14 +8,16 @@ from namu_parser import Classify_Data
 from typing import List, Tuple
 from dataclasses import dataclass, field
 
-#====================================================================
+
+# ====================================================================
 @dataclass
 class Merge_Data:
-    title_idx_pair: List[Tuple[str, int]] = field(default_factory=list) # (Title, info set index)
+    title_idx_pair: List[Tuple[str, int]] = field(default_factory=list)  # (Title, info set index)
     table: List[List[str]] = field(default_factory=list)
-    sent_list: List[Tuple[str, int]] = field(default_factory=list) # (sent, info set index)
+    sent_list: List[Tuple[str, int]] = field(default_factory=list)  # (sent, info set index)
 
-#====================================================================
+
+# ====================================================================
 def filter_junk_table(data: Classify_Data):
     # Check 1 - 2줄로 이루어진 table
     if 2 >= len(data.table):
@@ -24,7 +26,9 @@ def filter_junk_table(data: Classify_Data):
     # Check 2 - Not Yet...
 
     return True
-#====================================================================
+
+
+# ====================================================================
 def fit_table_column_max_len(data: Classify_Data):
     # check max len
     max_col_len = -1
@@ -39,7 +43,8 @@ def fit_table_column_max_len(data: Classify_Data):
 
     return data
 
-#====================================================================
+
+# ====================================================================
 def rotate_right_table(data: Classify_Data):
     row_len = len(data.table)
     col_len = len(data.table[0])
@@ -54,7 +59,8 @@ def rotate_right_table(data: Classify_Data):
 
     return data
 
-#====================================================================
+
+# ====================================================================
 ### MAIN ###
 if "__main__" == __name__:
     start_time = time.time()
@@ -99,8 +105,8 @@ if "__main__" == __name__:
     check_used_info_idx_set = []
 
     # 만들어진 table head_dict을 통해 merge table에 쓰일 head를 계산한다.
-    HEAD_CRITERIA_SCORE = 0.5 # head_val 테이블에서 얼마나 등장하는지
-    ROW_INFO_CRITERIA_SCORE = 0.5 # row가 얼만큼 merge table에 정보를 채웠는지
+    HEAD_CRITERIA_SCORE = 0.5  # head_val 테이블에서 얼마나 등장하는지
+    ROW_INFO_CRITERIA_SCORE = 0.5  # row가 얼만큼 merge table에 정보를 채웠는지
     for proc_idx, (head_key, head_val) in enumerate(head_dict.items()):
         if 0 == (proc_idx % 100):
             print(f"{proc_idx} Processing... : {head_key}")
@@ -117,7 +123,7 @@ if "__main__" == __name__:
         head_score_base_line = math.floor(len(head_val) * HEAD_CRITERIA_SCORE)
         merge_table_head_list = list(map(lambda x: x[0] if head_score_base_line <= x[1] else None, table_head_dict))
         merge_table_head_list = list(filter(lambda x: True if x is not None else False, merge_table_head_list))
-        merge_table_head_list.append("INFO_IDX") # 출처를 알고 나중에 자를 때 쓰기 위해
+        merge_table_head_list.append("INFO_IDX")  # 출처를 알고 나중에 자를 때 쓰기 위해
 
         # 정해진 merge table HEAD에 따라 info box table의 데이터를 삽입
         head_fit_base_line = math.floor(len(merge_table_head_list) * HEAD_CRITERIA_SCORE)
@@ -144,7 +150,7 @@ if "__main__" == __name__:
                 insert_count = len(list(filter(lambda x: True if x != "" else False, merge_row)))
                 row_insert_base_line = math.floor(len(merge_table_head_list) * ROW_INFO_CRITERIA_SCORE)
                 if row_insert_base_line <= insert_count:
-                    merge_row[-1] = data_idx # 맨 마지막은 info idx
+                    merge_row[-1] = data_idx  # 맨 마지막은 info idx
                     merge_row_list.append(merge_row)
         ## end, head_val loop
 
@@ -157,7 +163,7 @@ if "__main__" == __name__:
         if use_info_idx in check_used_info_idx_set:
             continue
         check_used_info_idx_set.extend(use_info_idx)
-        
+
         # info box에서 사용된 문장 뽑아내기
         merge_table_sent_list = []
         for data_idx in use_info_idx_list:
@@ -187,13 +193,13 @@ if "__main__" == __name__:
         for target_data in merge_data_list:
             output_txt.write("TITLE: \n")
             for x, y in target_data.title_idx_pair:
-                output_txt.write("("+x+"-"+str(y)+")\t")
+                output_txt.write("(" + x + "-" + str(y) + ")\t")
             output_txt.write("\n\nTABLE:\n")
 
             table_count += 1
             for r in target_data.table:
                 for c in r:
-                    output_txt.write(str(c)+"\t")
+                    output_txt.write(str(c) + "\t")
                 output_txt.write("\n")
             output_txt.write("\n\nSENT:\n")
 
