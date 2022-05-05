@@ -77,7 +77,7 @@ if "__main__" == __name__:
         print(f"[slice_merge_info][__main__] LOAD Size: {len(src_merge_info_list)}")
 
     # src_merge_info_list = src_merge_info_list[:1] # FOR TEST
-    results = slice_merge_table(merge_info_list=src_merge_info_list, base_line_len=10)
+    results = slice_merge_table(merge_info_list=src_merge_info_list, base_line_len=5)
     print(f"[slice_merge_info][__main__] Complete Size: {len(results)}")
 
     # write
