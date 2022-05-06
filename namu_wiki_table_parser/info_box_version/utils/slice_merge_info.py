@@ -71,6 +71,32 @@ def slice_merge_table(merge_info_list: List[Merge_Data], base_line_len: int = 10
 if "__main__" == __name__:
     print(f"[slice_merge_info][__main__] START !")
 
+    with open("./slice_merge_info_box.pkl", mode="rb") as check_file:
+        a = pickle.load(check_file)
+        print(len(a))
+
+    table_count = 0
+    sent_count = 0
+    with open("./slice_output.txt", mode="w", encoding="utf-8") as output_txt:
+        for target_data in a:
+            output_txt.write("TITLE: \n")
+            for x, y in target_data.title_idx_pair:
+                output_txt.write("(" + x + "-" + str(y) + ")\t")
+            output_txt.write("\n\nTABLE:\n")
+
+            table_count += 1
+            for r in target_data.table:
+                for c in r:
+                    output_txt.write(str(c) + "\t")
+                output_txt.write("\n")
+            output_txt.write("\n\nSENT:\n")
+
+            sent_count += len(target_data.sent_list)
+            for s, i in target_data.sent_list:
+                output_txt.write("(" + s + ", " + str(i) + ")")
+            output_txt.write("\n\n")
+    exit()
+
     src_merge_info_list = []
     with open("./merge_info_box.pkl", mode="rb") as src_file:
         src_merge_info_list = pickle.load(src_file)
