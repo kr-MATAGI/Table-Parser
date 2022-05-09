@@ -14,6 +14,8 @@ class Merge_Data:
     title_idx_pair: List[Tuple[str, int]] = field(default_factory=list) # (Title, info set index)
     table: List[List[str]] = field(default_factory=list)
     sent_list: List[Tuple[str, int]] = field(default_factory=list) # (sent, info set index)
+    # 2022.05.06 - link word 추가
+    link_word_idx_pair: List[Tuple[str, int]] = field(default_factory=list)
 
 #====================================================================
 def filter_junk_table(data: Classify_Data):
@@ -159,15 +161,22 @@ if "__main__" == __name__:
             for body_text in info_box_list[data_idx].body_text:
                 merge_table_sent_list.append((body_text, data_idx))
 
-        # 사용딘 title과 info idx pair 만들기
+        # 사용된 title과 info idx pair 만들기
         title_info_idx_pair = []
         for data_idx in use_idx_list:
             title_info_idx_pair.append((info_box_list[data_idx].title, data_idx))
 
+        # 사용된 link_word와 info idx pair 만들기
+        link_word_idx_pair = []
+        for data_idx in use_idx_list:
+            for link_word in info_box_list[data_idx].link_word_list:
+                link_word_idx_pair.append((link_word, data_idx))
+
         # make merge result
         if 2 <= len(merge_row_list):
             merge_result = Merge_Data(title_idx_pair=title_info_idx_pair,
-                                      table=merge_row_list, sent_list=merge_table_sent_list)
+                                      table=merge_row_list, sent_list=merge_table_sent_list,
+                                      link_word_idx_pair=link_word_idx_pair)
             merge_data_list.append(merge_result)
     # end, head_dict loop
 

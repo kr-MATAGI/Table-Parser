@@ -51,6 +51,7 @@ def slice_merge_table(merge_info_list: List[Merge_Data], base_line_len: int = 10
         # 원래 Merge Data에서 title과 sentences를 맵핑
         origin_title_list = merge_info.title_idx_pair
         origin_sent_list = merge_info.sent_list
+        origin_link_word_list = merge_info.link_word_idx_pair
         for slice_table in slice_table_list:
             new_merge_data = Merge_Data()
 
@@ -59,9 +60,13 @@ def slice_merge_table(merge_info_list: List[Merge_Data], base_line_len: int = 10
             extract_title_list = [x for x in origin_title_list if x[-1] in last_col_data_list]
             extract_sent_list = [x for x in origin_sent_list if x[-1] in last_col_data_list]
 
+            # 2022.05.06 - link word 추가
+            extract_link_word = [x for x in origin_link_word_list if x[-1] in last_col_data_list]
+
             new_merge_data.title_idx_pair = extract_title_list
             new_merge_data.table = slice_table
             new_merge_data.sent_list = extract_sent_list
+            new_merge_data.link_word_idx_pair = extract_link_word
 
             ret_list.append(new_merge_data)
 
@@ -89,12 +94,18 @@ if "__main__" == __name__:
                 for c in r:
                     output_txt.write(str(c) + "\t")
                 output_txt.write("\n")
-            output_txt.write("\n\nSENT:\n")
 
+            output_txt.write("\n\nLINK WORD:\n")
+            for lw, i in target_data.link_word_idx_pair:
+                output_txt.write("(" + lw + ", " + str(i) + ")")
+
+            output_txt.write("\n\nSENT:\n")
             sent_count += len(target_data.sent_list)
             for s, i in target_data.sent_list:
                 output_txt.write("(" + s + ", " + str(i) + ")")
             output_txt.write("\n\n")
+    print(f"table count : {table_count}")
+    print(f"sent count : {sent_count}")
     exit()
 
     src_merge_info_list = []

@@ -174,14 +174,13 @@ def remove_namu_syntax(srcList):
             newStr = re.sub(NAMU_RE.HTML_VIDEO.value, '', newStr)
             newStr = re.sub(NAMU_RE.EXTERNAL_LINK.value, '', newStr)
             newStr = re.sub(NAMU_RE.DOC_INSERT.value, '', newStr)
-
             newStr = re.sub(NAMU_RE.TEXT_FORM.value, '', newStr)
             newStr = re.sub(NAMU_RE.SUB_SCRIPT.value, '', newStr)
             newStr = re.sub(NAMU_RE.TEXT_SIZE_FRONT.value, '', newStr)
             newStr = re.sub(NAMU_RE.TEXT_COLOR.value, '', newStr)
             newStr = re.sub(NAMU_RE.LITERAL.value, '', newStr)
-            newStr = re.sub(NAMU_RE.LINK_ALT_FRONT.value, '', newStr)
-            newStr = re.sub(NAMU_RE.LINK_BASIC_FRONT.value, '', newStr)
+            # newStr = re.sub(NAMU_RE.LINK_ALT_FRONT.value, '', newStr)
+            # newStr = re.sub(NAMU_RE.LINK_BASIC_FRONT.value, '', newStr)
             newStr = re.sub(NAMU_RE.ADD_LIST.value, '', newStr)
             newStr = re.sub(NAMU_RE.BASIC_LIST.value, '', newStr)
             newStr = re.sub(NAMU_RE.FOOT_NOTE.value, '', newStr)
@@ -195,7 +194,7 @@ def remove_namu_syntax(srcList):
             newStr = re.sub(NAMU_RE.CLEARFIX.value, '', newStr)
             newStr = re.sub(NAMU_RE.FOLDING.value, '', newStr)
 
-            newStr = re.sub(NAMU_RE.LINK_BACK.value, '', newStr)
+            # newStr = re.sub(NAMU_RE.LINK_BACK.value, '', newStr)
             newStr = re.sub(NAMU_RE.TRIPLE_BARKET_BACK.value, '', newStr)
 
             # 12. Macro - Ruby
@@ -208,10 +207,16 @@ def remove_namu_syntax(srcList):
                     newStr = newStr.replace(rubyStr, delRubyStr)
 
             # Exception (Last Process)
-            newStr = re.sub(r'\[[^\]]+\]', '', newStr)
+            # newStr = re.sub(r'[^\]]\[[^\]]+\]', '', newStr)
+
+            if re.search(NAMU_RE.DISPLAY_TEXT.value, newStr):
+                target_list = re.findall(NAMU_RE.DISPLAY_TEXT.value, newStr)
+                for target_word in target_list:
+                    rhs_txt = target_word.split("|")[-1]
+                    newStr = newStr.replace(target_word, "[[" + rhs_txt)
 
             # Add newStr to return list
-            if 0 < len(newStr.lstrip()):
-                retStrList.append(newStr.lstrip())
+            if 0 < len(newStr.strip()):
+                retStrList.append(newStr.strip())
 
     return retStrList

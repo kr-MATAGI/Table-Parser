@@ -21,6 +21,8 @@ class Classify_Data:
     table: List[List[str]] = field(default_factory=list)
     body_text: str = ""
 
+    link_word_list: List[str] = field(default_factory=list)
+
 #============================================================
 class Namu_Parser:
     def __init__(self, src_path: str):
@@ -106,22 +108,26 @@ def extract_sentences_relate_link_word(info_box: List[List[str]], body_text: str
         for col in row:
             link_word_list = re.findall(re_link_word, col)
             all_link_word_list.extend(list(filter(lambda x: True if re.search(re_link_word, x) else False, link_word_list)))
-    all_link_word_list = list(map(lambda x: x.replace("]]", "").replace("[[", ""), set(all_link_word_list)))
+    all_link_word_list = list(set(all_link_word_list))
 
     # 본문에서 링크 단어를 포함하는 문장 추출
-    split_sent_list = []
+    target_sent_list = []
     for paragraph_text in body_text:
-        split_sent_list.extend(paragraph_text.split("."))
+        split_paragraph = paragraph_text.split(".")
+        split_paragraph = list(filter(lambda x: True if 0 < len(x) else False, split_paragraph))
+        for sent in split_paragraph:
+            if re.search(re_link_word, sent):
+                target_sent_list.append(sent.strip())
 
     link_word_rel_sent = []
-    for sent in split_sent_list:
+    for sent in target_sent_list:
         check_list = list(filter(lambda x: True if x in sent else False, all_link_word_list))
         if 0 < len(check_list):
             link_word_rel_sent.append(sent.strip())
     link_word_rel_sent = list(set(link_word_rel_sent))
     ret_body_text = link_word_rel_sent
 
-    return ret_body_text
+    return ret_body_text, all_link_word_list
 
 #============================================================
 if "__main__" == __name__:
@@ -149,17 +155,20 @@ if "__main__" == __name__:
         classify_data.body_text = remove_namu_syntax(srcList=classify_data.body_text)
 
         # 본문에서 info box의 링크 단어를 포함한 문장을 추출
-        classify_data.body_text = extract_sentences_relate_link_word(info_box=classify_data.table,
-                                                                     body_text=classify_data.body_text)
+        classify_data.body_text, link_word_list = extract_sentences_relate_link_word(info_box=classify_data.table,
+                                                                                     body_text=classify_data.body_text)
         # ignore - empty body_text and info box
         if 0 >= len(classify_data.body_text) or 0 >= len(classify_data.table):
             continue
-        
+
         # 테이블의 데이터에서 링크 단어를 표시하는 '[[', ']]'를 삭제
         classify_data.table = clear_link_syntax_in_table(classify_data.table)
         # table data 재처리
         classify_data.table = remove_empty_cells(classify_data.table)
         classify_data.table = remove_short_rows(classify_data.table)
+
+        # 2022.05.06 - link word 추가
+        classify_data.link_word_list = link_word_list
 
         all_results.append(classify_data)
 
@@ -170,6 +179,11 @@ if "__main__" == __name__:
                 for col in row:
                     write_file.write(col + "\t")
                 write_file.write("\n")
+
+            write_file.write("\nLINK_WORD: \n")
+            for link_word in classify_data.link_word_list:
+                write_file.write(link_word + "\t")
+
             write_file.write("\nSentences: \n")
             for sent in classify_data.body_text:
                 write_file.write(sent + "\n")
