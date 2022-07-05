@@ -8,10 +8,14 @@ class SPLIT_PARAG:
     title: str = ""
     text_list: List[str] = field(default_factory=list)
 
+@dataclass
+class Table_2dim:
+    row_list: List[str] = field(default_factory=list)
+
 #=============================================
 @dataclass
 class TT_Pair: # text and table pair
-    title: str = "" # paragraph title
+    # title: str = "" # paragraph title
     text: List[str] = field(default_factory=list)
     table: List[List[str]] = field(default_factory=list)
 
