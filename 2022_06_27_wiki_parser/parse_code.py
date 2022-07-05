@@ -505,5 +505,27 @@ def remove_mediawiki_tag(src_path: str=""):
 if "__main__" == __name__:
     print(f"[parse_code][main] TEST")
 
-    doc_path = "./web_dump/conv_kowiki-latest-pages-articles.xml"
-    parse_wiki_doc(doc_path)
+    # make data
+    is_make_data = False
+    if is_make_data:
+        doc_path = "./web_dump/conv_kowiki-latest-pages-articles.xml"
+        parse_wiki_doc(doc_path)
+
+    # check data size
+    is_check_data = True
+    if is_check_data:
+        data_path = "./save_wiki_page_info.pkl"
+        load_data: List[Wiki_Page] = []
+
+        with open(data_path, mode="rb") as load_pkl:
+            load_data = pickle.load(load_pkl)
+            print(f"[parse_code][check_size] LOAD SIZE: {len(load_data)}")
+
+        only_text_size: int = 0
+        text_table_pair_size: int = 0
+        for wiki_page in load_data:
+            only_text_size += len(wiki_page.only_text_list)
+            text_table_pair_size += len(wiki_page.text_table_pair)
+
+        print(f"[parse_code][check_size] only text paragraph size: {only_text_size}")
+        print(f"[parse_code][check_size] text table pair size: {text_table_pair_size}")
