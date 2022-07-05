@@ -232,7 +232,7 @@ def make_table_npy(src_data: List[Table_Sent_Data], model_name: str, max_len: in
     all_data_npy_stack = np.stack([npy_make_dict["input_ids"], npy_make_dict["segment_ids"],
                                    npy_make_dict["row_ids"], npy_make_dict["col_ids"]], axis=-1)
     print(f"all_data_npy_stack.shape: {all_data_npy_stack.shape}")
-    print(f"labels.shape: {npy_make_dict['labels']}")
+    print(f"labels.shape: {npy_make_dict['labels'].shape}")
 
     np.save("./npy/all_ids", all_data_npy_stack)
     np.save("./npy/label", npy_make_dict['labels'])
@@ -277,7 +277,7 @@ if "__main__" == __name__:
             print(f"[final_task.py][__main__] Save - List.Len: {len(save_data_list)}")
 
     #### MAKE *.npy
-    is_make_table_npy = True
+    is_make_table_npy = False
     if is_make_table_npy:
         start_time = time.time()
 
@@ -288,3 +288,8 @@ if "__main__" == __name__:
         make_table_npy(src_data=src_data, model_name="monologg/kobigbird-bert-base", max_len=512)
 
         print(f"Processing Time... : {time.time() - start_time}")
+
+    a = np.load("./npy/all_ids.npy")
+    print(a.shape)
+    b = np.load("./npy/label.npy")
+    print(b.shape)

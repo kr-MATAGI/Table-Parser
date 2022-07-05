@@ -13,7 +13,7 @@ from re_def import WIKI_SYNTAX
 
 ### METHOD
 #==============================================================================
-def parse_wiki_doc(src_path: str=""):
+def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
 #==============================================================================
     if not os.path.exists(src_path):
         print(f"[parse_code][parse_wiki_doc] ERR - Not Exists: {src_path}")
@@ -40,6 +40,9 @@ def parse_wiki_doc(src_path: str=""):
     print(f"[parse_wiki_doc] Complete - Size: {len(wiki_page_info_list)}")
 
     # save *.pkl file
+    if not is_write_file:
+        return
+
     save_path = "./save_wiki_page_info.pkl"
     with open(save_path, mode="wb") as save_pkl:
         pickle.dump(wiki_page_info_list, save_pkl)
@@ -501,6 +504,30 @@ def remove_mediawiki_tag(src_path: str=""):
         with open("./web_dump/conv_kowiki-latest-pages-articles.xml", mode="w", encoding="utf-8") as wf:
             wf.writelines(a)
 
+#==============================================================================
+def print_pkl(target_path: str):
+#==============================================================================
+    wiki_page_info_list: List[Wiki_Page] = []
+    with open(target_path, mode="rb") as load_pkl:
+        wiki_page_info_list = pickle.load(load_pkl)
+        print(f"[print_pkl] total size: {len(wiki_page_info_list)}")
+
+    for wp_idx, wiki_page in enumerate(wiki_page_info_list):
+        print(f"{wp_idx}, TITLE: {wiki_page.title}")
+
+        for only_text in wiki_page.only_text_list:
+            print(only_text)
+            print("----------------")
+
+        print("=======================================")
+        for txt_table in wiki_page.text_table_pair:
+            print(txt_table.text)
+            print("=======================================")
+            for r in txt_table.table:
+                print(len(r), r)
+        input()
+
+
 ### TEST ###
 if "__main__" == __name__:
     print(f"[parse_code][main] TEST")
@@ -512,7 +539,7 @@ if "__main__" == __name__:
         parse_wiki_doc(doc_path)
 
     # check data size
-    is_check_data = True
+    is_check_data = False
     if is_check_data:
         data_path = "./save_wiki_page_info.pkl"
         load_data: List[Wiki_Page] = []
@@ -527,5 +554,14 @@ if "__main__" == __name__:
             only_text_size += len(wiki_page.only_text_list)
             text_table_pair_size += len(wiki_page.text_table_pair)
 
+        '''
+            total data size: 1,745,894
+            only text paragraph size: 3,988,371
+            text and table pair size: 1,175,816
+        '''
         print(f"[parse_code][check_size] only text paragraph size: {only_text_size}")
-        print(f"[parse_code][check_size] text table pair size: {text_table_pair_size}")
+        print(f"[parse_code][check_size] text and table pair size: {text_table_pair_size}")
+
+    # pkl print (test)
+    print_target = "./save_wiki_page_info.pkl"
+    print_pkl(print_target)
