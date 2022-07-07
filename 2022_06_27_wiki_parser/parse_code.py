@@ -8,7 +8,7 @@ import os
 import pickle
 
 from typing import List
-from data_def import Wiki_Page, TT_Pair, SPLIT_PARAG, Table_2dim
+from data_def import Wiki_Page, TT_Pair, SPLIT_PARAG, Table_2dim, Only_Text
 from re_def import WIKI_SYNTAX
 
 ### METHOD
@@ -27,6 +27,7 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
         if not doc_text:
             continue
         res_split_body = split_minimum_paragraph(doc_text)
+        print("TITLE: ", doc_title)
 
         # 최소 단위의 문단 제목 찾기
         res_valid_info_list = check_valid_paragraph_list(res_split_body)
@@ -36,6 +37,9 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
 
         # Wiki_page 구조 만듦 - Text만 존재하는거, Text랑 Table Pair(중복 허용)
         res_wiki_page = make_wiki_page_data(doc_title, res_valid_paragraph)
+        print(res_wiki_page)
+        input()
+
         wiki_page_info_list.append(res_wiki_page)
     print(f"[parse_wiki_doc] Complete - Size: {len(wiki_page_info_list)}")
 
@@ -102,11 +106,13 @@ def make_wiki_page_data(doc_title: str, src_parag_list: List[SPLIT_PARAG]):
         if 0 < len(res_table_list): # make pair
             for target_table in res_table_list:
                 for target_paragraph in paragraph_list:
-                    tt_pair = TT_Pair(text=target_paragraph,
+                    tt_pair = TT_Pair(title=parag_body.title,
+                                      text=target_paragraph,
                                       table=target_table.row_list)
                     ret_wiki_page.text_table_pair.append(tt_pair)
         else:
-            ret_wiki_page.only_text_list.extend(paragraph_list)
+            only_text_data = Only_Text(title=parag_body.title, text=paragraph_list)
+            ret_wiki_page.only_text_list.append(only_text_data)
 
     return ret_wiki_page
 
@@ -533,10 +539,10 @@ if "__main__" == __name__:
     print(f"[parse_code][main] TEST")
 
     # make data
-    is_make_data = False
+    is_make_data = True
     if is_make_data:
-        doc_path = "./web_dump/conv_kowiki-latest-pages-articles.xml"
-        parse_wiki_doc(doc_path)
+        doc_path = "./web_dump/kowiki-latest-pages-articles2.xml"
+        parse_wiki_doc(doc_path, is_write_file=False)
 
     # check data size
     is_check_data = False
@@ -564,4 +570,4 @@ if "__main__" == __name__:
 
     # pkl print (test)
     print_target = "./save_wiki_page_info.pkl"
-    print_pkl(print_target)
+    #print_pkl(print_target)
