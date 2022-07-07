@@ -27,7 +27,7 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
         if not doc_text:
             continue
         res_split_body = split_minimum_paragraph(doc_text)
-        print("TITLE: ", doc_title)
+        # print("TITLE: ", doc_title)
 
         # 최소 단위의 문단 제목 찾기
         res_valid_info_list = check_valid_paragraph_list(res_split_body)
@@ -37,8 +37,8 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
 
         # Wiki_page 구조 만듦 - Text만 존재하는거, Text랑 Table Pair(중복 허용)
         res_wiki_page = make_wiki_page_data(doc_title, res_valid_paragraph)
-        print(res_wiki_page)
-        input()
+        # 'print(res_wiki_page)
+        # input()'
 
         wiki_page_info_list.append(res_wiki_page)
     print(f"[parse_wiki_doc] Complete - Size: {len(wiki_page_info_list)}")
