@@ -42,7 +42,7 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
         # 'print(res_wiki_page)
         # input()'
 
-        # save only_table_list
+        # save only_table_list - 2022.07.14
         for oly_table in only_table_list:
             for oly_row in oly_table:
                 one_line = "||".join(oly_row)
@@ -85,7 +85,7 @@ def make_wiki_page_data(doc_title: str, src_parag_list: List[SPLIT_PARAG]):
                 for cdx, col in enumerate(row):
                     conv_col = remove_wiki_syntax(col)
                     row[cdx] = conv_col
-            # for save *.txt file
+            # for save *.txt file - 2022.07.14
             if 0 < len(table.row_list):
                 only_table_list.append(copy.deepcopy(table.row_list))
 
