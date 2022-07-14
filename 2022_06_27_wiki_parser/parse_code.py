@@ -19,6 +19,8 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
         print(f"[parse_code][parse_wiki_doc] ERR - Not Exists: {src_path}")
         return
 
+    write_only_table = open("./only_table.txt", mode="w", encoding="utf-8")
+
     wiki_page_info_list: List[Wiki_Page] = []
     for doc_title, doc_text in read_wiki_doc(src_path):
         # wiki_page_data = Wiki_Page(title=doc_title)
@@ -36,9 +38,16 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
         res_valid_paragraph = filter_valid_paragraph(res_split_body, res_valid_info_list)
 
         # Wiki_page 구조 만듦 - Text만 존재하는거, Text랑 Table Pair(중복 허용)
-        res_wiki_page = make_wiki_page_data(doc_title, res_valid_paragraph)
+        res_wiki_page, only_table_list = make_wiki_page_data(doc_title, res_valid_paragraph)
         # 'print(res_wiki_page)
         # input()'
+
+        # save only_table_list
+        for oly_table in only_table_list:
+            for oly_row in oly_table:
+                one_line = "||".join(oly_row)
+                write_only_table.write(one_line+"\n")
+            write_only_table.write("========\n") # 8개
 
         wiki_page_info_list.append(res_wiki_page)
     print(f"[parse_wiki_doc] Complete - Size: {len(wiki_page_info_list)}")
@@ -47,7 +56,7 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
     if not is_write_file:
         return
 
-    save_path = "./save_wiki_page_info.pkl"
+    save_path = "./test.pkl"
     with open(save_path, mode="wb") as save_pkl:
         pickle.dump(wiki_page_info_list, save_pkl)
         print(f"[parse_code] Save - {save_path}")
@@ -61,6 +70,7 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
 def make_wiki_page_data(doc_title: str, src_parag_list: List[SPLIT_PARAG]):
 #==============================================================================
     ret_wiki_page = Wiki_Page(title=doc_title)
+    only_table_list = []
 
     for parag_body in src_parag_list:
         res_table_list, res_text_list = extract_paragraph_table(parag_body.text_list)
@@ -75,6 +85,9 @@ def make_wiki_page_data(doc_title: str, src_parag_list: List[SPLIT_PARAG]):
                 for cdx, col in enumerate(row):
                     conv_col = remove_wiki_syntax(col)
                     row[cdx] = conv_col
+            # for save *.txt file
+            if 0 < len(table.row_list):
+                only_table_list.append(copy.deepcopy(table.row_list))
 
         # if 0 < len(res_table_list):
         #     print("TITLE: \t", doc_title)
@@ -114,7 +127,7 @@ def make_wiki_page_data(doc_title: str, src_parag_list: List[SPLIT_PARAG]):
             only_text_data = Only_Text(title=parag_body.title, text=paragraph_list)
             ret_wiki_page.only_text_list.append(only_text_data)
 
-    return ret_wiki_page
+    return ret_wiki_page, only_table_list
 
 #==============================================================================
 def extract_paragraph_table(body_text: List[str]):
@@ -514,6 +527,7 @@ def remove_mediawiki_tag(src_path: str=""):
 def print_pkl(target_path: str):
 #==============================================================================
     wiki_page_info_list: List[Wiki_Page] = []
+
     with open(target_path, mode="rb") as load_pkl:
         wiki_page_info_list = pickle.load(load_pkl)
         print(f"[print_pkl] total size: {len(wiki_page_info_list)}")
@@ -526,13 +540,16 @@ def print_pkl(target_path: str):
             print("----------------")
 
         print("=======================================")
+
+        remove_duplicate = set()
         for txt_table in wiki_page.text_table_pair:
             print(txt_table.text)
             print("=======================================")
             for r in txt_table.table:
                 print(len(r), r)
-        input()
 
+            if 0 < len(txt_table.table):
+                remove_duplicate.add(txt_table.table)
 
 ### TEST ###
 if "__main__" == __name__:
@@ -569,5 +586,6 @@ if "__main__" == __name__:
         print(f"[parse_code][check_size] text and table pair size: {text_table_pair_size}")
 
     # pkl print (test)
-    print_target = "./save_wiki_page_info.pkl"
+    # print_target = "./save_wiki_page_info.pkl"
+    print_target = "./test.pkl"
     #print_pkl(print_target)
