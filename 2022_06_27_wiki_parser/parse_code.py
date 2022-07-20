@@ -25,6 +25,9 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
     for doc_title, doc_text in read_wiki_doc(src_path):
         # wiki_page_data = Wiki_Page(title=doc_title)
 
+        if "2021 리그 오브 레전드 챔피언스 코리아 서머" != doc_title:
+            continue
+
         # split
         if not doc_text:
             continue
@@ -39,11 +42,12 @@ def parse_wiki_doc(src_path: str="", is_write_file: bool=True):
 
         # Wiki_page 구조 만듦 - Text만 존재하는거, Text랑 Table Pair(중복 허용)
         res_wiki_page, only_table_list = make_wiki_page_data(doc_title, res_valid_paragraph)
-        # 'print(res_wiki_page)
-        # input()'
+        print(only_table_list)
+        input()
 
         # save only_table_list - 2022.07.14
         for oly_table in only_table_list:
+            write_only_table.write(oly_table[0]+"\n")
             for oly_row in oly_table:
                 one_line = "||".join(oly_row)
                 write_only_table.write(one_line+"\n")
@@ -87,7 +91,7 @@ def make_wiki_page_data(doc_title: str, src_parag_list: List[SPLIT_PARAG]):
                     row[cdx] = conv_col
             # for save *.txt file - 2022.07.14
             if 0 < len(table.row_list):
-                only_table_list.append(copy.deepcopy(table.row_list))
+                only_table_list.append((doc_title, copy.deepcopy(table.row_list)))
 
         # if 0 < len(res_table_list):
         #     print("TITLE: \t", doc_title)
@@ -166,7 +170,8 @@ def conv_2dim_table(src_table_list: List[List[str]]):
         new_row = []
         is_new_row = False
         for row in src_table:
-            if re.search(WIKI_SYNTAX.TABLE_ROW.value, row):
+            # 22.07.20
+            if re.search(WIKI_SYNTAX.TABLE_ROW.value, row) or re.search(WIKI_SYNTAX.TABLE_START.value, row):
                 is_new_row = True
                 if 0 < len(new_row):
                     table_2dim.row_list.append(copy.deepcopy(new_row))
@@ -189,6 +194,14 @@ def conv_2dim_table(src_table_list: List[List[str]]):
                 new_table_rows.append(conv_row)
             else:
                 new_table_rows.append(row)
+
+        # 22.07.20
+        for row in new_table_rows:
+            for cdx, col in enumerate(row):
+                if re.search(r"^\!.+", col):
+                    conv_col = re.sub(r"^\!", "", col)
+                    row[cdx] = conv_col
+
         table_2dim.row_list = new_table_rows
         ret_conv_table_list.append(table_2dim)
 
@@ -558,7 +571,7 @@ if "__main__" == __name__:
     # make data
     is_make_data = True
     if is_make_data:
-        doc_path = "./web_dump/kowiki-latest-pages-articles2.xml"
+        doc_path = "./web_dump/conv_kowiki-latest-pages-articles.xml"
         parse_wiki_doc(doc_path, is_write_file=False)
 
     # check data size
